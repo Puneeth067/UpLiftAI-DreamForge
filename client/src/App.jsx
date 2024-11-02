@@ -1,35 +1,82 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import HomePage from './pages/Home/HomePage';
+import AuthPages from './pages/Auth/AuthPage';
+import DashboardPage from './pages/Dashboard/DashboardPage';
+import PrivateRoute from './components/common/PrivateRoute/PrivateRoute';
+// import ProfilePage from './pages/Profile/ProfilePage';
+import SettingsPage from './pages/Profile/SettingsPage';
+import TicketsPage from './pages/Tickets/TicketsPage';
+import TicketDetailsPage from './pages/Tickets/TicketDetailsPage';
+// import AnalyticsPage from './pages/Analytics/AnalyticsPage';
+import NotFoundPage from './pages/Error/NotFoundPage';
+import './App.css';
+import './styles/globals.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/auth" element={<AuthPages />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DashboardPage />
+            </PrivateRoute>
+          }
+        />
+        {/* <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <ProfilePage />
+            </PrivateRoute>
+          }
+        /> */}
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute>
+              <SettingsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tickets"
+          element={
+            <PrivateRoute>
+              <TicketsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tickets/:id"
+          element={
+            <PrivateRoute>
+              <TicketDetailsPage />
+            </PrivateRoute>
+          }
+        />
+        {/* <Route
+          path="/analytics"
+          element={
+            <PrivateRoute>
+              <AnalyticsPage />
+            </PrivateRoute>
+          }
+        /> */}
+
+        {/* Error routes */}
+        <Route path="/404" element={<NotFoundPage />} />
+        <Route path="*" element={<Navigate to="/404" replace />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
