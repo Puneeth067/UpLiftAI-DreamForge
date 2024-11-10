@@ -29,11 +29,25 @@ export const supabase = createClient(
   }
 )
 
-// Optional: Add error handling for connection issues
+// Enhanced error handling
 supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_OUT') {
     console.log('User signed out')
   } else if (event === 'SIGNED_IN') {
     console.log('User signed in')
+  } else if (event === 'TOKEN_REFRESHED') {
+    console.log('Token refreshed')
+  } else if (event === 'USER_UPDATED') {
+    console.log('User updated')
   }
 })
+
+// Optional: Add a simple connection test method if needed
+export const testConnection = async () => {
+  try {
+    const { error } = await supabase.from('profiles').select('count', { count: 'exact' }).limit(1)
+    return !error
+  } catch {
+    return false
+  }
+}
