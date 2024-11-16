@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Mail, Lock, User, Building, Phone, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, Building, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff} from 'lucide-react';
 import { supabase } from '../../utils/supabase.js';
 
 const DEPARTMENTS = [
@@ -29,6 +29,19 @@ const DEFAULT_FORM_DATA = {
   phoneNumber: '',
 };
 
+// Phone formatting function
+const formatPhoneNumber = (value) => {
+  if (!value) return value;
+  const phoneNumber = value.replace(/[^\d]/g, '');
+  const phoneNumberLength = phoneNumber.length;
+  
+  if (phoneNumberLength < 4) return phoneNumber;
+  if (phoneNumberLength < 7) {
+    return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3)}`;
+  }
+  return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3, 6)} ${phoneNumber.slice(6, 10)}`;
+};
+
 const AuthPages = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -42,6 +55,59 @@ const AuthPages = () => {
   const [apiError, setApiError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Replace the existing email check with this version
+  const checkEmailExists = async (email) => {
+    if (!email || typeof email !== 'string') {
+      throw new Error('Invalid email format');
+    }
+  
+    try {
+      // First attempt: Try using the security definer function
+      const { data: functionResult, error: functionError } = await supabase
+        .rpc('check_email_exists', { check_email: email });
+  
+      if (!functionError && typeof functionResult === 'boolean') {
+        return functionResult;
+      }
+  
+      // Fallback: If the function call fails, try direct query
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .limit(1);
+  
+      if (error) {
+        console.error('Email check query error:', error);
+        
+        // If it's a permissions error, assume email doesn't exist
+        if (error.code === 'PGRST116' || error.code === '42501') {
+          return false;
+        }
+        
+        throw new Error('Email verification failed');
+      }
+  
+      return Array.isArray(data) && data.length > 0;
+  
+    } catch (error) {
+      console.error('Email check error:', error);
+      
+      // Check for specific error types
+      if (error.code === 'PGRST116' || error.code === '42501') {
+        return false;
+      }
+      
+      if (error.message?.includes('email verification failed')) {
+        throw error;
+      }
+      
+      throw new Error('Unable to verify email availability. Please try again.');
+    }
+  };
 
   const validateForm = useCallback(() => {
     const newErrors = {};
@@ -52,6 +118,12 @@ const AuthPages = () => {
       }
       if (!formData.confirmPassword || formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = 'Passwords do not match';
+      }
+      if (userType === 'customer' && formData.phoneNumber) {
+        const phoneDigits = formData.phoneNumber.replace(/\D/g, '');
+        if (phoneDigits.length !== 10) {
+          newErrors.phoneNumber = 'Please enter a valid 10-digit phone number';
+        }
       }
     }
   
@@ -73,7 +145,15 @@ const AuthPages = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+
+    // Handle phone number formatting
+    if (name === 'phoneNumber') {
+      const formattedPhone = formatPhoneNumber(value);
+      setFormData(prev => ({ ...prev, [name]: formattedPhone }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+    
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -134,30 +214,6 @@ const AuthPages = () => {
             }
           }
 
-          if (!profileData) {
-            // If we still don't have profile data after retries
-            // Create a default profile based on auth data
-            const defaultProfile = {
-              id: authData.user.id,
-              email: authData.user.email,
-              fullname: authData.user.user_metadata?.fullName || 'User',
-              usertype: authData.user.user_metadata?.userType || 'customer',
-              department: authData.user.user_metadata?.department || null,
-              phonenumber: authData.user.user_metadata?.phoneNumber || null,
-            };
-
-            // Try to create the profile
-            const { data: newProfile, error: createError } = await supabase
-              .from('profiles')
-              .upsert(defaultProfile)
-              .select()
-              .single();
-
-            if (!createError) {
-              profileData = newProfile;
-            }
-          }
-
           // Use whatever profile data we have
           const userData = {
             id: authData.user.id,
@@ -213,6 +269,21 @@ const AuthPages = () => {
           setIsLoading(false);
           return;
         }
+         
+         // Check if email exists
+        try {
+          const emailExists = await checkEmailExists(formData.email);
+          if (emailExists) {
+            setApiError('This email is already registered');
+            setIsLoading(false);
+            return;
+          }
+        } catch (emailError) {
+          console.error('Email check error:', emailError);
+          setApiError(emailError.message);
+          setIsLoading(false);
+          return;
+        }
 
         // Sign up the user
         const { data, error: signUpError } = await supabase.auth.signUp({
@@ -244,6 +315,7 @@ const AuthPages = () => {
         };
 
         try {
+
           const { error: insertError } = await supabase
             .from('profiles')
             .upsert(profileData, {
@@ -252,28 +324,19 @@ const AuthPages = () => {
             });
   
           if (insertError) {
-            // Handle RLS violation
-            if (insertError.message.includes('policy')) {
-              console.warn('RLS policy violation - proceeding with signup flow');
-              setShowSuccess(true);
-              setRegisteredEmail(formData.email);
-              setShowVerificationAlert(true);
-              setTimeout(() => {
-                setShowSuccess(false);
-              }, 1000);
-              return;
-            }
-            
-            // Handle other profile creation errors
-            if (insertError.message.includes('profiles_pkey')) {
-              setShowSuccess(true);
-              setRegisteredEmail(formData.email);
-              setShowVerificationAlert(true);
-              setTimeout(() => {
-                setShowSuccess(false);
-              }, 1000);
-              return;
-            }
+            // Handle RLS violation or profile key conflict
+              if (insertError.message.includes('policy') || 
+              insertError.message.includes('profiles_pkey')) {
+
+            // If email is unique, proceed with signup flow
+            setShowSuccess(true);
+            setRegisteredEmail(formData.email);
+            setShowVerificationAlert(true);
+            setTimeout(() => {
+              setShowSuccess(false);
+            }, 1000);
+            return;
+          }
             throw insertError;
           }
   
@@ -283,7 +346,7 @@ const AuthPages = () => {
           setFormData(DEFAULT_FORM_DATA);
           setTimeout(() => {
             setShowSuccess(false);
-          }, 500);
+          }, 1000);
         } catch (insertError) {
           if (!insertError.message.includes('profiles_pkey') && 
               !insertError.message.includes('policy')) {
@@ -328,32 +391,59 @@ const AuthPages = () => {
     e.currentTarget.style.outline = 'none';
   };
 
-  const renderInput = (label, name, type, placeholder, icon) => (
-    <div>
-      <label className="text-sm text-gray-700 font-bold ">{label}</label>
-      <div className="mt-1 relative">
-        <div className="absolute left-3 top-3 h-5 w-5 text-gray-400">
-          {icon}
+  const renderInput = (label, name, type, placeholder, icon) => {
+    const isPassword = type === 'password';
+    const isPhone = name === 'phoneNumber';
+    const showPasswordToggle = isPassword && (name === 'password' ? showPassword : showConfirmPassword);
+    
+    return (
+      <div>
+        <label className="text-sm text-gray-700 font-bold">{label}</label>
+        <div className="mt-1 relative">
+          <div className="absolute left-3 top-3 h-5 w-5 text-gray-400">
+            {icon}
+          </div>
+          <input
+            type={isPassword ? (showPasswordToggle ? 'text' : 'password') : type}
+            name={name}
+            value={formData[name]}
+            onChange={handleInputChange}
+            placeholder={placeholder}
+            disabled={isLoading}
+            maxLength={isPhone ? 14 : undefined}
+            className={`pl-10 ${isPassword ? 'pr-10' : ''} w-full p-3 bg-white text-gray-800 rounded-lg border ${
+              errors[name] ? 'border-red-500' : 'border-gray-300'
+            } focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
+              isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          />
+          {isPassword && (
+            <button
+              type="button"
+              onClick={() => {
+                if (name === 'password') {
+                  setShowPassword(!showPassword);
+                } else {
+                  setShowConfirmPassword(!showConfirmPassword);
+                }
+              }}
+              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+              tabIndex={-1}
+            >
+              {showPasswordToggle ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+          )}
+          {errors[name] && (
+            <p className="mt-1 text-sm text-red-500">{errors[name]}</p>
+          )}
         </div>
-        <input
-          type={type}
-          name={name}
-          value={formData[name]}
-          onChange={handleInputChange}
-          placeholder={placeholder}
-          disabled={isLoading}
-          className={`pl-10 w-full p-3 bg-white text-gray-800 rounded-lg border ${
-            errors[name] ? 'border-red-500' : 'border-gray-300'
-          } focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        />
-        {errors[name] && (
-          <p className="mt-1 text-sm text-red-500">{errors[name]}</p>
-        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -467,11 +557,11 @@ const AuthPages = () => {
                       </div>
                     )}
 
-                    {userType === 'customer' && 
-                      renderInput('Phone Number', 'phoneNumber', 'tel', 'Enter your phone number', <Phone />)
-                    }
-                    </>
-                  )}
+                  {userType === 'customer' && 
+                    renderInput('Phone Number', 'phoneNumber', 'tel', 'Enter your phone number', <Phone />)
+                  }
+                  </>
+                )}
   
                   {renderInput('Email', 'email', 'email', 'Enter your email', <Mail />)}
                   {renderInput('Password', 'password', 'password', 'Enter your password', <Lock />)}
