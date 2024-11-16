@@ -1,117 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { Menu, Bell, Settings, LogOut, Ticket, MessageSquare, User, ChevronRight } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { supabase } from '../../utils/supabase.js';  // Import supabase
+import { supabase } from '../../utils/supabase.js';
 
-const AgentDashboard = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [activeView, setActiveView] = useState('tickets');
-    const [activeItem, setActiveItem] = useState(null);
-    const [userData, setUserData] = useState(null);
+// Constants
+const MENU_ITEMS = [
+  {
+    title: 'Tickets',
+    icon: Ticket,
+    view: 'tickets',
+    subItems: ['Tickets Assigned', 'Tickets Resolved']
+  },
+  {
+    title: 'Chat Support',
+    icon: MessageSquare,
+    view: 'chat',
+  },
+  {
+    title: 'Profile',
+    icon: User,
+    view: 'profile'
+  }
+];
 
-    useEffect(() => {
-      const path = location.pathname;
-      const userDataFromAuth = location.state?.userData;
-    
-      // Set initial active view based on path
-      if (path.includes('chat')) {
-        setActiveView('chat');
-      } else if (path.includes('profile')) {
-        setActiveView('profile');
-      } else {
-        setActiveView('tickets');
-      }
-    
-      // Get user data from location state and handle redirection if missing
-      if (!userDataFromAuth) {
-        navigate('/auth', { replace: true });
-      } else {
-        setUserData(userDataFromAuth);
-      }
-    }, [location, navigate]);
-    
-
-  const menuItems = [
-    {
-      title: 'Tickets',
-      icon: Ticket,
-      view: 'tickets',
-      subItems: ['Tickets Assigned', 'Tickets Resolved']
-    },
-    {
-      title: 'Chat Support',
-      icon: MessageSquare,
-      view: 'chat',
-      onClick: () => navigate('/agentchatinterface')
-    },
-    {
-      title: 'Profile',
-      icon: User,
-      view: 'profile'
-    }
-  ];
-
-  
-  const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();  // Use supabase to sign out
-      if (error) throw error;
-      navigate('/', { replace: true });
-    } catch (error) {
-      console.error('Error signing out:', error);
-      // Optionally show a toast message here
-    }
+// MenuItem Component with PropTypes
+const MenuItem = ({ item, activeView, activeItem, index, onItemClick }) => {
+  const handleClick = () => {
+    onItemClick(item, index);
   };
 
-    // Modified SidebarContent to use actual user data
-    const SidebarContent = () => (
-      <div className="flex flex-col h-full bg-white">
-        <div className="p-4 border-b">
-          <div className="flex items-center space-x-3">
-            <Ticket className="h-6 w-6 text-blue-600" />
-            <span className="text-xl font-semibold">SupportHub</span>
-          </div>
-        </div>
-  
-        <nav className="flex-1 overflow-y-auto p-4">
-          {menuItems.map((item, index) => (
-            <MenuItem key={index} item={item} index={index} />
-          ))}
-        </nav>
-  
-        <div className="border-t p-4 mt-auto">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-              <User className="h-6 w-6 text-gray-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-medium truncate">{userData?.fullName || 'Loading...'}</p>
-              <p className="text-sm text-gray-500 truncate">
-                {userData?.department || 'Agent'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-
-  const MenuItem = ({ item, index }) => (
+  return (
     <div className="mb-2">
       <button 
-        onClick={() => {
-          if (item.onClick) {
-            item.onClick();
-          } else {
-            setActiveView(item.view);
-            setActiveItem(activeItem === index ? null : index);
-          }
-        }}
+        onClick={handleClick}
         className={`flex items-center w-full p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 ${
           activeView === item.view ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
         }`}
@@ -119,7 +46,11 @@ const AgentDashboard = () => {
         <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
         <span className="text-sm font-medium">{item.title}</span>
         {item.subItems && (
-          <ChevronRight className={`ml-auto h-4 w-4 transform transition-transform duration-200 ${activeItem === index ? 'rotate-90' : ''}`} />
+          <ChevronRight 
+            className={`ml-auto h-4 w-4 transform transition-transform duration-200 ${
+              activeItem === index ? 'rotate-90' : ''
+            }`} 
+          />
         )}
       </button>
       {item.subItems && activeItem === index && (
@@ -136,57 +67,144 @@ const AgentDashboard = () => {
       )}
     </div>
   );
+};
 
-  const renderContent = () => {
-    switch (activeView) {
-      case 'tickets':
-        return (
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-2xl font-semibold mb-6">Tickets Dashboard</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-medium mb-2">Active Tickets</h2>
-                <p className="text-3xl font-bold text-blue-600">12</p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-medium mb-2">Pending Response</h2>
-                <p className="text-3xl font-bold text-yellow-600">5</p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-medium mb-2">Resolved Today</h2>
-                <p className="text-3xl font-bold text-green-600">8</p>
-              </div>
-            </div>
-            
-            <div className="mt-6 bg-white rounded-lg shadow-sm">
-              <div className="p-6">
-                <h2 className="text-lg font-medium mb-4">Recent Tickets</h2>
-                <div className="text-gray-500">No recent tickets to display</div>
-              </div>
-            </div>
-          </div>
-        );
-      case 'profile':
-        return (
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-2xl font-semibold mb-6">Agent Profile</h1>
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                  <User className="h-8 w-8 text-gray-500" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-medium">John Doe</h2>
-                  <p className="text-gray-500">Support Agent</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return null;
+MenuItem.propTypes = {
+  item: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+    icon: PropTypes.elementType.isRequired,
+    view: PropTypes.string.isRequired,
+    subItems: PropTypes.arrayOf(PropTypes.string)
+  }).isRequired,
+  activeView: PropTypes.string.isRequired,
+  activeItem: PropTypes.number,
+  index: PropTypes.number.isRequired,
+  onItemClick: PropTypes.func.isRequired
+};
+
+const AgentDashboard = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [activeView, setActiveView] = useState('tickets');
+  const [activeItem, setActiveItem] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDataFromAuth = location.state?.userData;
+        
+        if (!userDataFromAuth) {
+          navigate('/auth', { replace: true });
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userDataFromAuth.id)
+          .single();
+
+        if (profileError) throw profileError;
+
+        if (profile.usertype !== 'agent') {
+          navigate('/customerdashboard', { replace: true });
+          return;
+        }
+
+        setUserData({
+          id: userDataFromAuth.id,
+          email: userDataFromAuth.email,
+          fullName: profile.fullname,
+          department: profile.department,
+          userType: profile.usertype,
+        });
+
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [navigate, location.state?.userData]);
+
+  const handleItemClick = (item, index) => {
+    if (item.view === 'chat') {
+      navigate('/agentchatinterface');
+    } else {
+      setActiveView(item.view);
+      setActiveItem(activeItem === index ? null : index);
     }
   };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full bg-white">
+      <div className="p-4 border-b">
+        <div className="flex items-center space-x-3">
+          <Ticket className="h-6 w-6 text-blue-600" />
+          <span className="text-xl font-semibold">SupportHub</span>
+        </div>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto p-4">
+        {MENU_ITEMS.map((item, index) => (
+          <MenuItem 
+            key={index}
+            item={item}
+            index={index}
+            activeView={activeView}
+            activeItem={activeItem}
+            onItemClick={handleItemClick}
+          />
+        ))}
+      </nav>
+
+      <div className="border-t p-4 mt-auto">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+            <User className="h-6 w-6 text-gray-500" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-medium truncate">{userData?.fullName || 'Loading...'}</p>
+            <p className="text-sm text-gray-500 truncate">
+              {userData?.department || 'Agent'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen text-red-600">
+        Error: {error}
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
@@ -225,7 +243,11 @@ const AgentDashboard = () => {
               <button className="p-2 hover:bg-gray-100 rounded-lg hidden sm:block">
                 <Settings className="h-6 w-6" />
               </button>
-              <button onClick={handleLogout} className="p-2 hover:bg-gray-100 rounded-lg hidden sm:block">
+              <button 
+                onClick={handleLogout} 
+                className="p-2 hover:bg-gray-100 rounded-lg hidden sm:block"
+                disabled={isLoading}
+              >
                 <LogOut className="h-6 w-6" />
               </button>
             </div>
@@ -233,7 +255,7 @@ const AgentDashboard = () => {
         </header>
 
         <main className="flex-1 overflow-auto pt-16 p-4 md:p-6">
-          {renderContent()}
+          {/* Content will be added here based on the active view */}
         </main>
       </div>
     </div>

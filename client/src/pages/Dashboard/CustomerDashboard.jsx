@@ -1,31 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, Bell, Settings, LogOut, Ticket, MessageSquare, User, ChevronRight } from 'lucide-react';
+import { Menu, Bell, Settings, LogOut, Ticket, MessageSquare, User, ChevronRight, HeadphonesIcon } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { supabase } from '../../utils/supabase.js';
 
 const CustomerDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const userData = location.state?.userData || {
-    fullName: 'Guest User',
-    email: '',
-    userType: 'customer',
-    phoneNumber: '',
-  };
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const userData = location.state?.userData;
 
-  const [activeView, setActiveView] = useState('tickets');
+  useEffect(() => {
+    const userDataFromAuth = location.state?.userData;
+    if (!userDataFromAuth) {
+      navigate('/auth', { replace: true });
+      return;
+    }
+
+    // Fetch profile data from Supabase
+    const fetchProfileData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userDataFromAuth.id)
+          .single();
+
+        if (error) throw error;
+        
+        if (data) {
+          setProfileData(data);
+        } else {
+          throw new Error('Profile not found');
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [location.state, navigate]);
+
   const [activeItem, setActiveItem] = useState(null);
+  const [activeView, setActiveView] = useState(null);
 
   const menuItems = [
     {
       title: 'Tickets',
       icon: Ticket,
       view: 'tickets',
-      subItems: ['Tickets Booked', 'Tickets Resolved']
+      onClick: () => navigate('/customertickets', { state: { userData } })
     },
     {
       title: 'Chat Support',
@@ -36,21 +69,43 @@ const CustomerDashboard = () => {
     {
       title: 'Profile',
       icon: User,
-      view: 'profile'
+      view: 'profile',
+      onClick: () => navigate('/profile', { state: { userData } })
     }
   ];
 
-  const handleLogout = () => {
-    // Add logout logic here
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-lg text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white">
       <div className="p-4 border-b">
         <div className="flex items-center space-x-3">
-          <Ticket className="h-6 w-6 text-blue-600" />
-          <span className="text-xl font-semibold">SupportHub</span>
+          <HeadphonesIcon className="h-6 w-6 text-blue-600" />
+          <span className="text-xl font-semibold">Service Desk</span>
         </div>
       </div>
 
@@ -66,8 +121,11 @@ const CustomerDashboard = () => {
             <User className="h-6 w-6 text-gray-500" />
           </div>
           <div className="min-w-0">
-            <p className="font-medium truncate">{userData.fullName}</p>
-            <p className="text-sm text-gray-500 truncate">{userData.email}</p>
+            <p className="font-medium truncate">{profileData.fullname}</p>
+            <p className="text-sm text-gray-500 truncate">{profileData.email}</p>
+            {profileData.department && (
+              <p className="text-xs text-gray-400 truncate">{profileData.department}</p>
+            )}
           </div>
         </div>
       </div>
@@ -93,69 +151,8 @@ const CustomerDashboard = () => {
           <ChevronRight className={`ml-auto h-4 w-4 transform transition-transform duration-200 ${activeItem === index ? 'rotate-90' : ''}`} />
         )}
       </button>
-      {item.subItems && activeItem === index && (
-        <div className="ml-6 mt-1 space-y-1">
-          {item.subItems.map((subItem, subIndex) => (
-            <button
-              key={subIndex}
-              className="flex items-center w-full p-2 text-sm rounded-lg hover:bg-gray-100 text-gray-600 transition-colors duration-200"
-            >
-              {subItem}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
-
-  const renderContent = () => {
-    switch (activeView) {
-      case 'chat':
-        navigate('/customerchatinterface', { state: { userData } });
-        return null;
-      case 'profile':
-        return (
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-2xl font-semibold mb-6">Profile Information</h1>
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm text-gray-500">Full Name</label>
-                  <p className="text-lg font-medium">{userData.fullName}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Email</label>
-                  <p className="text-lg font-medium">{userData.email}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Phone Number</label>
-                  <p className="text-lg font-medium">{userData.phoneNumber || 'Not provided'}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Account Type</label>
-                  <p className="text-lg font-medium capitalize">{userData.userType}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      case 'tickets':
-      default:
-        return (
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-2xl font-semibold mb-6">Welcome, {userData.fullName}</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {[1, 2, 3, 4, 5, 6].map((item) => (
-                <div key={item} className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
-                  <h2 className="text-lg font-medium mb-2">Card {item}</h2>
-                  <p className="text-gray-600">Sample content for demonstration</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-    }
-  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
@@ -164,8 +161,8 @@ const CustomerDashboard = () => {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 md:ml-64">
-        <header className="bg-white border-b fixed top-0 right-0 left-0 md:left-64 z-20">
-          <div className="flex items-center justify-between px-4 py-3">
+        <header className="bg-white border-b fixed top-0 right-0 left-0 md:left-64 z-20 h-16">
+          <div className="flex items-center justify-between px-4 h-full">
             <div className="flex items-center space-x-3">
               <Sheet>
                 <SheetTrigger asChild>
@@ -179,8 +176,8 @@ const CustomerDashboard = () => {
               </Sheet>
               
               <div className="flex items-center space-x-2">
-                <Ticket className="h-6 w-6 text-blue-600" />
-                <span className="text-xl font-semibold">Support Hub</span>
+                <HeadphonesIcon className="h-6 w-6 text-blue-600" />
+                <span className="text-xl font-semibold">Uplift-AI Support</span>
               </div>
             </div>
 
@@ -204,8 +201,48 @@ const CustomerDashboard = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto pt-16 p-4 md:p-6">
-          {renderContent()}
+        <main className="flex-1 overflow-auto mt-16 p-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-lg border border-blue-100">
+              <h1 className="text-3xl font-bold text-blue-800 mb-4">
+                Welcome {profileData.fullname}! 👋
+              </h1>
+              
+              <div className="space-y-6">
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  Your gateway to seamless customer support. We're here to make your experience smooth and efficient.
+                </p>
+                
+                <div className="grid md:grid-cols-2 gap-6 mt-8">
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
+                    <div className="flex items-center mb-3">
+                      <Ticket className="h-6 w-6 text-blue-600 mr-2" />
+                      <h3 className="text-lg font-semibold text-gray-800">Quick Support</h3>
+                    </div>
+                    <p className="text-gray-600">
+                      Create and track support tickets for faster issue resolution. We prioritize your concerns.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
+                    <div className="flex items-center mb-3">
+                      <MessageSquare className="h-6 w-6 text-blue-600 mr-2" />
+                      <h3 className="text-lg font-semibold text-gray-800">Live Chat</h3>
+                    </div>
+                    <p className="text-gray-600">
+                      Connect with our support team in real-time through our intuitive chat interface.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg mt-6">
+                  <p className="text-sm text-blue-800">
+                    👉 <span className="font-medium">Use the sidebar menu to navigate between different sections and access all our support features.</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>

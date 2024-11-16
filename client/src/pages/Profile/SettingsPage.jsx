@@ -33,7 +33,7 @@ const SettingsPage = ({ userType = 'user', onNavigateBack }) => {
               className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <ArrowLeft size={18} />
-              Back to Profile
+              Back to Dashboard
             </Button>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
               Settings

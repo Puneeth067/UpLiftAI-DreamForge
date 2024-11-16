@@ -14,7 +14,10 @@ const CustomerDashboard = lazy(() => import('./pages/Dashboard/CustomerDashboard
 const AgentDashboard = lazy(() => import('./pages/Dashboard/AgentDashboard'));
 const CustomerChatInterface = lazy(() => import('./pages/Chats/CustomerChatInterface'));
 const AgentChatInterface = lazy(() => import('./pages/Chats/AgentChatInterface'));
-// const SettingsPage = lazy(() => import('./pages/Profile/SettingsPage'));
+const CustomerTickets = lazy(() => import('./pages/Tickets/CustomerTickets'));
+//const AgentTickets = lazy(() => import('./pages/Tickets/AgentTickets'));
+//const SettingsPage = lazy(() => import('./pages/Profile/SettingsPage'));
+const ProfilePage = lazy(() => import('./pages/Profile/ProfilePage'));
 // const TicketsPage = lazy(() => import('./pages/Tickets/TicketsPage'));
 // const TicketDetailsPage = lazy(() => import('./pages/Tickets/TicketDetailsPage'));
 const NotFoundPage = lazy(() => import('./pages/Error/NotFoundPage'));
@@ -36,18 +39,17 @@ const ROUTES = {
   PROTECTED: {
     CUSTOMER: {
       DASHBOARD: '/customerdashboard',
-      CHAT: '/customerchatinterface'
+      CHAT: '/customerchatinterface',
+      TICKET: '/customertickets'
     },
     AGENT: {
       DASHBOARD: '/agentdashboard',
-      CHAT: '/agentchatinterface'
+      CHAT: '/agentchatinterface',
+      //TICKET: '/agenttickets'
+    },
+    COMMON: {
+      PROFILE: '/profile',
     }
-    //,
-    // COMMON: {
-    //   SETTINGS: '/settings',
-    //   TICKETS: '/tickets',
-    //   TICKET_DETAILS: '/tickets/:id'
-    // }
   }
 };
 
@@ -81,6 +83,15 @@ function App() {
               }
             />
 
+            <Route
+              path={ROUTES.PROTECTED.CUSTOMER.TICKET}
+              element={
+                // <PrivateRoute userType="agent">
+                  <CustomerTickets />
+                // </PrivateRoute>
+              }
+            />
+
             {/* Protected Agent routes */}
             <Route
               path={ROUTES.PROTECTED.AGENT.DASHBOARD}
@@ -99,32 +110,28 @@ function App() {
               }
             />
 
-            {/* Common protected routes
-            <Route
-              path={ROUTES.PROTECTED.COMMON.SETTINGS}
+            
+
+            {/* <Route
+              path={ROUTES.PROTECTED.AGENT.TICKET}
               element={
-                // <PrivateRoute>
-                  <SettingsPage />
+                // <PrivateRoute userType="agent">
+                  <AgentTickets />
                 // </PrivateRoute>
               }
-            />
+            /> */}
+
+            {/* Common protected routes
+            ProfilePage */}
             <Route
-              path={ROUTES.PROTECTED.COMMON.TICKETS}
+              path={ROUTES.PROTECTED.COMMON.PROFILE}
               element={
-                <PrivateRoute>
-                  <TicketsPage />
-                </PrivateRoute>
+                // <PrivateRoute>
+                  <ProfilePage />
+                //</PrivateRoute> 
               }
-            /> */}
-            {/* <Route
-              path={ROUTES.PROTECTED.COMMON.TICKET_DETAILS}
-              element={
-                <PrivateRoute>
-                  <TicketDetailsPage />
-                </PrivateRoute>
-              }
-            /> */}
-          {/* </Route> */}
+            />
+            
 
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to={ROUTES.PUBLIC.NOT_FOUND} replace />} />
