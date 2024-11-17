@@ -52,17 +52,16 @@ const FEATURES = {
   ]
 };
 
-// Memoized Feature Card Component
 const FeatureCard = memo(({ icon, title, description }) => (
   <Card>
     <CardContent className="p-6">
-      <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-50 text-blue-600">
+      <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
         {icon}
       </div>
-      <h3 className="mt-4 text-lg font-medium text-gray-900">
+      <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
         {title}
       </h3>
-      <p className="mt-2 text-base text-gray-500">
+      <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
         {description}
       </p>
     </CardContent>
@@ -123,13 +122,13 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <nav className="bg-white dark:bg-gray-800 shadow-sm dark:shadow-gray-900/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <Bot className="h-8 w-8 text-blue-600" aria-hidden="true" />
-              <span className="ml-2 text-xl font-bold text-gray-900">AI Support Hub</span>
+              <Bot className="h-8 w-8 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+              <span className="ml-2 text-xl font-bold text-gray-900 dark:text-gray-100">AI Support Hub</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button
@@ -160,20 +159,20 @@ const HomePage = () => {
       </nav>
 
       <main>
-        <div className="relative bg-white overflow-hidden">
+        <div className="relative bg-white dark:bg-gray-800 overflow-hidden">
           <div className="max-w-7xl mx-auto">
-            <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+            <div className="relative z-10 pb-8 bg-white dark:bg-gray-800 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
               <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
                 <div className="sm:text-center lg:text-left">
-                  <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                  <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-gray-100 sm:text-5xl md:text-6xl">
                     <span className="block">
                       {userType === 'customer' ? 'Get Support' : 'Provide Support'}
                     </span>
-                    <span className="block text-blue-600">
+                    <span className="block text-blue-600 dark:text-blue-400">
                       {userType === 'customer' ? 'Powered by AI' : 'Enhanced by AI'}
                     </span>
                   </h1>
-                  <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                  <p className="mt-3 text-base text-gray-500 dark:text-gray-400 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                     {userType === 'customer'
                       ? 'Experience lightning-fast support with our AI-powered system. Get instant answers or connect with our expert support team.'
                       : 'Streamline your support workflow with AI assistance. Handle more tickets efficiently while maintaining high-quality customer service.'}
@@ -181,7 +180,7 @@ const HomePage = () => {
                   <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                     <Button 
                       onClick={handleGetStarted}
-                      className="w-full sm:w-auto px-8 py-3 text-base font-medium rounded-md shadow"
+                      className="w-full sm:w-auto px-8 py-3 text-base font-medium rounded-md shadow dark:shadow-gray-900/10"
                       size="lg"
                     >
                       {userType === 'customer' ? 'Get Started' : 'Join as Agent'}
@@ -194,12 +193,12 @@ const HomePage = () => {
           </div>
         </div>
 
-        <section className="py-12 bg-white" aria-labelledby="features-heading">
+        <section className="py-12 bg-white dark:bg-gray-800" aria-labelledby="features-heading">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h2 
                 id="features-heading" 
-                className="text-3xl font-extrabold text-gray-900 sm:text-4xl"
+                className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 sm:text-4xl"
               >
                 {userType === 'customer' ? 'Why Choose Our Support System?' : 'Empower Your Support Team'}
               </h2>
@@ -213,11 +212,11 @@ const HomePage = () => {
           </div>
         </section>
 
-        <section className="bg-blue-50 py-12">
+        <section className="bg-blue-50 dark:bg-blue-900/20 py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl">
               <span className="block">Ready to get started?</span>
-              <span className="block text-blue-600">
+              <span className="block text-blue-600 dark:text-blue-400">
                 {userType === 'customer' ? 'Get support in seconds.' : 'Join our support team.'}
               </span>
             </h2>

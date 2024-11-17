@@ -398,9 +398,9 @@ const AuthPages = () => {
     
     return (
       <div>
-        <label className="text-sm text-gray-700 font-bold">{label}</label>
+        <label className="text-sm text-gray-700 dark:text-gray-300 font-bold">{label}</label>
         <div className="mt-1 relative">
-          <div className="absolute left-3 top-3 h-5 w-5 text-gray-400">
+          <div className="absolute left-3 top-3 h-5 w-5 text-gray-400 dark:text-gray-500">
             {icon}
           </div>
           <input
@@ -411,11 +411,11 @@ const AuthPages = () => {
             placeholder={placeholder}
             disabled={isLoading}
             maxLength={isPhone ? 14 : undefined}
-            className={`pl-10 ${isPassword ? 'pr-10' : ''} w-full p-3 bg-white text-gray-800 rounded-lg border ${
-              errors[name] ? 'border-red-500' : 'border-gray-300'
-            } focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
+            className={`pl-10 ${isPassword ? 'pr-10' : ''} w-full p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg border ${
+              errors[name] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+            } focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 ${
               isLoading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            } placeholder-gray-400 dark:placeholder-gray-500`}
           />
           {isPassword && (
             <button
@@ -427,7 +427,7 @@ const AuthPages = () => {
                   setShowConfirmPassword(!showConfirmPassword);
                 }
               }}
-              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="absolute right-3 top-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 focus:outline-none"
               tabIndex={-1}
             >
               {showPasswordToggle ? (
@@ -438,7 +438,7 @@ const AuthPages = () => {
             </button>
           )}
           {errors[name] && (
-            <p className="mt-1 text-sm text-red-500">{errors[name]}</p>
+            <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors[name]}</p>
           )}
         </div>
       </div>
@@ -446,10 +446,10 @@ const AuthPages = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       <div className="max-w-lg mx-auto pt-12 px-4">
         {showSuccess && (
-          <Alert className="mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4">
+          <Alert className="mb-4 bg-green-100 dark:bg-green-900 border-l-4 border-green-500 text-green-700 dark:text-green-200 p-4">
             <AlertDescription>
               {authMode === 'login' ? 'Successfully logged in!' : 'Account created successfully!'}
             </AlertDescription>
@@ -457,16 +457,16 @@ const AuthPages = () => {
         )}
 
         {showVerificationAlert && (
-          <Alert className="mb-4">
+          <Alert className="mb-4 dark:bg-gray-800 dark:border-gray-700">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Verify your email</AlertTitle>
-            <AlertDescription className="mt-2">
+            <AlertDescription className="mt-2 dark:text-gray-300">
               We've sent a verification link to <span className="font-medium">{registeredEmail}</span>.
               Please check your email and click the link to verify your account.
               Once verified, you can sign in to your account.
             </AlertDescription>
             <Button
-              className="mt-4 w-full"
+              className="mt-4 w-full dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100"
               variant="outline"
               onClick={() => switchMode('login')}
             >
@@ -476,18 +476,18 @@ const AuthPages = () => {
         )}
 
         {apiError && (
-          <Alert className="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+          <Alert className="mb-4 bg-red-100 dark:bg-red-900/50 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-4">
             <AlertDescription>{apiError}</AlertDescription>
           </Alert>
         )}
 
         {!showVerificationAlert && (
-          <Card className="w-full">
+          <Card className="w-full dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>
+              <CardTitle className="dark:text-gray-100">
                 {authMode === 'login' ? 'Welcome back' : 'Create an account'}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="dark:text-gray-400">
                 {authMode === 'login' 
                   ? 'Enter your credentials to access your account' 
                   : 'Choose your account type and fill in your details'}
@@ -496,15 +496,15 @@ const AuthPages = () => {
             <CardContent className="w-full space-y-4 text-left">
               {authMode === 'register' && (
                 <div className="space-y-2">
-                  <label className="text-gray-700 text-sm font-bold ">Account Type</label>
+                  <label className="text-gray-700 dark:text-gray-300 text-sm font-bold">Account Type</label>
                   <div className="grid grid-cols-2 gap-4">
                     {['customer', 'agent'].map((type) => (
                       <button
                         key={type}
                         className={`w-full p-4 flex flex-col items-center gap-2 rounded-lg border ${
                           userType === type 
-                            ? 'bg-blue-50 border-blue-200' 
-                            : 'bg-white border-gray-200'
+                            ? 'bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800' 
+                            : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600'
                         } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() => !isLoading && setUserType(type)}
                         disabled={isLoading}
@@ -519,11 +519,11 @@ const AuthPages = () => {
                         onMouseLeave={(e) => handleButtonHover(e, false, type)}
                       >
                         {type === 'customer' ? (
-                          <User className="h-6 w-6 text-gray-600" />
+                          <User className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                         ) : (
-                          <Building className="h-6 w-6 text-gray-600" />
+                          <Building className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                         )}
-                        <span className="text-sm text-gray-700">
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
                           {type === 'customer' ? 'Customer' : 'Support Agent'}
                         </span>
                       </button>
@@ -539,13 +539,13 @@ const AuthPages = () => {
 
                     {userType === 'agent' && (
                       <div>
-                        <label className="text-sm text-gray-700 font-bold ">Department</label>
+                        <label className="text-sm text-gray-700 dark:text-gray-300 font-bold">Department</label>
                         <select
                           name="department"
                           value={formData.department}
                           onChange={handleInputChange}
                           disabled={isLoading}
-                          className={`mt-1 w-full p-3 bg-white text-gray-800 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
+                          className={`mt-1 w-full p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 ${
                             isLoading ? 'opacity-50 cursor-not-allowed' : ''
                           }`}
                         >
@@ -557,75 +557,75 @@ const AuthPages = () => {
                       </div>
                     )}
 
-                  {userType === 'customer' && 
-                    renderInput('Phone Number', 'phoneNumber', 'tel', 'Enter your phone number', <Phone />)
-                  }
+                    {userType === 'customer' && 
+                      renderInput('Phone Number', 'phoneNumber', 'tel', 'Enter your phone number', <Phone />)
+                    }
                   </>
                 )}
   
-                  {renderInput('Email', 'email', 'email', 'Enter your email', <Mail />)}
-                  {renderInput('Password', 'password', 'password', 'Enter your password', <Lock />)}
-                  
-                  {authMode === 'register' && 
-                    renderInput('Confirm Password', 'confirmPassword', 'password', 'Confirm your password', <Lock />)
-                  }
+                {renderInput('Email', 'email', 'email', 'Enter your email', <Mail />)}
+                {renderInput('Password', 'password', 'password', 'Enter your password', <Lock />)}
+                
+                {authMode === 'register' && 
+                  renderInput('Confirm Password', 'confirmPassword', 'password', 'Confirm your password', <Lock />)
+                }
   
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg flex items-center justify-center gap-2"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        {authMode === 'login' ? 'Signing In...' : 'Creating Account...'}
-                      </>
-                    ) : (
-                      <>
-                        {authMode === 'login' ? 'Sign In' : 'Create Account'}
-                        <ArrowRight className="h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-  
-              <CardFooter>
-                <p className="text-sm text-center w-full">
-                  {authMode === 'login' ? (
+                <Button 
+                  type="submit" 
+                  className="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white p-3 rounded-lg flex items-center justify-center gap-2"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
                     <>
-                      Don't have an account?{' '}
-                      <button
-                        onClick={() => !isLoading && switchMode('register')}
-                        disabled={isLoading}
-                        className={`text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-0 bg-transparent border-none appearance-none ${
-                          isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        Sign up
-                      </button>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {authMode === 'login' ? 'Signing In...' : 'Creating Account...'}
                     </>
                   ) : (
                     <>
-                      Already have an account?{' '}
-                      <button
-                        onClick={() => !isLoading && switchMode('login')}
-                        disabled={isLoading}
-                        className={`text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-0 bg-transparent border-none appearance-none ${
-                          isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        Sign in
-                      </button>
+                      {authMode === 'login' ? 'Sign In' : 'Create Account'}
+                      <ArrowRight className="h-4 w-4" />
                     </>
                   )}
-                </p>
-              </CardFooter>
-            </Card>
-          )}
-        </div>
-      </div>
-    );
-  };
+                </Button>
+              </form>
+            </CardContent>
   
-  export default AuthPages;
+            <CardFooter>
+              <p className="text-sm text-center w-full dark:text-gray-300">
+                {authMode === 'login' ? (
+                  <>
+                    Don't have an account?{' '}
+                    <button
+                      onClick={() => !isLoading && switchMode('register')}
+                      disabled={isLoading}
+                      className={`text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none focus:ring-0 bg-transparent border-none appearance-none ${
+                        isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      Sign up
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{' '}
+                    <button
+                      onClick={() => !isLoading && switchMode('login')}
+                      disabled={isLoading}
+                      className={`text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none focus:ring-0 bg-transparent border-none appearance-none ${
+                        isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      Sign in
+                    </button>
+                  </>
+                )}
+              </p>
+            </CardFooter>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AuthPages;
