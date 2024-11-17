@@ -19,10 +19,12 @@ import {
   Clock,
 } from "lucide-react";
 import { supabase } from "@/utils/supabase";
+import { useTheme } from '../../contexts/ThemeContext';
 
 const CustomerTickets = () => {
   const location = useLocation();
   const userData = location.state?.userData;
+  const { isDarkMode, loadUserTheme } = useTheme();
 
   const [activeTickets, setActiveTickets] = useState([]);
   const [resolvedTickets, setResolvedTickets] = useState([]);
@@ -31,6 +33,8 @@ const CustomerTickets = () => {
 
   useEffect(() => {
     if (!userData?.id) return;
+
+    loadUserTheme(userData.id);
 
     async function fetchTickets() {
       setIsLoading(true);
@@ -53,24 +57,40 @@ const CustomerTickets = () => {
     }
 
     fetchTickets();
-  }, [userData?.id]);
+  }, [userData?.id, loadUserTheme]);
 
   const getStatusColor = (status) => {
     const colors = {
-      open: "bg-blue-500/10 text-blue-500 border-blue-200",
-      in_progress: "bg-yellow-500/10 text-yellow-600 border-yellow-200",
-      resolved: "bg-green-500/10 text-green-600 border-green-200",
+      open: isDarkMode 
+        ? "bg-blue-500/20 text-blue-400 border-blue-800"
+        : "bg-blue-500/10 text-blue-500 border-blue-200",
+      in_progress: isDarkMode
+        ? "bg-yellow-500/20 text-yellow-400 border-yellow-800"
+        : "bg-yellow-500/10 text-yellow-600 border-yellow-200",
+      resolved: isDarkMode
+        ? "bg-green-500/20 text-green-400 border-green-800"
+        : "bg-green-500/10 text-green-600 border-green-200",
     };
-    return colors[status] || "bg-gray-500/10 text-gray-600 border-gray-200";
+    return colors[status] || (isDarkMode 
+      ? "bg-gray-500/20 text-gray-400 border-gray-800"
+      : "bg-gray-500/10 text-gray-600 border-gray-200");
   };
 
   const getPriorityColor = (status) => {
     const colors = {
-      high: "bg-red-500/10 text-red-500 border-red-200",
-      medium: "bg-yellow-500/10 text-yellow-600 border-yellow-200",
-      low: "bg-green-500/10 text-green-600 border-green-200"
+      high: isDarkMode
+        ? "bg-red-500/20 text-red-400 border-red-800"
+        : "bg-red-500/10 text-red-500 border-red-200",
+      medium: isDarkMode
+        ? "bg-yellow-500/20 text-yellow-400 border-yellow-800"
+        : "bg-yellow-500/10 text-yellow-600 border-yellow-200",
+      low: isDarkMode
+        ? "bg-green-500/20 text-green-400 border-green-800"
+        : "bg-green-500/10 text-green-600 border-green-200"
     };
-    return colors[status] || "bg-gray-500/10 text-gray-600 border-gray-200";
+    return colors[status] || (isDarkMode
+      ? "bg-gray-500/20 text-gray-400 border-gray-800"
+      : "bg-gray-500/10 text-gray-600 border-gray-200");
   };
 
   const formatDate = (dateString) => {
@@ -82,19 +102,29 @@ const CustomerTickets = () => {
   };
 
   const renderTicketCard = (ticket) => (
-    <Card key={ticket.id} className="group transition-all duration-200 hover:shadow-md border-l-4" style={{
-      borderLeftColor: ticket.priority === 'high' ? '#ef4444' : 
-                       ticket.priority === 'medium' ? '#eab308' : '#22c55e'
-    }}>
+    <Card 
+      key={ticket.id} 
+      className={`group transition-all duration-200 hover:shadow-md border-l-4 ${
+        isDarkMode ? 'bg-gray-800 hover:bg-gray-800/80' : 'bg-white hover:bg-gray-50'
+      }`}
+      style={{
+        borderLeftColor: ticket.priority === 'high' ? '#ef4444' : 
+                        ticket.priority === 'medium' ? '#eab308' : '#22c55e'
+      }}
+    >
       <CardContent className="pt-6">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-3 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-lg group-hover:text-blue-600 transition-colors">
+              <h3 className={`font-semibold text-lg group-hover:text-blue-500 transition-colors ${
+                isDarkMode ? 'text-gray-100' : 'text-gray-900'
+              }`}>
                 {ticket.issue_type}
               </h3>
             </div>
-            <div className="flex items-center gap-3 text-sm text-gray-500">
+            <div className={`flex items-center gap-3 text-sm ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`}>
               <div className="flex items-center gap-1">
                 <MessageSquare size={14} />
                 <span>#{ticket.id}</span>
@@ -123,11 +153,19 @@ const CustomerTickets = () => {
   );
 
   const renderEmptyState = (message) => (
-    <Card className="bg-gray-50/50">
+    <Card className={isDarkMode ? 'bg-gray-800/50' : 'bg-gray-50/50'}>
       <CardContent className="py-12 text-center">
-        <CircleSlash className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-1">No tickets found</h3>
-        <p className="text-gray-500">{message}</p>
+        <CircleSlash className={`mx-auto h-12 w-12 ${
+          isDarkMode ? 'text-gray-600' : 'text-gray-400'
+        } mb-4`} />
+        <h3 className={`text-lg font-medium mb-1 ${
+          isDarkMode ? 'text-gray-100' : 'text-gray-900'
+        }`}>
+          No tickets found
+        </h3>
+        <p className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>
+          {message}
+        </p>
       </CardContent>
     </Card>
   );
@@ -142,12 +180,24 @@ const CustomerTickets = () => {
 
   if (!userData) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50">
-        <Card className="w-96 text-center">
+      <div className={`min-h-screen flex justify-center items-center ${
+        isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+      }`}>
+        <Card className={isDarkMode ? 'bg-gray-800 w-96' : 'w-96'}>
           <CardContent className="py-6">
-            <CircleSlash className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Authentication Required</h3>
-            <p className="text-gray-500 mb-4">Please log in to view your tickets</p>
+            <CircleSlash className={`mx-auto h-12 w-12 ${
+              isDarkMode ? 'text-gray-600' : 'text-gray-400'
+            } mb-4`} />
+            <h3 className={`text-lg font-medium mb-2 ${
+              isDarkMode ? 'text-gray-100' : 'text-gray-900'
+            }`}>
+              Authentication Required
+            </h3>
+            <p className={`mb-4 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`}>
+              Please log in to view your tickets
+            </p>
             <Button onClick={() => window.history.push('/login')}>
               Go to Login
             </Button>
@@ -158,30 +208,52 @@ const CustomerTickets = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center">
-      <div className="w-[1024px] bg-white shadow-xl rounded-lg my-8">
-        <div className="p-6 border-b border-gray-100">
+    <div className={`min-h-screen flex justify-center ${
+      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+    }`}>
+      <div className={`w-[1024px] shadow-xl rounded-lg my-8 ${
+        isDarkMode ? 'bg-gray-800' : 'bg-white'
+      }`}>
+        <div className={`p-6 border-b ${
+          isDarkMode ? 'border-gray-700' : 'border-gray-100'
+        }`}>
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
-              className="hover:bg-gray-100"
+              className={`hover:bg-gray-700 ${
+                isDarkMode ? 'text-gray-300 hover:text-gray-100' : 'text-gray-700 hover:bg-gray-100'
+              }`}
               onClick={() => window.history.back()}
             >
               <ArrowLeft size={16} className="mr-2" />
               Back
             </Button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900">TicketZone</h1>
-              <p className="text-sm text-gray-500 mt-1">Manage and track your support tickets</p>
+              <h1 className={`text-2xl font-bold ${
+                isDarkMode ? 'text-gray-100' : 'text-gray-900'
+              }`}>
+                TicketZone
+              </h1>
+              <p className={`text-sm mt-1 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}>
+                Manage and track your support tickets
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="p-6 border-b border-gray-100">
+        <div className={`p-6 border-b ${
+          isDarkMode ? 'border-gray-700' : 'border-gray-100'
+        }`}>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${
+              isDarkMode ? 'text-gray-500' : 'text-gray-400'
+            }`} />
             <Input
-              className="pl-10"
+              className={`pl-10 ${
+                isDarkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : ''
+              }`}
               placeholder="Search tickets by issue type..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -191,7 +263,7 @@ const CustomerTickets = () => {
 
         <div className="p-6">
           <Tabs defaultValue="active" className="space-y-6">
-            <TabsList className="bg-gray-50/80 p-1">
+            <TabsList className={isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50/80'}>
               <TabsTrigger value="active" className="gap-2">
                 Active Tickets
                 {activeTickets.length > 0 && (
@@ -209,8 +281,12 @@ const CustomerTickets = () => {
             <TabsContent value="active" className="space-y-4">
               {isLoading ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                  <p className="mt-4 text-gray-500">Loading tickets...</p>
+                  <div className={`animate-spin rounded-full h-8 w-8 border-b-2 mx-auto ${
+                    isDarkMode ? 'border-gray-400' : 'border-gray-900'
+                  }`}></div>
+                  <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'}>
+                    Loading tickets...
+                  </p>
                 </div>
               ) : filteredActiveTickets.length > 0 ? (
                 filteredActiveTickets.map(renderTicketCard)
@@ -226,8 +302,12 @@ const CustomerTickets = () => {
             <TabsContent value="resolved" className="space-y-4">
               {isLoading ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                  <p className="mt-4 text-gray-500">Loading tickets...</p>
+                  <div className={`animate-spin rounded-full h-8 w-8 border-b-2 mx-auto ${
+                    isDarkMode ? 'border-gray-400' : 'border-gray-900'
+                  }`}></div>
+                  <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'}>
+                    Loading tickets...
+                  </p>
                 </div>
               ) : filteredResolvedTickets.length > 0 ? (
                 filteredResolvedTickets.map(renderTicketCard)

@@ -9,21 +9,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from '@/utils/supabase';
+import { useTheme } from '../../contexts/ThemeContext';
 
-const TypingIndicator = () => (
-  <div className="flex items-center space-x-2 p-4">
-    <div className="flex space-x-1">
-      <div className="w-2 h-2 bg-violet-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-      <div className="w-2 h-2 bg-violet-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-      <div className="w-2 h-2 bg-violet-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+const TypingIndicator = () => {
+  const { isDarkMode } = useTheme();
+  
+  return (
+    <div className="flex items-center space-x-2 p-4">
+      <div className="flex space-x-1">
+        <div className={`w-2 h-2 ${isDarkMode ? 'bg-violet-400' : 'bg-violet-500'} rounded-full animate-bounce`} style={{ animationDelay: '0ms' }} />
+        <div className={`w-2 h-2 ${isDarkMode ? 'bg-violet-400' : 'bg-violet-500'} rounded-full animate-bounce`} style={{ animationDelay: '150ms' }} />
+        <div className={`w-2 h-2 ${isDarkMode ? 'bg-violet-400' : 'bg-violet-500'} rounded-full animate-bounce`} style={{ animationDelay: '300ms' }} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const CustomerChatInterface = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userData = location.state?.userData;
+  const { isDarkMode, loadUserTheme } = useTheme();
   const [messages, setMessages] = useState([
     {
       type: 'bot',
@@ -49,9 +55,15 @@ const CustomerChatInterface = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  
+
   useEffect(() => {
+
+    // Load user theme
+    loadUserTheme(userData.id);
+
     scrollToBottom();
-  }, [messages]);
+  }, [messages, loadUserTheme]);
 
   const simulateAIResponse = async (userMessage) => {
     setIsTyping(true);
@@ -202,22 +214,24 @@ const CustomerChatInterface = () => {
       <div className="flex flex-col items-center gap-1">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 ${
           message.type === 'bot' 
-            ? 'bg-gradient-to-br from-violet-500 to-purple-600' 
-            : 'bg-gradient-to-br from-indigo-500 to-blue-600'
+            ? `${isDarkMode ? 'from-violet-400 to-purple-500' : 'from-violet-500 to-purple-600'} bg-gradient-to-br` 
+            : `${isDarkMode ? 'from-indigo-400 to-blue-500' : 'from-indigo-500 to-blue-600'} bg-gradient-to-br`
         }`}>
           {message.type === 'bot' ? 
             <Bot className="w-6 h-6 text-white" /> : 
             <UserIcon className="w-6 h-6 text-white" />
           }
         </div>
-        <span className="text-xs text-gray-500 font-medium">
+        <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
       <div className={`relative max-w-[75%] p-4 rounded-2xl shadow-md transition-all duration-200 ${
         message.type === 'user' 
-          ? 'bg-gradient-to-br from-indigo-500 to-blue-600 text-white' 
-          : 'bg-white dark:bg-gray-800 border border-gray-100 text-gray-800 dark:text-gray-200'
+          ? `${isDarkMode ? 'from-indigo-400 to-blue-500' : 'from-indigo-500 to-blue-600'} bg-gradient-to-br text-white` 
+          : `${isDarkMode 
+              ? 'bg-gray-800 border-gray-700 text-gray-100' 
+              : 'bg-white border-gray-100 text-gray-800'} border`
       }`}>
         <p className="text-sm leading-relaxed">{message.content}</p>
       </div>
@@ -225,14 +239,22 @@ const CustomerChatInterface = () => {
   ));
 
   const SatisfactionSurvey = () => (
-    <Card className="mb-4 border-violet-200 bg-violet-50 dark:bg-violet-900/10 dark:border-violet-800">
+    <Card className={`mb-4 ${
+      isDarkMode 
+        ? 'bg-violet-900/20 border-violet-700 text-violet-100' 
+        : 'bg-violet-50 border-violet-200 text-violet-800'
+    }`}>
       <CardContent className="p-6">
         <div className="text-center">
-          <p className="text-sm font-medium mb-4 text-violet-800 dark:text-violet-200">Has your issue been resolved?</p>
+          <p className="text-sm font-medium mb-4">Has your issue been resolved?</p>
           <div className="flex justify-center gap-4">
             <Button
               variant="outline"
-              className="border-violet-200 hover:bg-violet-100 hover:text-violet-800 dark:border-violet-700 dark:hover:bg-violet-900"
+              className={`${
+                isDarkMode
+                  ? 'border-violet-600 hover:bg-violet-800 text-violet-100'
+                  : 'border-violet-200 hover:bg-violet-100 text-violet-800'
+              }`}
               onClick={() => {
                 setIsSatisfied(false);
                 setShowTicketDialog(true);
@@ -241,7 +263,11 @@ const CustomerChatInterface = () => {
               No, I need more help
             </Button>
             <Button
-              className="bg-violet-600 hover:bg-violet-700 text-white"
+              className={`${
+                isDarkMode
+                  ? 'bg-violet-500 hover:bg-violet-600'
+                  : 'bg-violet-600 hover:bg-violet-700'
+              } text-white`}
               onClick={() => {
                 setIsSatisfied(true);
                 setMessages(prev => [...prev, {
@@ -261,26 +287,42 @@ const CustomerChatInterface = () => {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10 backdrop-blur-lg bg-opacity-80">
+    <div className={`flex flex-col h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`fixed top-0 left-0 right-0 ${
+        isDarkMode
+          ? 'bg-gray-800/80 border-gray-700'
+          : 'bg-white/80 border-gray-200'
+      } border-b backdrop-blur-lg z-10`}>
         <div className="w-full max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                className={`${
+                  isDarkMode
+                    ? 'hover:bg-gray-700 text-gray-300'
+                    : 'hover:bg-gray-100 text-gray-600'
+                }`}
                 onClick={() => navigate(-1)}
               >
-                <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <ArrowLeft className="w-5 h-5" />
               </Button>
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Uplift-AI Support</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">We're here to help you</p>
+                <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                  Uplift-AI Assistance
+                </h2>
+                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  We're here to help you
+                </p>
               </div>
             </div>
             <Button 
-              className="bg-violet-600 hover:bg-violet-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              className={`${
+                isDarkMode
+                  ? 'bg-violet-500 hover:bg-violet-600'
+                  : 'bg-violet-600 hover:bg-violet-700'
+              } text-white shadow-lg hover:shadow-xl transition-all duration-200`}
               onClick={() => setShowTicketDialog(true)}
             >
               Create Ticket
@@ -294,18 +336,19 @@ const CustomerChatInterface = () => {
           {messages.map((message, index) => (
             <MessageBubble key={`${message.timestamp.getTime()}-${index}`} message={message} />
           ))}
-
           {isTyping && <TypingIndicator />}
-
           {conversationCount > 5 && conversationCount % 3 === 0 && isSatisfied === null && (
             <SatisfactionSurvey />
           )}
-
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-10 backdrop-blur-lg bg-opacity-80">
+      <div className={`fixed bottom-0 left-0 right-0 ${
+        isDarkMode
+          ? 'bg-gray-800/80 border-gray-700'
+          : 'bg-white/80 border-gray-200'
+      } border-t backdrop-blur-lg z-10`}>
         <div className="max-w-4xl mx-auto p-4">
           <div className="flex items-center gap-3">
             <div className="flex-1 relative">
@@ -320,10 +363,18 @@ const CustomerChatInterface = () => {
                     handleSendMessage();
                   }
                 }}
-                className="pr-28 focus-visible:ring-violet-500 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
+                className={`pr-28 ${
+                  isDarkMode
+                    ? 'bg-gray-700 text-gray-200 placeholder-gray-400 focus-visible:ring-violet-400'
+                    : 'bg-white text-gray-900 placeholder-gray-500 focus-visible:ring-violet-500'
+                }`}
               />
               <Button 
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 px-4 bg-violet-600 hover:bg-violet-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 px-4 ${
+                  isDarkMode
+                    ? 'bg-violet-500 hover:bg-violet-600'
+                    : 'bg-violet-600 hover:bg-violet-700'
+                } text-white shadow-md hover:shadow-lg transition-all duration-200`}
                 onClick={handleSendMessage} 
                 disabled={!inputMessage.trim()}
               >

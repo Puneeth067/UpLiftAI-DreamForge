@@ -4,6 +4,7 @@ import React, { lazy, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 // import PrivateRoute from './components/common/PrivateRoute/PrivateRoute';
 // import ProtectedLayout from './Protection/ProtectedLayout';
+import { ThemeProvider } from './contexts/ThemeContext';
 import './App.css';
 import './styles/globals.css';
 
@@ -16,7 +17,7 @@ const CustomerChatInterface = lazy(() => import('./pages/Chats/CustomerChatInter
 const AgentChatInterface = lazy(() => import('./pages/Chats/AgentChatInterface'));
 const CustomerTickets = lazy(() => import('./pages/Tickets/CustomerTickets'));
 //const AgentTickets = lazy(() => import('./pages/Tickets/AgentTickets'));
-//const SettingsPage = lazy(() => import('./pages/Profile/SettingsPage'));
+const SettingsPage = lazy(() => import('./pages/Profile/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/Profile/ProfilePage'));
 // const TicketsPage = lazy(() => import('./pages/Tickets/TicketsPage'));
 // const TicketDetailsPage = lazy(() => import('./pages/Tickets/TicketDetailsPage'));
@@ -49,6 +50,7 @@ const ROUTES = {
     },
     COMMON: {
       PROFILE: '/profile',
+      SETTING: '/settings',
     }
   }
 };
@@ -56,87 +58,98 @@ const ROUTES = {
 function App() {
   return (
     <Router>
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          {/* Public routes - without AuthProvider and ErrorBoundary */}
-          <Route path={ROUTES.PUBLIC.HOME} element={<HomePage />} />
-          <Route path={ROUTES.PUBLIC.AUTH} element={<AuthPages />} />
-          <Route path={ROUTES.PUBLIC.NOT_FOUND} element={<NotFoundPage />} />
+      <ThemeProvider>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            {/* Public routes - without AuthProvider and ErrorBoundary */}
+            <Route path={ROUTES.PUBLIC.HOME} element={<HomePage />} />
+            <Route path={ROUTES.PUBLIC.AUTH} element={<AuthPages />} />
+            <Route path={ROUTES.PUBLIC.NOT_FOUND} element={<NotFoundPage />} />
 
-          {/* Protected routes - wrapped with ProtectedLayout */}
-          {/* <Route element={<ProtectedLayout />}> */}
-            {/* Protected Customer routes */}
-            <Route
-              path={ROUTES.PROTECTED.CUSTOMER.DASHBOARD}
-              element={
-                // <PrivateRoute userType="customer">
-                  <CustomerDashboard />
-                // {/* </PrivateRoute> */}
-              }
-            />
-            <Route
-              path={ROUTES.PROTECTED.CUSTOMER.CHAT}
-              element={
-                // <PrivateRoute userType="customer">
-                  <CustomerChatInterface />
-                // </PrivateRoute>
-              }
-            />
+            {/* Protected routes - wrapped with ProtectedLayout */}
+            {/* <Route element={<ProtectedLayout />}> */}
+              {/* Protected Customer routes */}
+              <Route
+                path={ROUTES.PROTECTED.CUSTOMER.DASHBOARD}
+                element={
+                  // <PrivateRoute userType="customer">
+                    <CustomerDashboard />
+                  // {/* </PrivateRoute> */}
+                }
+              />
+              <Route
+                path={ROUTES.PROTECTED.CUSTOMER.CHAT}
+                element={
+                  // <PrivateRoute userType="customer">
+                    <CustomerChatInterface />
+                  // </PrivateRoute>
+                }
+              />
 
-            <Route
-              path={ROUTES.PROTECTED.CUSTOMER.TICKET}
-              element={
-                // <PrivateRoute userType="agent">
-                  <CustomerTickets />
-                // </PrivateRoute>
-              }
-            />
+              <Route
+                path={ROUTES.PROTECTED.CUSTOMER.TICKET}
+                element={
+                  // <PrivateRoute userType="agent">
+                    <CustomerTickets />
+                  // </PrivateRoute>
+                }
+              />
 
-            {/* Protected Agent routes */}
-            <Route
-              path={ROUTES.PROTECTED.AGENT.DASHBOARD}
-              element={
-                // <PrivateRoute userType="agent">
-                  <AgentDashboard />
-                // </PrivateRoute>
-              }
-            />
-            <Route
-              path={ROUTES.PROTECTED.AGENT.CHAT}
-              element={
-                // <PrivateRoute userType="agent">
-                  <AgentChatInterface />
-                // </PrivateRoute>
-              }
-            />
+              {/* Protected Agent routes */}
+              <Route
+                path={ROUTES.PROTECTED.AGENT.DASHBOARD}
+                element={
+                  // <PrivateRoute userType="agent">
+                    <AgentDashboard />
+                  // </PrivateRoute>
+                }
+              />
+              <Route
+                path={ROUTES.PROTECTED.AGENT.CHAT}
+                element={
+                  // <PrivateRoute userType="agent">
+                    <AgentChatInterface />
+                  // </PrivateRoute>
+                }
+              />
 
-            
+              
 
-            {/* <Route
-              path={ROUTES.PROTECTED.AGENT.TICKET}
-              element={
-                // <PrivateRoute userType="agent">
-                  <AgentTickets />
-                // </PrivateRoute>
-              }
-            /> */}
+              {/* <Route
+                path={ROUTES.PROTECTED.AGENT.TICKET}
+                element={
+                  // <PrivateRoute userType="agent">
+                    <AgentTickets />
+                  // </PrivateRoute>
+                }
+              /> */}
 
-            {/* Common protected routes
-            ProfilePage */}
-            <Route
-              path={ROUTES.PROTECTED.COMMON.PROFILE}
-              element={
-                // <PrivateRoute>
-                  <ProfilePage />
-                //</PrivateRoute> 
-              }
-            />
-            
+              {/* Common protected routes
+              ProfilePage */}
+              <Route
+                path={ROUTES.PROTECTED.COMMON.PROFILE}
+                element={
+                  // <PrivateRoute>
+                    <ProfilePage />
+                  //</PrivateRoute> 
+                }
+              />
 
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to={ROUTES.PUBLIC.NOT_FOUND} replace />} />
-        </Routes>
-      </Suspense>
+              <Route
+                path={ROUTES.PROTECTED.COMMON.SETTING}
+                element={
+                  // <PrivateRoute>
+                    <SettingsPage />
+                  //</PrivateRoute> 
+                }
+              />
+              
+
+            {/* Catch-all route */}
+            <Route path="*" element={<Navigate to={ROUTES.PUBLIC.NOT_FOUND} replace />} />
+          </Routes>
+        </Suspense>
+        </ThemeProvider>
     </Router>
   );
 }

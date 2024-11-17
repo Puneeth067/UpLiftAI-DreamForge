@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster"
+import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '@/utils/supabase';
 import {
   Mail,
@@ -27,10 +29,34 @@ import {
   Info
 } from 'lucide-react';
 
+const DEPARTMENTS = [
+  'Technical Support',
+  'Customer Service',
+  'Billing Support',
+  'Product Support'
+];
+
+const formatPhoneNumber = (value) => {
+  if (!value) return value;
+  
+  // Remove all non-numeric characters
+  const phoneNumber = value.replace(/[^\d]/g, '');
+  
+  // Format the number as XXX XXX XXXX
+  if (phoneNumber.length <= 3) {
+    return phoneNumber;
+  } else if (phoneNumber.length <= 6) {
+    return `(${phoneNumber.slice(0, 3)})-${phoneNumber.slice(3)}`;
+  } else {
+    return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3, 6)} ${phoneNumber.slice(6, 10)}`;
+  }
+};
+
 const ProfilePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const userId = location.state?.userData?.id;
+  const { isDarkMode, loadUserTheme } = useTheme();
   
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -48,9 +74,11 @@ const ProfilePage = () => {
   });
 
   useEffect(() => {
+    // Load user theme
+    loadUserTheme(userId);
     fetchProfile();
     fetchAvatars();
-  }, [userId]);
+  }, [userId, loadUserTheme]);
 
   const fetchAvatars = async () => {
     // In a real implementation, you might want to fetch this list from an API
@@ -93,7 +121,8 @@ const ProfilePage = () => {
       toast({
         title: "Error",
         description: "Failed to load profile data",
-        variant: "destructive"
+        variant: "destructive",
+        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
       });
       setLoading(false);
     }
@@ -126,13 +155,15 @@ const ProfilePage = () => {
       toast({
         title: "Success",
         description: "Profile updated successfully",
+        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
       });
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
         title: "Error",
         description: "Failed to update profile",
-        variant: "destructive"
+        variant: "destructive",
+        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
       });
     }
   };
@@ -143,11 +174,30 @@ const ProfilePage = () => {
   };
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    
+    if (name === 'phonenumber') {
+      // Format phone number while typing
+      const formattedPhone = formatPhoneNumber(value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: formattedPhone
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
+  
+  const handleDepartmentChange = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      department: value
+    }));
+  };
+
 
   const renderAvatarDialog = () => (
     <Dialog open={avatarDialogOpen} onOpenChange={setAvatarDialogOpen}>
@@ -192,17 +242,27 @@ const ProfilePage = () => {
         description: "Hover over your profile picture to change your avatar!",
         icon: <Info className="h-5 w-5 text-blue-500" />,
         duration: 5000,
-        className: "bg-blue-50 border-blue-200",
+        className: `${isDarkMode 
+          ? "bg-gray-800 border-gray-700 text-gray-100" 
+          : "bg-blue-50 border-blue-200"}`
       });
     }
   };
 
   const getUserTypeColor = (userType) => {
     const types = {
-      admin: 'bg-purple-50 text-purple-700 border border-purple-200',
-      agent: 'bg-blue-50 text-blue-700 border border-blue-200',
-      customer: 'bg-green-50 text-green-700 border border-green-200',
-      default: 'bg-gray-50 text-gray-700 border border-gray-200'
+      admin: isDarkMode 
+        ? 'bg-purple-900 text-purple-100 border-purple-800'
+        : 'bg-purple-50 text-purple-700 border-purple-200',
+      agent: isDarkMode
+        ? 'bg-blue-900 text-blue-100 border-blue-800'
+        : 'bg-blue-50 text-blue-700 border-blue-200',
+      customer: isDarkMode
+        ? 'bg-green-900 text-green-100 border-green-800'
+        : 'bg-green-50 text-green-700 border-green-200',
+      default: isDarkMode
+        ? 'bg-gray-800 text-gray-100 border-gray-700'
+        : 'bg-gray-50 text-gray-700 border-gray-200'
     };
     return types[userType?.toLowerCase()] || types.default;
   };
@@ -214,7 +274,7 @@ const ProfilePage = () => {
     return (
       <div className="flex flex-col items-center text-center">
         <div className="relative group">
-          <Avatar className="h-32 w-32 ring-4 ring-white shadow-lg">
+          <Avatar className={`h-32 w-32 ${isDarkMode ? 'ring-gray-800' : 'ring-white'} ring-4 shadow-lg`}>
             <AvatarImage 
               src={`/avatars/${profile?.avatar_url || 'user.png'}`} 
               alt={profile?.fullname} 
@@ -236,24 +296,26 @@ const ProfilePage = () => {
           </Badge>
         </div>
         
-        <h2 className="text-2xl font-bold mt-6 text-gray-900">{profile?.fullname}</h2>
+        <h2 className={`text-2xl font-bold mt-6 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+          {profile?.fullname}
+        </h2>
         <Badge variant="secondary" className={`mt-2 px-4 py-1 ${getUserTypeColor(profile?.usertype)}`}>
           {profile?.usertype || 'Customer'}
         </Badge>
 
         <div className="w-full mt-8 space-y-4">
-          <div className="flex items-center gap-3 text-sm text-gray-600 justify-center">
+          <div className={`flex items-center gap-3 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} justify-center`}>
             <Mail className="h-4 w-4" />
             {profile?.email}
           </div>
           {isCustomer && (
-            <div className="flex items-center gap-3 text-sm text-gray-600 justify-center">
+            <div className={`flex items-center gap-3 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} justify-center`}>
               <Phone className="h-4 w-4" />
               {profile?.phonenumber || 'Not provided'}
             </div>
           )}
           {isAgent && (
-            <div className="flex items-center gap-3 text-sm text-gray-600 justify-center">
+            <div className={`flex items-center gap-3 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} justify-center`}>
               <Building className="h-4 w-4" />
               {profile?.department || 'Not specified'}
             </div>
@@ -275,48 +337,89 @@ const ProfilePage = () => {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Full Name</label>
+            <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Full Name
+            </label>
             <Input
               name="fullname"
               value={formData.fullname}
               onChange={handleInputChange}
-              className="transition-all focus:ring-2 focus:ring-blue-100"
+              className={`transition-all focus:ring-2 ${
+                isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200'
+              }`}
             />
           </div>
           
           {isCustomer && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Phone</label>
+              <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Phone
+              </label>
               <Input
                 name="phonenumber"
                 value={formData.phonenumber}
                 onChange={handleInputChange}
-                className="transition-all focus:ring-2 focus:ring-blue-100"
+                placeholder="(555) 555-5555"
+                maxLength={14}
+                className={`transition-all focus:ring-2 ${
+                  isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200'
+                }`}
               />
             </div>
           )}
           {isAgent && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Department</label>
-              <Input
-                name="department"
+              <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Department
+              </label>
+              <Select
                 value={formData.department}
-                onChange={handleInputChange}
-                className="transition-all focus:ring-2 focus:ring-blue-100"
-              />
+                onValueChange={handleDepartmentChange}
+              >
+                <SelectTrigger className={`w-full ${
+                  isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200'
+                }`}>
+                  <SelectValue placeholder="Select a department" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DEPARTMENTS.map((dept) => (
+                    <SelectItem key={dept} value={dept}>
+                      {dept}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
-        </div>
-        <div className="flex justify-end gap-3">
-          
-          <Button onClick={handleUpdate}>
-            <Save className="h-4 w-4 mr-2" />
-            Save Changes
-          </Button>
         </div>
       </motion.div>
     );
   };
+
+  const renderEditButtons = () => (
+    <div className="flex gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setEditing(false)}
+        className={`transition-all ${
+          isDarkMode ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-900 hover:bg-gray-100'
+        }`}
+      >
+        <X className="h-4 w-4 mr-2" />
+        Cancel
+      </Button>
+      <Button
+        variant="default"
+        size="sm"
+        onClick={handleUpdate}
+        className="transition-all"
+      >
+        <Save className="h-4 w-4 mr-2" />
+        Save
+      </Button>
+    </div>
+  );
 
   const renderViewMode = () => {
     const isAgent = profile?.usertype === 'agent';
@@ -330,21 +433,29 @@ const ProfilePage = () => {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-500">Full Name</label>
-            <p className="text-gray-900 font-medium">{profile?.fullname}</p>
+            <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              Full Name
+            </label>
+            <p className={`font-medium ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+              {profile?.fullname}
+            </p>
           </div>
           {isCustomer && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-500">Phone</label>
-              <p className="text-gray-900 font-medium">
+              <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Phone
+              </label>
+              <p className={`font-medium ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
                 {profile?.phonenumber || 'Not provided'}
               </p>
             </div>
           )}
           {isAgent && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-500">Department</label>
-              <p className="text-gray-900 font-medium">
+              <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Department
+              </label>
+              <p className={`font-medium ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
                 {profile?.department || 'Not specified'}
               </p>
             </div>
@@ -354,48 +465,23 @@ const ProfilePage = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card className="md:col-span-1">
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center space-y-4">
-                <Skeleton className="h-32 w-32 rounded-full" />
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="md:col-span-2">
-            <CardContent className="pt-6">
-              <div className="space-y-6">
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-6 w-1/2" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <Toaster />
       {renderAvatarDialog()}
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <div className="flex items-center mb-8">
           <Button
             variant="ghost"
-            className="mr-4"
+            className={`mr-4 ${isDarkMode ? 'text-gray-100 hover:bg-gray-800' : 'text-gray-900 hover:bg-gray-100'}`}
             onClick={() => navigate(-1)}
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back
           </Button>
-          <h1 className="text-2xl font-bold text-gray-900">Profile Details</h1>
+          <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+            Profile Details
+          </h1>
         </div>
 
         <motion.div 
@@ -403,64 +489,86 @@ const ProfilePage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-8"
         >
-          {/* Profile Card */}
-          <Card className="md:col-span-1 shadow-md hover:shadow-lg transition-shadow">
+          <Card className={`md:col-span-1 shadow-md hover:shadow-lg transition-shadow ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+          }`}>
             <CardContent className="pt-8">
               {renderProfileInfo()}
             </CardContent>
           </Card>
 
-          {/* Main Content */}
           <div className="md:col-span-2 space-y-8">
-            {/* Profile Information */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <h3 className="text-xl font-semibold text-gray-900">Profile Information</h3>
-              <Button
-                variant={editing ? "outline" : "ghost"}
-                size="sm"
-                onClick={handleEditToggle}
-                className="transition-all"
-              >
+            <Card className={`shadow-md hover:shadow-lg transition-shadow ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            }`}>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                  Profile Information
+                </h3>
                 {editing ? (
-                  <X className="h-4 w-4 mr-2" />
+                  renderEditButtons()
                 ) : (
-                  <Edit2 className="h-4 w-4 mr-2" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleEditToggle}
+                    className={`transition-all ${
+                      isDarkMode ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
                 )}
-                {editing ? 'Cancel' : 'Edit'}
-              </Button>
-            </CardHeader>
+              </CardHeader>
               <CardContent>
                 {editing ? renderEditForm() : renderViewMode()}
               </CardContent>
             </Card>
 
-            {/* Account Details */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
+            <Card className={`shadow-md hover:shadow-lg transition-shadow ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            }`}>
               <CardHeader>
-                <h3 className="text-xl font-semibold text-gray-900">Account Details</h3>
+                <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                  Account Details
+                </h3>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className={`flex items-center gap-4 p-6 rounded-xl ${getUserTypeColor(profile?.usertype)} transition-all hover:shadow-md`}>
-                    <div className="p-3 bg-white rounded-lg shadow-sm">
-                      <Shield className="h-6 w-6" />
+                    <div className={`p-3 ${isDarkMode ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-sm`}>
+                      <Shield className={`h-6 w-6 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`} />
                     </div>
                     <div>
-                      <div className="text-sm opacity-75">Account Type</div>
-                      <div className="font-semibold text-lg">
-                        {profile?.usertype || 'Standard User'}
+                      <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Account Type
+                      </div>
+                      <div className={`font-semibold text-lg ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                      {profile?.usertype || 'Standard User'}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-4 p-6 bg-white rounded-xl border border-gray-100 transition-all hover:shadow-md">
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <Clock className="h-6 w-6 text-gray-600" />
+                  <div className={`flex items-center gap-4 p-6 rounded-xl transition-all hover:shadow-md ${
+                    isDarkMode 
+                      ? 'bg-gray-800 border-gray-700' 
+                      : 'bg-white border-gray-100'
+                  }`}>
+                    <div className={`p-3 rounded-lg ${
+                      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+                    }`}>
+                      <Clock className={`h-6 w-6 ${
+                        isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                      }`} />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-600">Account Created</div>
-                      <div className="font-semibold text-lg">
+                      <div className={`text-sm ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>Account Created</div>
+                      <div className={`font-semibold text-lg ${
+                        isDarkMode ? 'text-gray-100' : 'text-gray-900'
+                      }`}>
                         {new Date(profile?.created_at).toLocaleDateString()}
                       </div>
                     </div>
@@ -471,6 +579,47 @@ const ProfilePage = () => {
           </div>
         </motion.div>
       </div>
+
+      {loading && (
+        <div className="container mx-auto px-4 py-8 max-w-5xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className={`md:col-span-1 ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
+            }`}>
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center space-y-4">
+                  <Skeleton className={`h-32 w-32 rounded-full ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                  }`} />
+                  <Skeleton className={`h-6 w-48 ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                  }`} />
+                  <Skeleton className={`h-4 w-32 ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                  }`} />
+                </div>
+              </CardContent>
+            </Card>
+            <Card className={`md:col-span-2 ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'
+            }`}>
+              <CardContent className="pt-6">
+                <div className="space-y-6">
+                  <Skeleton className={`h-6 w-full ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                  }`} />
+                  <Skeleton className={`h-6 w-3/4 ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                  }`} />
+                  <Skeleton className={`h-6 w-1/2 ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                  }`} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
