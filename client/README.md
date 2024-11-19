@@ -28,7 +28,7 @@ To install and run the client application locally, follow these steps:
 
 1. Clone the repository:
   ```bash
-  git clone https://github.com/yourusername/UPLIFTAI-SUPPORT.git
+  git clone https://github.com/puneeth067/UPLIFTAI-SUPPORT.git
   ```
 2. Navigate to the client directory:
   ```bash
