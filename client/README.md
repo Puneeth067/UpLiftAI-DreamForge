@@ -67,7 +67,7 @@ npx supabase functions deploy delete-account
 
 7. Start the application:
 ```bash
-cd ..
+cd client
 npm run dev
 ```
 
