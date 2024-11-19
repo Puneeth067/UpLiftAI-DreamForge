@@ -3,7 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 // Environment variables configuration
 const REQUIRED_ENV_VARS = {
   VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-  VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY
+  VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+  VITE_SUPABASE_SERVICE_ROLE_KEY: import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
 }
 
 // Validate all required environment variables
@@ -20,6 +21,7 @@ Object.entries(REQUIRED_ENV_VARS).forEach(([key, value]) => {
 export const supabase = createClient(
   REQUIRED_ENV_VARS.VITE_SUPABASE_URL,
   REQUIRED_ENV_VARS.VITE_SUPABASE_ANON_KEY,
+  
   {
     auth: {
       autoRefreshToken: true,
@@ -29,8 +31,21 @@ export const supabase = createClient(
   }
 )
 
+export const supabaseAdmin = createClient(
+  REQUIRED_ENV_VARS.VITE_SUPABASE_URL,
+  REQUIRED_ENV_VARS.VITE_SUPABASE_SERVICE_ROLE_KEY, 
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  }
+
+)
+
 // Enhanced error handling
-supabase.auth.onAuthStateChange((event, session) => {
+supabase.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_OUT') {
     console.log('User signed out')
   } else if (event === 'SIGNED_IN') {

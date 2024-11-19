@@ -1,10 +1,11 @@
 // App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import React, { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 // import PrivateRoute from './components/common/PrivateRoute/PrivateRoute';
 // import ProtectedLayout from './Protection/ProtectedLayout';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
 import './App.css';
 import './styles/globals.css';
 
@@ -58,6 +59,7 @@ const ROUTES = {
 function App() {
   return (
     <Router>
+      <AuthProvider>
       <ThemeProvider>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
@@ -150,6 +152,7 @@ function App() {
           </Routes>
         </Suspense>
         </ThemeProvider>
+      </AuthProvider>
     </Router>
   );
 }

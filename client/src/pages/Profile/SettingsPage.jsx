@@ -4,7 +4,6 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster"
 import {
   Moon,
   Globe,
@@ -25,17 +25,19 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const SettingsPage = () => {
+  const { session, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [confirmEmail, setConfirmEmail] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState('');
   const { isDarkMode, toggleTheme } = useTheme();
   
   const [userData, setUserData] = useState(location.state?.userData);
-  const userType = location.state?.userType || 'user';
+  const userType = location.state?.userData.userType || 'user';
 
   const [settings, setSettings] = useState({
     darkMode: isDarkMode,
@@ -48,14 +50,14 @@ const SettingsPage = () => {
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: profileData } = await supabase
+        const { data: userData } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', userData.id)
           .single();
         
-        if (profileData) {
-          setUserData(profileData);
+        if (userData) {
+          setUserData(userData);
         }
       }
     };
@@ -63,7 +65,7 @@ const SettingsPage = () => {
     if (!userData) {
       getCurrentUser();
     }
-  }, []);
+  }, [userData]);
 
   // Load user settings
   useEffect(() => {
@@ -146,51 +148,56 @@ const SettingsPage = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (confirmEmail !== userData?.email) {
+    if (confirmDelete.toUpperCase() !== 'DELETE') {
       toast({
         title: "Error",
-        description: "Email confirmation doesn't match",
+        description: "Please type 'DELETE' to confirm account deletion",
         variant: "destructive"
       });
       return;
     }
-
+  
     setLoading(true);
     try {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userData.id);
-
-      if (profileError) throw profileError;
-
-      const { error: settingsError } = await supabase
-        .from('user_settings')
-        .delete()
-        .eq('user_id', userData.id);
-
-      if (settingsError) throw settingsError;
-
-      const { error: authError } = await supabase.auth.admin.deleteUser(
-        userData.id
+      // Ensure we have a valid session
+      if (!session) {
+        throw new Error("No active session found");
+      }
+  
+      // Call the Edge Function for account deletion
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, 
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ user_id: session.user.id })
+        }
       );
-
-      if (authError) throw authError;
-
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete account');
+      }
+  
+      // Sign out the user after successful deletion
       await supabase.auth.signOut();
-
+  
       toast({
         title: "Account Deleted",
-        description: "Your account has been successfully deleted.",
+        description: "Your account has been permanently deleted.",
         duration: 5000
       });
-
+  
       navigate('/', { replace: true });
     } catch (error) {
       console.error('Error deleting account:', error);
       toast({
         title: "Error",
-        description: "Failed to delete account. Please try again.",
+        description: error.message || "Failed to delete account. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -200,6 +207,7 @@ const SettingsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Toaster />
       {/* Header Section */}
       <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 h-16">
@@ -313,15 +321,15 @@ const SettingsPage = () => {
                 <div className="space-y-4">
                   <h3 className="font-medium text-red-600 dark:text-red-500">Delete Account</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {userType === 'user' 
+                    {userType === 'user'
                       ? "This action will permanently delete your account and all associated data. This cannot be undone."
                       : "This action will permanently delete your agent account and reassign all your active tickets. This cannot be undone."}
                   </p>
-                  
+                
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="destructive" 
+                      <Button
+                        variant="destructive"
                         className="w-full mt-2 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
                       >
                         Delete Account
@@ -333,24 +341,26 @@ const SettingsPage = () => {
                           Delete Account
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          <p className="mb-4 text-gray-600 dark:text-gray-400">
-                            This action cannot be undone. This will permanently delete your account
-                            and remove all associated data from our servers.
-                          </p>
-                          <div className="space-y-2">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              Please type your email to confirm:
-                            </p>
-                            <input
-                              type="email"
-                              className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-md 
-                                       bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-                                       focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 
-                                       focus:border-transparent"
-                              placeholder={userData?.email}
-                              value={confirmEmail}
-                              onChange={(e) => setConfirmEmail(e.target.value)}
-                            />
+                          <div className="space-y-4 text-gray-600 dark:text-gray-400">
+                            <div>
+                              This action cannot be undone. This will permanently delete your account
+                              and remove all associated data from our servers.
+                            </div>
+                            <div className="space-y-2">
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                Please type <strong>DELETE</strong> to confirm:
+                              </div>
+                              <input
+                                type="text"
+                                className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-md
+                                            bg-white dark:bg-gray-800 text-gray-900 dark:text-white
+                                            focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600
+                                            focus:border-transparent"
+                                placeholder="Type DELETE"
+                                value={confirmDelete}
+                                onChange={(e) => setConfirmDelete(e.target.value)}
+                              />
+                            </div>
                           </div>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
