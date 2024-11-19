@@ -40,6 +40,7 @@ To install and run the client application locally, follow these steps:
   ```
 4. In windows Powershell:
   ```bash
+  cd UPLIFTAI-SUPPORT\client\src\supabase\functions\delete-account
   deno run --allow-net --allow-env --allow-read index.ts
   ```
 
