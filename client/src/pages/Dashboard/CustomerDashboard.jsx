@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/sheet";
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../utils/supabase.js';
+import LoadingScreen from '@/components/ui/loading';
 
 const CustomerDashboard = () => {
   const navigate = useNavigate();
@@ -99,11 +100,7 @@ const CustomerDashboard = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (error) {
@@ -184,11 +181,7 @@ const CustomerDashboard = () => {
   );
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen dark:bg-gray-900">
-        <div className="text-lg dark:text-gray-100">Loading...</div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (error) {

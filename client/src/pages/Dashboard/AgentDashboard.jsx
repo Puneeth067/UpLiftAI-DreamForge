@@ -10,6 +10,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import LoadingScreen from "@/components/ui/loading";
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../utils/supabase.js';
 
@@ -126,11 +127,7 @@ const AgentDashboard = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (error) {
