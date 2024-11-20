@@ -14,33 +14,32 @@ import { Mail, Lock, User, Building, Phone, ArrowRight, Loader2, AlertCircle, Ey
 import { supabase } from '../../utils/supabase.js';
 
 const AuthBackgroundSVG = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
     className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
     preserveAspectRatio="xMidYMid slice"
     viewBox="0 0 1440 900"
   >
     <defs>
       <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#F6F9FF" stopOpacity="0.9" />
-        <stop offset="100%" stopColor="#C6D9FF" stopOpacity="0.5" />
+        <stop offset="0%" stopColor="#F4E6FF" stopOpacity="0.9" />
+        <stop offset="100%" stopColor="#E0C4FF" stopOpacity="0.5" />
       </radialGradient>
-      
+     
       <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#FFD700" stopOpacity="0.8" />
-        <stop offset="100%" stopColor="#FFEFBA" stopOpacity="0.4" />
+        <stop offset="0%" stopColor="#8A4FFF" stopOpacity="0.8" />
+        <stop offset="100%" stopColor="#C6A3FF" stopOpacity="0.4" />
       </radialGradient>
-
       <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#102A43" stopOpacity="0.7" />
-        <stop offset="100%" stopColor="#0B1E30" stopOpacity="0.9" />
+        <stop offset="0%" stopColor="#3A1C6C" stopOpacity="0.7" />
+        <stop offset="100%" stopColor="#2A1352" stopOpacity="0.9" />
       </radialGradient>
-      
+     
       <filter id="blurFilter">
         <feGaussianBlur stdDeviation="50" />
       </filter>
     </defs>
-    
+   
     {/* Light Mode Patterns */}
     <g className="opacity-100 dark:opacity-0">
       <circle cx="400" cy="250" r="200" fill="url(#lightGradient)" filter="url(#blurFilter)" />
@@ -49,7 +48,7 @@ const AuthBackgroundSVG = () => (
       <polygon points="900,300 1200,600 600,600" fill="url(#lightGradient)" opacity="0.3" />
       <ellipse cx="1200" cy="700" rx="450" ry="300" fill="url(#lightGradient)" filter="url(#blurFilter)" />
     </g>
-    
+   
     {/* Dark Mode Patterns */}
     <g className="opacity-0 dark:opacity-70">
       <circle cx="400" cy="250" r="350" fill="url(#darkGradient)" filter="url(#blurFilter)" />
@@ -58,8 +57,6 @@ const AuthBackgroundSVG = () => (
     </g>
   </svg>
 );
-
-
 
 const DEPARTMENTS = [
   'Technical Support',
