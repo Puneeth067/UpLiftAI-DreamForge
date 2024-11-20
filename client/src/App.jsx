@@ -17,7 +17,7 @@ const AgentDashboard = lazy(() => import('./pages/Dashboard/AgentDashboard'));
 const CustomerChatInterface = lazy(() => import('./pages/Chats/CustomerChatInterface'));
 const AgentChatInterface = lazy(() => import('./pages/Chats/AgentChatInterface'));
 const CustomerTickets = lazy(() => import('./pages/Tickets/CustomerTickets'));
-//const AgentTickets = lazy(() => import('./pages/Tickets/AgentTickets'));
+const AgentTickets = lazy(() => import('./pages/Tickets/AgentTickets'));
 const SettingsPage = lazy(() => import('./pages/Profile/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/Profile/ProfilePage'));
 // const TicketsPage = lazy(() => import('./pages/Tickets/TicketsPage'));
@@ -47,7 +47,7 @@ const ROUTES = {
     AGENT: {
       DASHBOARD: '/agentdashboard',
       CHAT: '/agentchatinterface',
-      //TICKET: '/agenttickets'
+      TICKET: '/agenttickets'
     },
     COMMON: {
       PROFILE: '/profile',
@@ -117,14 +117,14 @@ function App() {
 
               
 
-              {/* <Route
+              <Route
                 path={ROUTES.PROTECTED.AGENT.TICKET}
                 element={
                   // <PrivateRoute userType="agent">
                     <AgentTickets />
                   // </PrivateRoute>
                 }
-              /> */}
+              />
 
               {/* Common protected routes
               ProfilePage */}

@@ -168,10 +168,45 @@ const ProfilePage = () => {
     }
   };
 
-  const handleAvatarSelect = (avatar) => {
+  const handleAvatarSelect = async (avatar) => {
+    // Update the local state immediately
     setSelectedAvatar(avatar);
-    setAvatarDialogOpen(false);
+    
+    try {
+      // Optionally, update the avatar in Supabase immediately
+      const { error } = await supabase
+        .from('profiles')
+        .update({ avatar_url: avatar })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      // Update the local profile state
+      setProfile(prev => ({
+        ...prev,
+        avatar_url: avatar
+      }));
+
+      // Close the avatar dialog
+      setAvatarDialogOpen(false);
+
+      // Show a toast notification
+      toast({
+        title: "Avatar Updated",
+        description: "Your avatar has been updated successfully",
+        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+      });
+    } catch (error) {
+      console.error('Error updating avatar:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update avatar",
+        variant: "destructive",
+        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+      });
+    }
   };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -276,7 +311,7 @@ const ProfilePage = () => {
         <div className="relative group">
           <Avatar className={`h-32 w-32 ${isDarkMode ? 'ring-gray-800' : 'ring-white'} ring-4 shadow-lg`}>
             <AvatarImage 
-              src={`/avatars/${profile?.avatar_url || 'user.png'}`} 
+              src={`/avatars/${editing ? selectedAvatar : (profile?.avatar_url || 'user.png')}`} 
               alt={profile?.fullname} 
             />
             <AvatarFallback>

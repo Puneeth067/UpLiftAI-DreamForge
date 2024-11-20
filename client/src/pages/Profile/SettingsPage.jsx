@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,9 +18,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster"
 import {
   Moon,
-  Globe,
+  Bell,
   ArrowLeft,
   AlertTriangle,
+  Mail,
+  MessageCircle,
+  AlertOctagon
 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -41,8 +43,14 @@ const SettingsPage = () => {
 
   const [settings, setSettings] = useState({
     darkMode: isDarkMode,
-    language: 'en',
-    timezone: 'utc'
+    notifications: {
+      email: true,
+      sms: false,
+      push: true,
+      ticketUpdates: true,
+      criticalAlerts: true,
+      marketingComms: false
+    }
   });
 
   // Get current user and settings on mount
@@ -113,12 +121,17 @@ const SettingsPage = () => {
     }
   }, [userData?.id]);
 
-  const updateSetting = async (key, value) => {
+  const updateSetting = async (key, value, subKey = null) => {
     try {
-      const newSettings = {
-        ...settings,
-        [key]: value
-      };
+      const newSettings = subKey 
+        ? { 
+            ...settings, 
+            [key]: { 
+              ...settings[key], 
+              [subKey]: value 
+            } 
+          }
+        : { ...settings, [key]: value };
 
       setSettings(newSettings);
 
@@ -255,53 +268,70 @@ const SettingsPage = () => {
               </CardContent>
             </Card>
 
-            {/* Language and Region */}
+            {/* Notification Preferences */}
             <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
               <CardHeader className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-6">
                 <div className="flex items-center gap-3">
-                  <Globe size={20} className="text-blue-600 dark:text-blue-500" />
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Language & Region</h2>
+                  <Bell size={20} className="text-blue-600 dark:text-blue-500" />
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Notification Preferences
+                  </h2>
                 </div>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1.5">
-                      Language
-                    </label>
-                    <Select 
-                      value={settings.language}
-                      onValueChange={(value) => updateSetting('language', value)}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="es">Spanish</SelectItem>
-                        <SelectItem value="fr">French</SelectItem>
-                        <SelectItem value="de">German</SelectItem>
-                      </SelectContent>
-                    </Select>
+              <CardContent className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Notification Channels */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Notification Channels
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Mail size={16} className="text-gray-500" />
+                        <span>Email Notifications</span>
+                      </div>
+                      <Switch 
+                        checked={settings.notifications.email}
+                        onCheckedChange={(checked) => updateSetting('notifications', checked, 'email')}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <MessageCircle size={16} className="text-gray-500" />
+                        <span>Push Notifications</span>
+                      </div>
+                      <Switch 
+                        checked={settings.notifications.push}
+                        onCheckedChange={(checked) => updateSetting('notifications', checked, 'push')}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1.5">
-                      Time Zone
-                    </label>
-                    <Select 
-                      value={settings.timezone}
-                      onValueChange={(value) => updateSetting('timezone', value)}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Time Zone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="utc">UTC</SelectItem>
-                        <SelectItem value="est">EST</SelectItem>
-                        <SelectItem value="pst">PST</SelectItem>
-                        <SelectItem value="gmt">GMT</SelectItem>
-                      </SelectContent>
-                    </Select>
+
+                  {/* Notification Types */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Notification Types
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <AlertOctagon size={16} className="text-red-500" />
+                        <span>Critical Alerts</span>
+                      </div>
+                      <Switch 
+                        checked={settings.notifications.criticalAlerts}
+                        onCheckedChange={(checked) => updateSetting('notifications', checked, 'criticalAlerts')}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle size={16} className="text-yellow-500" />
+                        <span>Ticket Updates</span>
+                      </div>
+                      <Switch 
+                        checked={settings.notifications.ticketUpdates}
+                        onCheckedChange={(checked) => updateSetting('notifications', checked, 'ticketUpdates')}
+                      />
+                    </div>
                   </div>
                 </div>
               </CardContent>

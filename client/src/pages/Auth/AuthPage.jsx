@@ -13,6 +13,54 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Mail, Lock, User, Building, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff} from 'lucide-react';
 import { supabase } from '../../utils/supabase.js';
 
+const AuthBackgroundSVG = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+    preserveAspectRatio="xMidYMid slice"
+    viewBox="0 0 1440 900"
+  >
+    <defs>
+      <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#F6F9FF" stopOpacity="0.9" />
+        <stop offset="100%" stopColor="#C6D9FF" stopOpacity="0.5" />
+      </radialGradient>
+      
+      <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#FFD700" stopOpacity="0.8" />
+        <stop offset="100%" stopColor="#FFEFBA" stopOpacity="0.4" />
+      </radialGradient>
+
+      <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#102A43" stopOpacity="0.7" />
+        <stop offset="100%" stopColor="#0B1E30" stopOpacity="0.9" />
+      </radialGradient>
+      
+      <filter id="blurFilter">
+        <feGaussianBlur stdDeviation="50" />
+      </filter>
+    </defs>
+    
+    {/* Light Mode Patterns */}
+    <g className="opacity-100 dark:opacity-0">
+      <circle cx="400" cy="250" r="200" fill="url(#lightGradient)" filter="url(#blurFilter)" />
+      <circle cx="1000" cy="400" r="300" fill="url(#lightGradient)" opacity="0.7" />
+      <circle cx="700" cy="700" r="150" fill="url(#accentGradient)" opacity="0.5" />
+      <polygon points="900,300 1200,600 600,600" fill="url(#lightGradient)" opacity="0.3" />
+      <ellipse cx="1200" cy="700" rx="450" ry="300" fill="url(#lightGradient)" filter="url(#blurFilter)" />
+    </g>
+    
+    {/* Dark Mode Patterns */}
+    <g className="opacity-0 dark:opacity-70">
+      <circle cx="400" cy="250" r="350" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+      <polygon points="700,500 1100,800 500,800" fill="url(#darkGradient)" opacity="0.6" />
+      <ellipse cx="1100" cy="600" rx="500" ry="320" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+    </g>
+  </svg>
+);
+
+
+
 const DEPARTMENTS = [
   'Technical Support',
   'Customer Service',
@@ -446,8 +494,9 @@ const AuthPages = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="max-w-lg mx-auto pt-12 px-4">
+    <div className="min-h-screen bg-white dark:bg-gray-900 relative overflow-hidden">
+      <AuthBackgroundSVG className="z-0"/>
+      <div className="relative z-10 max-w-lg mx-auto pt-12 px-4">
         {showSuccess && (
           <Alert className="mb-4 bg-green-100 dark:bg-green-900 border-l-4 border-green-500 text-green-700 dark:text-green-200 p-4">
             <AlertDescription>
@@ -475,11 +524,7 @@ const AuthPages = () => {
           </Alert>
         )}
 
-        {apiError && (
-          <Alert className="mb-4 bg-red-100 dark:bg-red-900/50 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-4">
-            <AlertDescription>{apiError}</AlertDescription>
-          </Alert>
-        )}
+        
 
         {!showVerificationAlert && (
           <Card className="w-full dark:bg-gray-800 dark:border-gray-700">
@@ -622,6 +667,12 @@ const AuthPages = () => {
               </p>
             </CardFooter>
           </Card>
+        )}
+
+        {apiError && (
+          <Alert className="mt-4 mb-4 bg-red-100 dark:bg-red-900/50 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-4">
+            <AlertDescription>{apiError}</AlertDescription>
+          </Alert>
         )}
       </div>
     </div>
