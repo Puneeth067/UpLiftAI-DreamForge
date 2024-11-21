@@ -9,6 +9,7 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../utils/supabase.js';
 import LoadingScreen from '@/components/ui/loading';
+import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 
 const CustomerDashboard = () => {
   const navigate = useNavigate();
@@ -194,6 +195,7 @@ const CustomerDashboard = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      <CyberCursorEffect />
       <aside className="hidden md:block w-64 fixed left-0 top-0 h-full border-r dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900 z-30 transition-colors duration-200">
         <SidebarContent />
       </aside>

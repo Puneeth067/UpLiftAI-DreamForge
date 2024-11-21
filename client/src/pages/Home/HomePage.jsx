@@ -16,7 +16,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
-import CursorEffect from '@/components/ui/CursorEffect';
+import CyberCursorEffect from '@/components/ui/CyberCursorEffect';
+import PropTypes from 'prop-types';
 
 const HomeBackground = () => (
   <svg 
@@ -185,6 +186,8 @@ const FEATURES = {
   ]
 };
 
+
+
 const FeatureCard = memo(({ icon, title, description }) => {
   return (
     <motion.div
@@ -240,15 +243,23 @@ const FeatureCard = memo(({ icon, title, description }) => {
         </CardContent>
       </Card>
     </motion.div>
-  );
+);
 });
+FeatureCard.displayName = 'FeatureCard';
+
+FeatureCard.propTypes = {
+  icon: PropTypes.element.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+};
 
 FeatureCard.displayName = 'FeatureCard';
+
 const HomePage = () => {
   const [userType, setUserType] = useState('customer');
   const [showAlert, setShowAlert] = useState(false);
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
 
   const handleDashboardNavigation = useCallback(() => {
     if (user) {
@@ -296,9 +307,9 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/70 dark:to-gray-800">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/70 dark:to-gray-800 cursor-none">
       <HomeBackground className="z-0"/>
-      <CursorEffect />
+      <CyberCursorEffect />
       <motion.nav 
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}

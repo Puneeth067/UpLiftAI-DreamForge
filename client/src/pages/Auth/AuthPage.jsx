@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Card,
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Mail, Lock, User, Building, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff} from 'lucide-react';
 import { supabase } from '../../utils/supabase.js';
+import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 
 const AuthBackgroundSVG = () => (
   <svg
@@ -186,7 +187,7 @@ const AuthPages = () => {
   
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData, authMode]);
+  }, [formData, authMode, userType]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -491,8 +492,9 @@ const AuthPages = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 relative overflow-hidden">
-      <AuthBackgroundSVG className="z-0"/>
+    <div className="min-h-screen bg-white dark:bg-gray-900 relative overflow-hidden cursor-none">
+      <AuthBackgroundSVG className="z-0 "/>
+      <CyberCursorEffect />
       <div className="relative z-10 max-w-lg mx-auto pt-12 px-4">
         {showSuccess && (
           <Alert className="mb-4 bg-green-100 dark:bg-green-900 border-l-4 border-green-500 text-green-700 dark:text-green-200 p-4">
@@ -507,7 +509,7 @@ const AuthPages = () => {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Verify your email</AlertTitle>
             <AlertDescription className="mt-2 dark:text-gray-300">
-              We've sent a verification link to <span className="font-medium">{registeredEmail}</span>.
+              We`ve sent a verification link to <span className="font-medium">{registeredEmail}</span>.
               Please check your email and click the link to verify your account.
               Once verified, you can sign in to your account.
             </AlertDescription>
@@ -636,7 +638,7 @@ const AuthPages = () => {
               <p className="text-sm text-center w-full dark:text-gray-300">
                 {authMode === 'login' ? (
                   <>
-                    Don't have an account?{' '}
+                    Don`t have an account?{' '}
                     <button
                       onClick={() => !isLoading && switchMode('register')}
                       disabled={isLoading}
