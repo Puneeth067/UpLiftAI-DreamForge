@@ -145,7 +145,7 @@ const CustomerChatInterface = () => {
         issue_type: ticketData.type,
         priority: ticketData.priority,
         description: ticketData.description,
-        status: 'open'
+        status: 'active'
       });
   
       const { data: ticket, error } = await supabase
@@ -156,7 +156,7 @@ const CustomerChatInterface = () => {
             issue_type: ticketData.type,
             priority: ticketData.priority,
             description: ticketData.description,
-            status: 'open'
+            status: 'active'
           }
         ]);
   

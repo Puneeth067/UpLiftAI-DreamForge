@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Menu, Bell, Settings, LogOut, Ticket, MessageSquare, User, 
   ChevronRight, HeadphonesIcon, Users, Clock, BarChart2, 
-  Calendar, CheckCircle, AlertCircle
+  Calendar, CheckCircle
 } from 'lucide-react';
 import {
   Sheet,
@@ -13,6 +13,7 @@ import {
 import LoadingScreen from "@/components/ui/loading";
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../utils/supabase.js';
+import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 
 const AgentDashboard = () => {
   const navigate = useNavigate();
@@ -247,7 +248,8 @@ const AgentDashboard = () => {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900 cursor-none">
+      <CyberCursorEffect />
       <aside className="hidden md:block w-64 fixed left-0 top-0 h-full border-r border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900 z-30">
         <SidebarContent />
       </aside>

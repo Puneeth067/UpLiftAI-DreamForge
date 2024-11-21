@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+  CardContent
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,19 +15,35 @@ import {
   Timer, 
   ArrowLeft,
   Clock,
+  XCircle,
+  MessageCircle
 } from "lucide-react";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription 
+} from "@/components/ui/dialog";
 import { supabase } from "@/utils/supabase";
 import { useTheme } from '../../contexts/ThemeContext';
 
 const CustomerTickets = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const userData = location.state?.userData;
   const { isDarkMode, loadUserTheme } = useTheme();
 
   const [activeTickets, setActiveTickets] = useState([]);
+  const [inProgressTickets, setInProgressTickets] = useState([]);
   const [resolvedTickets, setResolvedTickets] = useState([]);
+  const [rejectedTickets, setRejectedTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  const [selectedRejectedTicket, setSelectedRejectedTicket] = useState(null);
+  const [selectedInProgressTicket, setSelectedInProgressTicket] = useState(null);
+
 
   useEffect(() => {
     if (!userData?.id) return;
@@ -48,11 +62,15 @@ const CustomerTickets = () => {
         return;
       }
 
-      const active = tickets.filter((ticket) => ticket.status !== "resolved");
+      const active = tickets.filter((ticket) => ticket.status === "active");
+      const inProgress = tickets.filter((ticket) => ticket.status === "in_progress");
       const resolved = tickets.filter((ticket) => ticket.status === "resolved");
+      const rejected = tickets.filter((ticket) => ticket.status === "rejected");
 
       setActiveTickets(active);
+      setInProgressTickets(inProgress);
       setResolvedTickets(resolved);
+      setRejectedTickets(rejected);
       setIsLoading(false);
     }
 
@@ -61,7 +79,7 @@ const CustomerTickets = () => {
 
   const getStatusColor = (status) => {
     const colors = {
-      open: isDarkMode 
+      active: isDarkMode 
         ? "bg-blue-500/20 text-blue-400 border-blue-800"
         : "bg-blue-500/10 text-blue-500 border-blue-200",
       in_progress: isDarkMode
@@ -70,6 +88,9 @@ const CustomerTickets = () => {
       resolved: isDarkMode
         ? "bg-green-500/20 text-green-400 border-green-800"
         : "bg-green-500/10 text-green-600 border-green-200",
+      rejected: isDarkMode
+        ? "bg-red-500/20 text-red-400 border-red-800"
+        : "bg-red-500/10 text-red-500 border-red-200"
     };
     return colors[status] || (isDarkMode 
       ? "bg-gray-500/20 text-gray-400 border-gray-800"
@@ -111,7 +132,18 @@ const CustomerTickets = () => {
         borderLeftColor: ticket.priority === 'high' ? '#ef4444' : 
                         ticket.priority === 'medium' ? '#eab308' : '#22c55e'
       }}
+      onClick={() => {
+        // Open dialog for rejected tickets
+        if (ticket.status === 'rejected') {
+          setSelectedRejectedTicket(ticket);
+        }
+        // Open dialog for in-progress tickets
+        if (ticket.status === 'in_progress') {
+          setSelectedInProgressTicket(ticket);
+        }
+      }}
     >
+      {/* Existing ticket card content remains the same */}
       <CardContent className="pt-6">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-3 flex-1">
@@ -174,7 +206,15 @@ const CustomerTickets = () => {
     ticket.issue_type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const filteredInProgressTickets = inProgressTickets.filter((ticket) =>
+    ticket.issue_type.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const filteredResolvedTickets = resolvedTickets.filter((ticket) =>
+    ticket.issue_type.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredRejectedTickets = rejectedTickets.filter((ticket) =>
     ticket.issue_type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -265,15 +305,27 @@ const CustomerTickets = () => {
           <Tabs defaultValue="active" className="space-y-6">
             <TabsList className={isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50/80'}>
               <TabsTrigger value="active" className="gap-2">
-                Active Tickets
+                Tickets Booked
                 {activeTickets.length > 0 && (
                   <Badge variant="secondary">{activeTickets.length}</Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="in_progress" className="gap-2">
+                In Progress
+                {inProgressTickets.length > 0 && (
+                  <Badge variant="secondary">{inProgressTickets.length}</Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger value="resolved" className="gap-2">
                 Resolved
                 {resolvedTickets.length > 0 && (
                   <Badge variant="secondary">{resolvedTickets.length}</Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="rejected" className="gap-2">
+                Rejected
+                {rejectedTickets.length > 0 && (
+                  <Badge variant="secondary">{rejectedTickets.length}</Badge>
                 )}
               </TabsTrigger>
             </TabsList>
@@ -299,6 +351,27 @@ const CustomerTickets = () => {
               )}
             </TabsContent>
 
+            <TabsContent value="in_progress" className="space-y-4">
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <div className={`animate-spin rounded-full h-8 w-8 border-b-2 mx-auto ${
+                    isDarkMode ? 'border-gray-400' : 'border-gray-900'
+                  }`}></div>
+                  <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'}>
+                    Loading tickets...
+                  </p>
+                </div>
+              ) : filteredInProgressTickets.length > 0 ? (
+                filteredInProgressTickets.map(renderTicketCard)
+              ) : (
+                renderEmptyState(
+                  searchTerm
+                    ? "No in-progress tickets match your search"
+                    : "You don't have any in-progress tickets"
+                )
+              )}
+            </TabsContent>
+
             <TabsContent value="resolved" className="space-y-4">
               {isLoading ? (
                 <div className="text-center py-12">
@@ -319,9 +392,155 @@ const CustomerTickets = () => {
                 )
               )}
             </TabsContent>
+
+            <TabsContent value="rejected" className="space-y-4">
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <div className={`animate-spin rounded-full h-8 w-8 border-b-2 mx-auto ${
+                    isDarkMode ? 'border-gray-400' : 'border-gray-900'
+                  }`}></div>
+                  <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'
+                  }>
+                    Loading tickets...
+                  </p>
+                </div>
+              ) : filteredRejectedTickets.length > 0 ? (
+                filteredRejectedTickets.map(renderTicketCard)
+              ) : (
+                renderEmptyState(
+                  searchTerm
+                    ? "No rejected tickets match your search"
+                    : "You don't have any rejected tickets"
+                )
+              )}
+            </TabsContent>
           </Tabs>
         </div>
       </div>
+
+      <Dialog 
+        open={!!selectedRejectedTicket} 
+        onOpenChange={() => setSelectedRejectedTicket(null)}
+      >
+        <DialogContent className={isDarkMode ? 'bg-gray-800 border-gray-700' : ''}>
+          <DialogHeader>
+            <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
+              <div className="flex items-center gap-2">
+                <XCircle className="text-red-500" />
+                Ticket Rejection Details
+              </div>
+            </DialogTitle>
+            <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
+              Ticket #{selectedRejectedTicket?.id} - {selectedRejectedTicket?.issue_type}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className={`space-y-4 p-4 rounded-lg ${
+            isDarkMode 
+              ? 'bg-gray-700/50 text-gray-200' 
+              : 'bg-gray-100 text-gray-800'
+          }`}>
+            <div>
+              <h3 className="font-semibold mb-2">Description</h3>
+              <p className="text-sm">
+                {selectedRejectedTicket?.description || 'No description available.'}
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-2">Rejection Reason</h3>
+              <p className="text-sm">
+                {selectedRejectedTicket?.rejection_reason || 'No specific reason provided.'}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end">
+            <Button 
+              variant="outline" 
+              onClick={() => setSelectedRejectedTicket(null)}
+              className={isDarkMode 
+                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                : ''
+              }
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New In-Progress Ticket Dialog */}
+      <Dialog 
+        open={!!selectedInProgressTicket} 
+        onOpenChange={() => setSelectedInProgressTicket(null)}
+      >
+        <DialogContent className={isDarkMode ? 'bg-gray-800 border-gray-700' : ''}>
+          <DialogHeader>
+            <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
+              <div className="flex items-center gap-2">
+                <MessageCircle className="text-yellow-500" />
+                Agent Waiting for Your Response
+              </div>
+            </DialogTitle>
+            <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
+              Ticket #{selectedInProgressTicket?.id} - {selectedInProgressTicket?.issue_type}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className={`space-y-4 p-4 rounded-lg ${
+            isDarkMode 
+              ? 'bg-gray-700/50 text-gray-200' 
+              : 'bg-gray-100 text-gray-800'
+          }`}>
+            <div>
+              <h3 className="font-semibold mb-2">Important Notice</h3>
+              <p className="text-sm">
+                Your support agent is waiting for you to start the conversation. 
+                Please initiate the chat within the next 5 minutes to prevent ticket cancellation.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-2">Ticket Details</h3>
+              <p className="text-sm">
+                <strong>Description:</strong> {selectedInProgressTicket?.description || 'No description available.'}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setSelectedInProgressTicket(null)}
+              className={isDarkMode 
+                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                : ''
+              }
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                // Navigate to ticket chat interface with ticket details
+                navigate('/ticketchatinterface', { 
+                  state: { 
+                    ticketId: selectedInProgressTicket.id,
+                    userData: userData 
+                  } 
+                });
+              }}
+              className={`${
+                isDarkMode 
+                  ? 'bg-yellow-600 text-white hover:bg-yellow-500' 
+                  : 'bg-yellow-500 text-white hover:bg-yellow-600'
+              }`}
+            >
+              Start Conversation
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
