@@ -34,6 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 const AgentTickets = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const userData = location.state?.userData;
   const { isDarkMode, loadUserTheme } = useTheme();
 
@@ -44,6 +45,9 @@ const AgentTickets = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   
+  const [selectedResolvedTicket, setSelectedResolvedTicket] = useState(null);
+  const [isResolvedDialogOpen, setIsResolvedDialogOpen] = useState(false);
+
   // New state for ticket details dialog
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -73,30 +77,39 @@ const fetchInProgressTicketUserDetails = async (userId) => {
   return data;
 };
 
-// Updated handleTicketClick
 const handleTicketClick = async (ticket) => {
-  if (ticket.status === 'active') {
-    setSelectedTicket(ticket);
-    const details = await fetchTicketDetails(ticket.id);
-    setTicketDetails(details);
-    setIsDialogOpen(true);
-  } else if (ticket.status === 'in_progress') {
-    const userDetails = await fetchInProgressTicketUserDetails(ticket.user_id);
-    setInProgressTicketUser(userDetails);
-    setSelectedTicket(ticket);
-    setIsInProgressDialogOpen(true);
-  }
-};
+    if (ticket.status === 'active') {
+      // Existing active ticket logic
+      setSelectedTicket(ticket);
+      const details = await fetchTicketDetails(ticket.id);
+      setTicketDetails(details);
+      setIsDialogOpen(true);
+    } else if (ticket.status === 'in_progress') {
+      // Existing in-progress ticket logic
+      const userDetails = await fetchInProgressTicketUserDetails(ticket.user_id);
+      setInProgressTicketUser(userDetails);
+      setSelectedTicket(ticket);
+      setIsInProgressDialogOpen(true);
+    } else if (ticket.status === 'resolved') {
+      // New logic for resolved tickets
+      const details = await fetchTicketDetails(ticket.id);
+      setSelectedResolvedTicket(details);
+      setIsResolvedDialogOpen(true);
+    }
+  };
 
 // In-Progress Ticket Details Dialog
 const InProgressTicketDetailsDialog = () => {
   const navigate = useNavigate();
 
   const handleStartChat = () => {
+    // Pass complete ticket data during navigation
     navigate('/agentchatinterface', { 
       state: { 
-        ticketId: selectedTicket.id, 
-        userId: selectedTicket.user_id 
+        ticketId: selectedTicket.id,
+        userId: selectedTicket.user_id,
+        agentId: userData.id, // Add agent ID from userData
+        ticketData: selectedTicket // Pass the complete ticket object
       } 
     });
   };
@@ -215,8 +228,8 @@ const InProgressTicketDetailsDialog = () => {
   };
 
 
-   // Update ticket status method
-   const updateTicketStatus = async (status, reason = "") => {
+   // Updated updateTicketStatus method
+  const updateTicketStatus = async (status, reason = "") => {
     if (!selectedTicket) return;
 
     try {
@@ -225,6 +238,11 @@ const InProgressTicketDetailsDialog = () => {
         status: status, 
         last_update: new Date().toISOString()
       };
+
+      // Add agent_id when accepting ticket (status = in_progress)
+      if (status === "in_progress") {
+        updateData.agent_id = userData.id;
+      }
 
       // Add rejection-specific fields if rejecting
       if (status === "rejected") {
@@ -496,6 +514,80 @@ const InProgressTicketDetailsDialog = () => {
     );
   };
 
+  // Resolved Ticket Details Dialog
+  const ResolvedTicketDetailsDialog = () => {
+    if (!selectedResolvedTicket) return null;
+
+    return (
+      <Dialog 
+        open={isResolvedDialogOpen} 
+        onOpenChange={setIsResolvedDialogOpen}
+      >
+        <DialogContent className={`sm:max-w-[600px] ${
+          isDarkMode ? 'bg-gray-800 border-gray-700' : ''
+        }`}>
+          <DialogHeader>
+            <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
+              Resolved Ticket #{selectedResolvedTicket.id}
+            </DialogTitle>
+            <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
+              Ticket Resolution Details
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className={`space-y-4 ${isDarkMode ? 'text-gray-300' : ''}`}>
+            <div>
+              <p className="font-medium mb-2">Ticket Feedback</p>
+              <p className={`p-3 rounded-md ${
+                isDarkMode 
+                  ? 'bg-gray-700 text-gray-200' 
+                  : 'bg-gray-50 text-gray-800'
+              }`}>
+                {selectedResolvedTicket.feedback || 'No feedback provided'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="font-medium">Issue Type</p>
+                <p>{selectedResolvedTicket.issue_type}</p>
+              </div>
+              <div>
+                <p className="font-medium">Resolution Date</p>
+                <p>{formatDate(selectedResolvedTicket.last_update)}</p>
+              </div>
+            </div>
+
+            <div>
+              <p className="font-medium mb-2">Description</p>
+              <p className={`p-3 rounded-md ${
+                isDarkMode 
+                  ? 'bg-gray-700 text-gray-200' 
+                  : 'bg-gray-50 text-gray-800'
+              }`}>
+                {selectedResolvedTicket.description || 'No description provided'}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="default" 
+              onClick={() => setIsResolvedDialogOpen(false)}
+              className={`mr-2 ${
+                isDarkMode 
+                  ? 'text-gray-300 hover:bg-gray-700' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   const renderTicketCard = (ticket) => (
     <Card 
       key={ticket.id} 
@@ -633,7 +725,7 @@ const InProgressTicketDetailsDialog = () => {
               className={`hover:bg-gray-700 ${
                 isDarkMode ? 'text-gray-300 hover:text-gray-100' : 'text-gray-700 hover:bg-gray-100'
               }`}
-              onClick={() => window.history.back()}
+              onClick={() => navigate('/agentdashboard', { state: { userData } })}
             >
               <ArrowLeft size={16} className="mr-2" />
               Back
@@ -791,6 +883,7 @@ const InProgressTicketDetailsDialog = () => {
       <TicketDetailsDialog />
       <InProgressTicketDetailsDialog />
       <RejectionReasonDialog />
+      <ResolvedTicketDetailsDialog />
     </div>
   );
 };

@@ -1,299 +1,383 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent } from '@/components/ui/card';
 import { 
   Send, 
-  User, 
-  Bot, 
-  Paperclip, 
-  MoreVertical, 
+  ArrowLeft, 
+  User,
   Clock,
-  Tag,
-  History,
-  PhoneCall,
-  Filter,
-  Search,
-  RefreshCw,
-  Link2,
-  FileText,
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Menu
+  CheckCircle2,
+  MessageSquare
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { chatService } from '@/services/api/chatService';
+import { useTheme } from '@/contexts/ThemeContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
+import { supabase } from '../../utils/supabase';
+import { chat } from '../../utils/supabase-chat';
 
-
-const AgentChatInterface = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      content: "Hello! I'm having trouble accessing my account. It keeps saying 'invalid credentials'.",
-      time: "10:30 AM",
-      isCustomer: true,
-      customerName: "John Doe"
-    },
-    {
-      id: 2,
-      content: "I understand your concern. Could you confirm if you're using the correct email address?",
-      time: "10:31 AM",
-      isAgent: true,
-      agentName: "Sarah Wilson"
-    }
-  ]);
-  
-  const [input, setInput] = useState('');
-  const [showLeftSidebar, setShowLeftSidebar] = useState(true);
-  const [showRightSidebar, setShowRightSidebar] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-  
-  const [selectedCustomer, setSelectedCustomer] = useState({
-    name: "John Doe",
-    email: "john.doe@email.com",
-    ticketId: "TK-2024-001",
-    status: "Active",
-    priority: "High",
-    waitTime: "5m",
-    history: "3 previous tickets"
-  });
-
-  const [suggestedResponses] = useState([
-    "Could you please verify your account email?",
-    "I'll help you reset your password. Shall we proceed?",
-    "Let me check your account status."
-  ]);
+function AgentChatInterface() {
+  const location = useLocation();
+  const { ticketId, userId, agentId, ticketData } = location.state || {};
+  const { isDarkMode } = useTheme();
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [userDetails, setUserDetails] = useState(null);
+  const [ticketDetails, setTicketDetails] = useState(ticketData || null);
+  const [isResolutionDialogOpen, setIsResolutionDialogOpen] = useState(false);
+  const [resolutionNote, setResolutionNote] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollAreaRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth < 1024) {
-        setShowLeftSidebar(false);
-        setShowRightSidebar(false);
+    if (!ticketId || !agentId || !userId) return;
+
+    const loadInitialData = async () => {
+      try {
+        setIsLoading(true);
+        // Load messages
+        const messagesData = await chatService.getMessages(ticketId);
+        setMessages(messagesData);
+
+        // Load user details
+        const { data: userData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        setUserDetails(userData);
+
+        // Only load ticket details if not already provided
+        if (!ticketData) {
+          const { data: fetchedTicketData } = await supabase
+            .from('tickets')
+            .select('*')
+            .eq('id', ticketId)
+            .single();
+          setTicketDetails(fetchedTicketData);
+        }
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+        toast({
+          variant: "destructive",
+          title: "Error loading chat data",
+          description: "Please try refreshing the page."
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
+    loadInitialData();
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    
-    const newMessage = {
-      id: messages.length + 1,
-      content: input,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isAgent: true,
-      agentName: "Sarah Wilson"
+    // Subscribe to new messages
+    const messageSubscription = chatService.subscribeToMessages(ticketId, (newMessage) => {
+      setMessages((prev) => [...prev, newMessage]);
+      if (newMessage.receiver_id === agentId) {
+        chatService.markMessagesAsRead(ticketId, agentId);
+      }
+    });
+
+    // Subscribe to typing indicators
+    const typingSubscription = chat
+      .channel(`typing:${ticketId}`)
+      .on('broadcast', { event: 'typing' }, ({ payload }) => {
+        if (payload.userId !== agentId) {
+          setIsTyping(true);
+          clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 3000);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      messageSubscription.unsubscribe();
+      typingSubscription.unsubscribe();
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
     };
-    
-    setMessages([...messages, newMessage]);
-    setInput('');
+  }, [ticketId, agentId, userId, ticketData]);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleTyping = () => {
+    const channel = chat.channel(`typing:${ticketId}`);
+    channel.send({
+      type: 'broadcast',
+      event: 'typing',
+      payload: { userId: agentId }
+    });
   };
 
-  const LeftSidebar = () => (
-    <Card style={{ width: showLeftSidebar ? '256px' : '0', transition: 'width 0.3s', overflow: 'hidden', flexShrink: 0 }}>
-      <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-          <Search style={{ height: '16px', width: '16px', color: '#6b7280' }} />
-          <input
-            type="text"
-            placeholder="Search conversations..."
-            style={{ width: '100%', fontSize: '14px', border: 'none', backgroundColor: '#ffffff', outline: 'none' }}
-          />
-        </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Button variant="outline" size="sm" style={{ width: '100%' }}>
-            <Filter style={{ height: '16px', width: '16px', marginRight: '4px' }} />
-            Filter
-          </Button>
-          <Button variant="outline" size="sm" style={{ width: '100%' }}>
-            <RefreshCw style={{ height: '16px', width: '16px', marginRight: '4px' }} />
-            Refresh
-          </Button>
-        </div>
-      </div>
-      <div style={{ overflowY: 'auto', padding: '8px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>Active Chats</h3>
-        {[1, 2, 3].map((chat) => (
-          <div key={chat} style={{ padding: '8px', cursor: 'pointer', borderRadius: '8px', backgroundColor: '#f9fafb' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Avatar style={{ height: '32px', width: '32px' }}>
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: '500', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>John Doe</span>
-                  <Badge variant="outline" style={{ fontSize: '12px' }}>High</Badge>
-                </div>
-                <p style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Login issue...</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
 
-  const RightSidebar = () => (
-    <Card style={{ width: showRightSidebar ? '320px' : '0', transition: 'width 0.3s', overflow: 'hidden', flexShrink: 0 }}>
-      <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
-        <h3 style={{ fontWeight: '600', marginBottom: '16px' }}>Customer Details</h3>
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ fontSize: '14px', color: '#6b7280' }}>Email</label>
-          <p style={{ fontSize: '14px' }}>{selectedCustomer.email}</p>
-        </div>
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ fontSize: '14px', color: '#6b7280' }}>Previous Interactions</label>
-          <p style={{ fontSize: '14px' }}>{selectedCustomer.history}</p>
-        </div>
-        <Separator />
-        <div style={{ marginTop: '16px' }}>
-          <h4 style={{ fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>Quick Actions</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <Button variant="outline" size="sm" style={{ justifyContent: 'start' }}>
-              <Tag style={{ height: '16px', width: '16px', marginRight: '8px' }} />
-              Add Tags
-            </Button>
-            <Button variant="outline" size="sm" style={{ justifyContent: 'start' }}>
-              <History style={{ height: '16px', width: '16px', marginRight: '8px' }} />
-              View History
-            </Button>
-            <Button variant="outline" size="sm" style={{ justifyContent: 'start' }}>
-              <AlertCircle style={{ height: '16px', width: '16px', marginRight: '8px' }} />
-              Escalate Issue
-            </Button>
-          </div>
-        </div>
+    try {
+      await chatService.sendMessage({
+        ticketId,
+        senderId: agentId,
+        receiverId: userId,
+        content: newMessage.trim(),
+        messageType: 'text'
+      });
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        variant: "destructive",
+        title: "Failed to send message",
+        description: "Please try again."
+      });
+    }
+  };
+
+  const handleResolveTicket = async () => {
+    if (!resolutionNote.trim()) return;
+  
+    try {
+      // First update ticket status
+      const { error: ticketError } = await supabase
+        .from('tickets')
+        .update({ 
+          status: 'resolved',
+          resolution_note: resolutionNote,
+          resolved_at: new Date().toISOString(),
+          resolved_by: agentId
+        })
+        .eq('id', ticketId);
+  
+      if (ticketError) throw ticketError;
+  
+      // Send resolution message as a regular text message instead of system
+      await chatService.sendMessage({
+        ticketId,
+        senderId: agentId,
+        receiverId: userId,
+        content: `Ticket Resolution: ${resolutionNote}`,
+        messageType: 'text' // Changed from 'system' to 'text'
+      });
+  
+      toast({
+        title: "Ticket Resolved",
+        description: "The ticket has been marked as resolved."
+      });
+  
+      // Update local ticket details state
+      setTicketDetails(prev => ({
+        ...prev,
+        status: 'resolved',
+        resolution_note: resolutionNote,
+        resolved_at: new Date().toISOString(),
+        resolved_by: agentId
+      }));
+  
+      setIsResolutionDialogOpen(false);
+      
+      // Optional: You might want to stay on the page to see the resolution message
+      // Instead of immediately going back, you could add a slight delay
+      setTimeout(() => window.history.back(), 1500);
+  
+    } catch (error) {
+      console.error('Error resolving ticket:', error);
+      toast({
+        variant: "destructive",
+        title: "Failed to resolve ticket",
+        description: error.message || "Please try again."
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
       </div>
-    </Card>
-  );
+    );
+  }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', maxWidth: '1400px', margin: '0 auto', padding: '16px', gap: '16px' }}>
-      {/* Mobile Menu Button */}
-      {isMobile && (
-        <Button
-          variant="outline"
-          size="icon"
-          style={{ position: 'fixed', top: '16px', left: '16px', zIndex: '50' }}
-          onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-        >
-          <Menu style={{ height: '16px', width: '16px' }} />
-        </Button>
-      )}
-
-      {/* Left Sidebar */}
-      {(!isMobile || showLeftSidebar) && <LeftSidebar />}
-
-      {/* Main Chat Area */}
-      <Card style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: '0' }}>
-        {/* Chat Header */}
-        <div style={{ borderBottom: '1px solid #e5e7eb', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {!isMobile && (
-              <Button variant="ghost" size="icon" onClick={() => setShowLeftSidebar(!showLeftSidebar)}>
-                <ChevronLeft style={{ height: '16px', width: '16px' }} />
-              </Button>
-            )}
-            <Avatar style={{ height: '40px', width: '40px' }}>
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-            <div>
-              <h2 style={{ fontWeight: '600' }}>{selectedCustomer.name}</h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#6b7280' }}>
-                <span>Ticket #{selectedCustomer.ticketId}</span>
-                <Badge variant="secondary">{selectedCustomer.priority}</Badge>
-                <Badge variant="outline">Wait time: {selectedCustomer.waitTime}</Badge>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <Toaster />
+      <div className="max-w-6xl mx-auto p-4">
+        <div className="grid grid-cols-[1fr_300px] gap-4">
+          <Card className={isDarkMode ? 'bg-gray-800' : 'bg-white'}>
+            <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  onClick={() => window.history.back()}
+                  className={isDarkMode ? 'text-gray-300' : ''}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Tickets
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsResolutionDialogOpen(true)}
+                  className="ml-auto"
+                  disabled={ticketDetails?.status === 'resolved'}
+                >
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Resolve Ticket
+                </Button>
               </div>
             </div>
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <Button variant="outline" size="icon"><MoreVertical style={{ height: '16px', width: '16px' }} /></Button>
-            {!isMobile && (
-              <Button variant="ghost" size="icon" onClick={() => setShowRightSidebar(!showRightSidebar)}>
-                <ChevronRight style={{ height: '16px', width: '16px' }} />
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Messages Area */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-          {messages.map((message) => (
-            <div key={message.id} style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexDirection: message.isAgent ? 'row-reverse' : 'row' }}>
-              <Avatar style={{ height: '32px', width: '32px' }}>
-                <AvatarFallback>{message.isAgent ? 'AG' : 'CU'}</AvatarFallback>
-              </Avatar>
-              <div style={{
-                maxWidth: '70%',
-                borderRadius: '8px',
-                padding: '12px',
-                backgroundColor: message.isAgent ? '#1e40af' : '#f3f4f6',
-                color: message.isAgent ? '#ffffff' : '#111827',
-              }}>
-                <div style={{ fontSize: '12px', marginBottom: '4px' }}>
-                  {message.isAgent ? message.agentName : message.customerName}
+            
+            <CardContent className="p-4">
+              <ScrollArea 
+                ref={scrollAreaRef}
+                className="h-[600px] pr-4"
+              >
+                <div className="space-y-4">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${
+                        message.sender_id === userId ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      <div
+                        className={`max-w-[70%] rounded-lg p-3 ${
+                          message.sender_id === userId
+                            ? `${isDarkMode ? 'bg-blue-600' : 'bg-blue-500'} text-white`
+                            : `${
+                                isDarkMode 
+                                  ? 'bg-gray-700 text-gray-100' 
+                                  : 'bg-gray-100 text-gray-900'
+                              }`
+                        }`}
+                      >
+                        <p className="break-words">{message.content}</p>
+                        <div className="flex items-center justify-end gap-1 mt-1">
+                          <span className={`text-xs ${
+                            message.sender_id === userId
+                              ? 'text-blue-100'
+                              : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                          }`}>
+                            {new Date(message.created_at).toLocaleTimeString()}
+                          </span>
+                          {message.sender_id === userId && message.is_read && (
+                            <CheckCircle2 className="h-3 w-3 text-blue-100" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <p style={{ fontSize: '14px' }}>{message.content}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', opacity: '0.7', marginTop: '4px' }}>
-                  <Clock style={{ height: '12px', width: '12px' }} />
-                  <span>{message.time}</span>
+                {isTyping && (
+                  <div className="text-sm text-gray-500 mt-2">
+                    Customer is typing...
+                  </div>
+                )}
+              </ScrollArea>
+
+              <form onSubmit={handleSendMessage} className="mt-4 flex gap-2">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={handleTyping}
+                  placeholder="Type your message..."
+                  className={isDarkMode ? 'bg-gray-700 text-gray-100' : ''}
+                  disabled={ticketDetails?.status === 'resolved'}
+                />
+                <Button 
+                  type="submit" 
+                  disabled={!newMessage.trim() || ticketDetails?.status === 'resolved'}
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Sidebar with ticket and user details */}
+          <Card className={isDarkMode ? 'bg-gray-800' : 'bg-white'}>
+            <CardContent className="p-4">
+              <div className="space-y-6">
+                <div>
+                  <h3 className={`font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+                    Ticket Details
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      <span>#{ticketDetails?.id.slice(0, 8)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span>{new Date(ticketDetails?.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <Badge variant={ticketDetails?.status === 'resolved' ? 'success' : 'secondary'}>
+                      {ticketDetails?.status}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className={`font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+                    Customer Details
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span>{userDetails?.full_name}</span>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {userDetails?.email}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            </CardContent>
+          </Card>
         </div>
+      </div>
 
-        {/* AI Suggestions */}
-        <div style={{ borderTop: '1px solid #e5e7eb', padding: '12px', backgroundColor: '#f9fafb' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <Bot style={{ height: '16px', width: '16px', color: '#1e40af' }} />
-            <span style={{ fontSize: '14px', fontWeight: '500' }}>AI Suggested Responses:</span>
-          </div>
-          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }}>
-            {suggestedResponses.map((response, index) => (
-              <Button key={index} variant="outline" size="sm" style={{ whiteSpace: 'nowrap' }} onClick={() => setInput(response)}>
-                {response}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Input Area */}
-        <div style={{ padding: '16px' }}>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
-              style={{
-                width: '100%',
-                borderRadius: '8px',
-                padding: '12px',
-                minHeight: '80px',
-                border: '1px solid #e5e7eb',
-                outline: 'none',
-                resize: 'none',
-                fontSize: '14px',
-                backgroundColor: '#ffffff', // White background for the input
-                color: '#374151' // Dark mode text color
-              }}
+      <Dialog open={isResolutionDialogOpen} onOpenChange={setIsResolutionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Resolve Ticket</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Textarea
+              placeholder="Enter resolution note..."
+              value={resolutionNote}
+              onChange={(e) => setResolutionNote(e.target.value)}
+              className="min-h-[100px]"
             />
-            <Button onClick={handleSend} style={{ paddingLeft: '24px', paddingRight: '24px' }}>
-              Send
-            </Button>
           </div>
-        </div>
-      </Card>
-
-      {/* Right Sidebar */}
-      {(!isMobile || showRightSidebar) && <RightSidebar />}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsResolutionDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleResolveTicket} disabled={!resolutionNote.trim()}>
+              Resolve
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
-};
+}
 
 export default AgentChatInterface;
