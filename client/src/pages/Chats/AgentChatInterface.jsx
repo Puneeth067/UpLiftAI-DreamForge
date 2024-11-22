@@ -176,6 +176,14 @@ function AgentChatInterface() {
         content: `Ticket Resolution: ${resolutionNote}`,
         messageType: 'text' // Changed from 'system' to 'text'
       });
+
+      // Delete all messages associated with this ticket
+      const { error: deleteMessagesError } = await chat
+        .from('messages')
+        .delete()
+        .eq('ticket_id', ticketId);
+  
+      if (deleteMessagesError) throw deleteMessagesError;
   
       toast({
         title: "Ticket Resolved",
