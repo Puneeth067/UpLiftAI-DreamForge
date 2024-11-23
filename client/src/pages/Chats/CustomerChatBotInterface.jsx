@@ -2,30 +2,31 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Send, Bot, User as UserIcon, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from '@/utils/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
+import PropTypes from 'prop-types';
+  
 
 const TypingIndicator = () => {
   const { isDarkMode } = useTheme();
   
   return (
-    <div className="flex items-center space-x-2 p-4">
+    <div className="flex items-center space-x-2 mt-2">
       <div className="flex space-x-1">
-        <div className={`w-2 h-2 ${isDarkMode ? 'bg-violet-400' : 'bg-violet-500'} rounded-full animate-bounce`} style={{ animationDelay: '0ms' }} />
-        <div className={`w-2 h-2 ${isDarkMode ? 'bg-violet-400' : 'bg-violet-500'} rounded-full animate-bounce`} style={{ animationDelay: '150ms' }} />
-        <div className={`w-2 h-2 ${isDarkMode ? 'bg-violet-400' : 'bg-violet-500'} rounded-full animate-bounce`} style={{ animationDelay: '300ms' }} />
+        <div className={`w-2 h-2 ${isDarkMode ? 'bg-teal-400' : 'bg-teal-500'} rounded-full animate-bounce`} style={{ animationDelay: '0ms' }} />
+        <div className={`w-2 h-2 ${isDarkMode ? 'bg-teal-400' : 'bg-teal-500'} rounded-full animate-bounce`} style={{ animationDelay: '150ms' }} />
+        <div className={`w-2 h-2 ${isDarkMode ? 'bg-teal-400' : 'bg-teal-500'} rounded-full animate-bounce`} style={{ animationDelay: '300ms' }} />
       </div>
     </div>
   );
 };
 
-const CustomerChatInterface = () => {
+const CustomerChatBotInterface = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userData = location.state?.userData;
@@ -50,20 +51,32 @@ const CustomerChatInterface = () => {
     description: ''
   });
   const [uploading, setUploading] = useState(false);
+  const textareaRef = useRef(null);
+  
+  useEffect(() => {
+    loadUserTheme(userData.id);
+    autoResizeTextarea();
+    scrollToBottom();
+  }, [messages, inputMessage, loadUserTheme]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  
+  // Simplify the autoResize function
+  const autoResizeTextarea = () => {
+    if (textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
+    }
+  };
 
-  useEffect(() => {
-
-    // Load user theme
-    loadUserTheme(userData.id);
-
-    scrollToBottom();
-  }, [messages, loadUserTheme]);
+  // Simplify the input handling
+  const handleTextareaChange = (e) => {
+    setInputMessage(e.target.value);
+    // Resize will be handled by useEffect
+  };
 
   const simulateAIResponse = async (userMessage) => {
     setIsTyping(true);
@@ -209,51 +222,65 @@ const CustomerChatInterface = () => {
     }
   };
 
-  const MessageBubble = React.memo(({ message }) => (
-    <div className={`flex items-start gap-3 mb-4 ${message.type === 'user' ? 'flex-row-reverse' : ''}`}>
-      <div className="flex flex-col items-center gap-1">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 ${
-          message.type === 'bot' 
-            ? `${isDarkMode ? 'from-violet-400 to-purple-500' : 'from-violet-500 to-purple-600'} bg-gradient-to-br` 
-            : `${isDarkMode ? 'from-indigo-400 to-blue-500' : 'from-indigo-500 to-blue-600'} bg-gradient-to-br`
-        }`}>
-          {message.type === 'bot' ? 
-            <Bot className="w-6 h-6 text-white" /> : 
-            <UserIcon className="w-6 h-6 text-white" />
-          }
-        </div>
-        <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
+  
+  const MessageBubble = ({ message, isDarkMode }) => {
+    // Function to preserve line breaks while rendering
+    const formatMessage = (content) => {
+      return content.split('\n').map((text, index) => (
+        <React.Fragment key={index}>
+          {text}
+          {index !== content.split('\n').length - 1 && <br />}
+        </React.Fragment>
+      ));
+    };
+  
+    return (
+      <div className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} mb-2`}>
+        <Card 
+          className={`max-w-[80%] min-w-[70px] ${
+            message.type === 'user' 
+              ? `${isDarkMode ? 'bg-primary text-primary-foreground' : 'bg-primary text-primary-foreground'}` 
+              : `${isDarkMode ? 'bg-muted text-muted-foreground' : 'bg-gray-100 text-gray-900'}`
+          }`}
+        >
+          <CardContent className="p-3">
+            <div className="flex items-start gap-2 w-full">
+              {message.type === 'bot' && (
+                <Bot className="w-4 h-4 mt-1 flex-shrink-0" />
+              )}
+              <div className="flex-1 text-sm overflow-hidden">
+                <p className="break-words whitespace-pre-line overflow-wrap-break-word text-left">
+                  {formatMessage(message.content)}
+                </p>
+              </div>
+              {message.type === 'user' && (
+                <UserIcon className="w-4 h-4 mt-1 flex-shrink-0" />
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
-      <div className={`relative max-w-[75%] p-4 rounded-2xl shadow-md transition-all duration-200 ${
-        message.type === 'user' 
-          ? `${isDarkMode ? 'from-indigo-400 to-blue-500' : 'from-indigo-500 to-blue-600'} bg-gradient-to-br text-white` 
-          : `${isDarkMode 
-              ? 'bg-gray-800 border-gray-700 text-gray-100' 
-              : 'bg-white border-gray-100 text-gray-800'} border`
-      }`}>
-        <p className="text-sm leading-relaxed">{message.content}</p>
-      </div>
-    </div>
-  ));
+    );
+  };
 
   const SatisfactionSurvey = () => (
-    <Card className={`mb-4 ${
+    <Card className={`w-full mb-6 transform transition-all duration-300 hover:scale-102 ${
       isDarkMode 
-        ? 'bg-violet-900/20 border-violet-700 text-violet-100' 
-        : 'bg-violet-50 border-violet-200 text-violet-800'
+        ? 'bg-teal-900/20 border-teal-700' 
+        : 'bg-teal-50 border-teal-200'
     }`}>
-      <CardContent className="p-6">
+      <CardContent className="p-8">
         <div className="text-center">
-          <p className="text-sm font-medium mb-4">Has your issue been resolved?</p>
-          <div className="flex justify-center gap-4">
+          <p className={`text-base font-medium mb-6 ${isDarkMode ? 'text-teal-100' : 'text-teal-800'}`}>
+            Has your issue been resolved?
+          </p>
+          <div className="flex justify-center gap-6">
             <Button
               variant="outline"
-              className={`${
+              className={`transform transition-all duration-300 hover:scale-105 ${
                 isDarkMode
-                  ? 'border-violet-600 hover:bg-violet-800 text-violet-100'
-                  : 'border-violet-200 hover:bg-violet-100 text-violet-800'
+                  ? 'border-teal-600 hover:bg-teal-800/50 text-teal-100'
+                  : 'border-teal-200 hover:bg-teal-100/50 text-teal-800'
               }`}
               onClick={() => {
                 setIsSatisfied(false);
@@ -263,10 +290,10 @@ const CustomerChatInterface = () => {
               No, I need more help
             </Button>
             <Button
-              className={`${
+              className={`transform transition-all duration-300 hover:scale-105 ${
                 isDarkMode
-                  ? 'bg-violet-500 hover:bg-violet-600'
-                  : 'bg-violet-600 hover:bg-violet-700'
+                  ? 'bg-teal-500 hover:bg-teal-600'
+                  : 'bg-teal-600 hover:bg-teal-700'
               } text-white`}
               onClick={() => {
                 setIsSatisfied(true);
@@ -276,6 +303,7 @@ const CustomerChatInterface = () => {
                   timestamp: new Date(),
                   status: 'delivered'
                 }]);
+                navigate(-1);
               }}
             >
               Yes, thank you!
@@ -286,123 +314,132 @@ const CustomerChatInterface = () => {
     </Card>
   );
 
+  MessageBubble.propTypes = {
+    message: PropTypes.shape({
+      type: PropTypes.string.isRequired,
+      content: PropTypes.string.isRequired,
+      timestamp: PropTypes.instanceOf(Date).isRequired,
+    }).isRequired,
+    isDarkMode: PropTypes.bool.isRequired,
+  };
+  
+  MessageBubble.displayName = 'MessageBubble';
+
   return (
-    <div className={`flex flex-col h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <div className={`fixed top-0 left-0 right-0 ${
-        isDarkMode
-          ? 'bg-gray-800/80 border-gray-700'
-          : 'bg-white/80 border-gray-200'
-      } border-b backdrop-blur-lg z-10`}>
-        <div className="w-full max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className={`${
-                  isDarkMode
-                    ? 'hover:bg-gray-700 text-gray-300'
-                    : 'hover:bg-gray-100 text-gray-600'
-                }`}
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <div>
-                <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                  Uplift-AI Assistance
-                </h2>
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  We're here to help you
-                </p>
+    <div className={`min-h-screen w-full flex justify-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className="w-full h-screen flex flex-col">
+        <Card className="h-full flex flex-col my-4">
+          {/* Header Card */}
+          <CardHeader className="flex-shrink-0 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-5">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className={`rounded-xl transition-all duration-300 hover:scale-110 ${
+                    isDarkMode
+                      ? 'hover:bg-gray-700 text-gray-300'
+                      : 'hover:bg-gray-100 text-gray-600'
+                  }`}
+                  onClick={() => navigate(-1)}
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </Button>
+                <div>
+                  <CardTitle className={`text-2xl ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                    Uplift-AI Assistance
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    We`re here to help you
+                  </CardDescription>
+                </div>
               </div>
+              <Button 
+                className={`rounded-xl ml-40 px-6 py-5 transform transition-all duration-300 hover:scale-105 ${
+                  isDarkMode
+                    ? 'from-teal-400 to-emerald-500'
+                    : 'from-teal-500 to-emerald-600'
+                } bg-gradient-to-br text-white shadow-lg hover:shadow-xl`}
+                onClick={() => setShowTicketDialog(true)}
+              >
+                Create Ticket
+              </Button>
             </div>
-            <Button 
-              className={`${
-                isDarkMode
-                  ? 'bg-violet-500 hover:bg-violet-600'
-                  : 'bg-violet-600 hover:bg-violet-700'
-              } text-white shadow-lg hover:shadow-xl transition-all duration-200`}
-              onClick={() => setShowTicketDialog(true)}
-            >
-              Create Ticket
-            </Button>
-          </div>
-        </div>
-      </div>
+          </CardHeader>
 
-      <div className="flex-1 overflow-y-auto pt-28 pb-32 px-6 max-w-4xl mx-auto w-full">
-        <div className="space-y-6">
-          {messages.map((message, index) => (
-            <MessageBubble key={`${message.timestamp.getTime()}-${index}`} message={message} />
-          ))}
-          {isTyping && <TypingIndicator />}
-          {conversationCount > 5 && conversationCount % 3 === 0 && isSatisfied === null && (
-            <SatisfactionSurvey />
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      <div className={`fixed bottom-0 left-0 right-0 ${
-        isDarkMode
-          ? 'bg-gray-800/80 border-gray-700'
-          : 'bg-white/80 border-gray-200'
-      } border-t backdrop-blur-lg z-10`}>
-        <div className="max-w-4xl mx-auto p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-1 relative">
-              <Input
-                type="text"
-                placeholder="Type your message..."
+          {/* Chat Content */}
+          <CardContent className="flex-1 overflow-y-auto py-6 px-4">
+            <div className="max-w-3xl mx-auto space-y-4">
+              {messages.map((message, index) => (
+                <MessageBubble 
+                  key={`${message.timestamp.getTime()}-${index}`} 
+                  message={message}
+                  isDarkMode={isDarkMode}
+                />
+              ))}
+              {isTyping && <TypingIndicator />}
+              {conversationCount > 5 && conversationCount % 3 === 0 && isSatisfied === null && (
+                <SatisfactionSurvey />
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          </CardContent>
+          <CardFooter className="flex-shrink-0 border-t p-4">
+            <div className="w-full max-w-3xl mx-auto relative">
+              <Textarea
+                ref={textareaRef}
                 value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={(e) => {
+                onChange={handleTextareaChange}
+                onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSendMessage();
                   }
                 }}
-                className={`pr-28 ${
+                placeholder="Type your message..."
+                className={`pr-32 min-h-[56px] max-h-[150px] rounded-xl text-base overflow-y-auto resize-none ${
                   isDarkMode
-                    ? 'bg-gray-700 text-gray-200 placeholder-gray-400 focus-visible:ring-violet-400'
-                    : 'bg-white text-gray-900 placeholder-gray-500 focus-visible:ring-violet-500'
+                    ? 'bg-gray-700 text-gray-200 placeholder-gray-400 focus-visible:ring-teal-400'
+                    : 'bg-white text-gray-900 placeholder-gray-500 focus-visible:ring-teal-500'
                 }`}
+                style={{
+                  paddingRight: '8rem',
+                }}
               />
               <Button 
-                className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 px-4 ${
+                className={`absolute right-2 bottom-2 h-10 px-6 rounded-lg transform transition-all duration-300 hover:scale-105 ${
                   isDarkMode
-                    ? 'bg-violet-500 hover:bg-violet-600'
-                    : 'bg-violet-600 hover:bg-violet-700'
-                } text-white shadow-md hover:shadow-lg transition-all duration-200`}
-                onClick={handleSendMessage} 
+                    ? 'from-teal-400 to-emerald-500'
+                    : 'from-teal-500 to-emerald-600'
+                } bg-gradient-to-br text-white shadow-md hover:shadow-lg`}
+                onClick={handleSendMessage}
                 disabled={!inputMessage.trim()}
               >
-                <Send className="w-4 h-4 mr-2" />
+                <Send className="w-5 h-5 mr-2" />
                 Send
               </Button>
             </div>
-          </div>
-        </div>
+          </CardFooter>
+        </Card>
       </div>
 
       <Dialog open={showTicketDialog} onOpenChange={setShowTicketDialog}>
-        <DialogContent className="sm:max-w-[425px] dark:bg-gray-800">
+        <DialogContent className={`sm:max-w-[500px] rounded-2xl ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
           <DialogHeader>
-            <DialogTitle className="text-xl dark:text-gray-200">Create Support Ticket</DialogTitle>
-            <DialogDescription className="dark:text-gray-400">
+            <DialogTitle className={`text-2xl ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Create Support Ticket</DialogTitle>
+            <DialogDescription className={`text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               Fill out the form below to submit a new support ticket. Our team will respond as soon as possible.
             </DialogDescription>
           </DialogHeader>
-          <Separator className="dark:bg-gray-700" />
-          <div className="grid gap-4 py-4">
+          <Separator className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} />
+          <div className="grid gap-6 py-6">
             <div className="grid gap-2">
-              <label htmlFor="issue-type" className="font-medium dark:text-gray-200">Issue Type</label>
+              <label htmlFor="issue-type" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Issue Type</label>
               <Select
                 value={ticketData.type}
                 onValueChange={(value) => setTicketData(prev => ({ ...prev, type: value }))}
               >
-                <SelectTrigger className="bg-white dark:bg-gray-700 dark:text-gray-200">
+                <SelectTrigger className={`bg-white dark:bg-gray-700 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                   <SelectValue placeholder="Select issue type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -414,12 +451,12 @@ const CustomerChatInterface = () => {
               </Select>
             </div>
             <div className="grid gap-2">
-              <label className="font-medium dark:text-gray-200">Priority</label>
+              <label className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Priority</label>
               <Select
                 value={ticketData.priority}
                 onValueChange={(value) => setTicketData(prev => ({ ...prev, priority: value }))}
               >
-                <SelectTrigger className="bg-white dark:bg-gray-700 dark:text-gray-200">
+                <SelectTrigger className={`bg-white dark:bg-gray-700 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -430,31 +467,50 @@ const CustomerChatInterface = () => {
               </Select>
             </div>
             <div className="grid gap-2">
-              <label htmlFor="description" className="font-medium dark:text-gray-200">Description</label>
+              <label htmlFor="description" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Description</label>
               <Textarea
                 id="description"
                 placeholder="Please describe your issue in detail"
                 value={ticketData.description}
                 onChange={(e) => setTicketData(prev => ({ ...prev, description: e.target.value }))}
-                className="h-32 bg-white dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
+                className={`h-32 ${
+                  isDarkMode
+                    ? 'bg-gray-700 text-gray-200 placeholder-gray-400'
+                    : 'bg-white text-gray-800 placeholder-gray-500'
+                }`}
               />
             </div>
           </div>
-          <Separator className="dark:bg-gray-700" />
-          <DialogFooter className="gap-2 sm:gap-0">
+          <Separator className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} />
+          <DialogFooter className="gap-3 sm:gap-0">
             <Button 
               variant="outline" 
               onClick={() => setShowTicketDialog(false)}
-              className="dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+              className={`rounded-lg ${
+                isDarkMode
+                  ? 'border-gray-600 text-gray-200 hover:bg-gray-700'
+                  : 'border-gray-200 text-gray-800 hover:bg-gray-100'
+              }`}
             >
               Cancel
             </Button>
             <Button 
-              className="bg-violet-600 hover:bg-violet-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+              className={`rounded-lg transform transition-all duration-300 hover:scale-105 ${
+                isDarkMode
+                  ? 'from-teal-400 to-emerald-500'
+                  : 'from-teal-500 to-emerald-600'
+              } bg-gradient-to-br text-white shadow-md hover:shadow-xl`}
               onClick={handleTicketSubmit}
               disabled={uploading}
             >
-              {uploading ? 'Submitting...' : 'Submit Ticket'}
+              {uploading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Submitting...</span>
+                </div>
+              ) : (
+                <span>Submit Ticket</span>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -463,4 +519,4 @@ const CustomerChatInterface = () => {
   );
 };
 
-export default CustomerChatInterface;
+export default CustomerChatBotInterface;

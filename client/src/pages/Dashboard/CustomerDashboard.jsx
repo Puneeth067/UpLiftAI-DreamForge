@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, Bell, Settings, LogOut, Ticket, MessageSquare, User, ChevronRight, HeadphonesIcon } from 'lucide-react';
 import {
@@ -71,7 +71,7 @@ const CustomerDashboard = () => {
       title: 'Chat Support',
       icon: MessageSquare,
       view: 'chat',
-      onClick: () => navigate('/customerchatinterface', { state: { userData } })
+      onClick: () => navigate('/customerchatbotinterface', { state: { userData } })
     },
     {
       title: 'Profile',

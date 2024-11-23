@@ -14,7 +14,7 @@ const HomePage = lazy(() => import('./pages/Home/HomePage'));
 const AuthPages = lazy(() => import('./pages/Auth/AuthPage'));
 const CustomerDashboard = lazy(() => import('./pages/Dashboard/CustomerDashboard'));
 const AgentDashboard = lazy(() => import('./pages/Dashboard/AgentDashboard'));
-const CustomerChatInterface = lazy(() => import('./pages/Chats/CustomerChatInterface'));
+const CustomerChatBotInterface = lazy(() => import('./pages/Chats/CustomerChatBotInterface'));
 const CustomerRealtimeChat = lazy(() => import('./pages/Chats/CustomerRealtimeChat'));
 const AgentChatInterface = lazy(() => import('./pages/Chats/AgentChatInterface'));
 const CustomerTickets = lazy(() => import('./pages/Tickets/CustomerTickets'));
@@ -42,7 +42,7 @@ const ROUTES = {
   PROTECTED: {
     CUSTOMER: {
       DASHBOARD: '/customerdashboard',
-      CHAT: '/customerchatinterface',
+      CHATBOT: '/customerchatbotinterface',
       REALTIMECHAT: '/customerrealtimechat',
       TICKET: '/customertickets'
     },
@@ -82,10 +82,10 @@ function App() {
                 }
               />
               <Route
-                path={ROUTES.PROTECTED.CUSTOMER.CHAT}
+                path={ROUTES.PROTECTED.CUSTOMER.CHATBOT}
                 element={
                   // <PrivateRoute userType="customer">
-                    <CustomerChatInterface />
+                    <CustomerChatBotInterface />
                   // </PrivateRoute>
                 }
               />

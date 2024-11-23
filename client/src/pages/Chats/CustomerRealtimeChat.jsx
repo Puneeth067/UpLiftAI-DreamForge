@@ -69,7 +69,7 @@ const CustomerChatInterface = () => {
         subscription.unsubscribe();
       }
     };
-  }, [ticketId, agentId, userData?.id, location.state, navigate]);
+  }, [ticketId, agentId, userData, location.state, navigate]);
 
   useEffect(() => {
     // Scroll to bottom when new messages arrive
