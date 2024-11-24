@@ -18,10 +18,11 @@ import{
 } from "@/components/ui/avatar";
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
-import { Github, Twitter, Instagram, Linkedin, Globe, Mail, Edit, Save, Plus, X, Building, Calendar, Home,MessageSquare, Star, Palette, User, PanelLeftClose, PanelLeftOpen} from "lucide-react";
+import { Github, Twitter, Instagram, Linkedin, Globe, Mail, Edit, Save, Plus, X, Building, Calendar, Home,MessageSquare, Star, Palette, User, PanelLeftClose, PanelLeftOpen, Settings} from "lucide-react";
 import { supabase } from '@/utils/supabase';
 import PropTypes from 'prop-types';
 import { useTheme } from '../../contexts/ThemeContext';
+import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 
 const BackgroundSVG = () => (
   <svg
@@ -122,11 +123,17 @@ const AgentPortfolio = () => {
       onClick: () => navigate('/portfolio', { state: { userData } })
     },
     {
-      title: 'Profile Settings',
+      title: 'Profile',
       icon: User,
       view: 'profile',
       onClick: () => navigate('/profile', { state: { userData } })
-    }
+    },
+    {
+      title: 'Settings',
+      icon: Settings,
+      view: 'settings',
+      onClick: () => navigate('/settings', { state: { userData } })
+    }    
   ];
 
   const fetchPortfolioData = async () => {
@@ -288,6 +295,7 @@ const AgentPortfolio = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/80 text-foreground">
       <BackgroundSVG className="z-0 "/>
+      <CyberCursorEffect />
       <aside className={`hidden md:block fixed left-0 top-0 h-full border-r border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900 z-30 transition-all duration-300 ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}>

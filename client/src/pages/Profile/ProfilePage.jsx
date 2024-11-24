@@ -33,9 +33,11 @@ import {
   Palette,
   User,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  Settings
 } from 'lucide-react';
 import PropTypes from 'prop-types';
+import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 
 
 const BackgroundSVG = () => (
@@ -139,6 +141,7 @@ const ProfilePage = () => {
   const [setActiveView] = useState('profile');
   const [activeItem, setActiveItem] = useState(null);
 
+  // Updated menu items for creator dashboard
   const menuItems = [
     {
       title: 'Home',
@@ -165,11 +168,17 @@ const ProfilePage = () => {
       onClick: () => navigate('/portfolio', { state: { userData } })
     },
     {
-      title: 'Profile Settings',
+      title: 'Profile',
       icon: User,
       view: 'profile',
       onClick: () => navigate('/profile', { state: { userData } })
-    }
+    },
+    {
+      title: 'Settings',
+      icon: Settings,
+      view: 'settings',
+      onClick: () => navigate('/settings', { state: { userData } })
+    }    
   ];
 
   const SidebarContent = () => (
@@ -695,6 +704,7 @@ const ProfilePage = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <BackgroundSVG className="z-0 "/>
+      <CyberCursorEffect />
       <aside className={`hidden md:block fixed left-0 top-0 h-full border-r border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900 z-30 transition-all duration-300 ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}>

@@ -143,21 +143,18 @@ const AgentDashboard = () => {
       onClick: () => navigate('/portfolio', { state: { userData } })
     },
     {
-      title: 'Profile Settings',
+      title: 'Profile',
       icon: User,
       view: 'profile',
       onClick: () => navigate('/profile', { state: { userData } })
-    }
+    },
+    {
+      title: 'Settings',
+      icon: Settings,
+      view: 'settings',
+      onClick: () => navigate('/settings', { state: { userData } })
+    }    
   ];
-
-  const handleSettingsClick = () => {
-    navigate('/settings', { 
-      state: { 
-        userData,
-        userType: userData?.usertype || 'user' 
-      } 
-    });
-  };
 
   const handleLogout = async () => {
     try {
@@ -316,11 +313,6 @@ const AgentDashboard = () => {
                 <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                   3
                 </span>
-              </button>
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden sm:block"
-              onClick={handleSettingsClick}
-              >
-                <Settings className="h-6 w-6 dark:text-white" />
               </button>
               <button 
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden sm:block"

@@ -18,7 +18,7 @@ import {
   X,
   CheckCircle2,
   XCircle,
-  PanelLeftOpen, PanelLeftClose,Home,Palette,Star, Sparkles, Paintbrush
+  PanelLeftOpen, PanelLeftClose,Home,Palette,Star, Sparkles, Paintbrush, Settings
 } from "lucide-react";
 import { supabase } from "@/utils/supabase";
 import { useTheme } from '../../contexts/ThemeContext';
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import LoadingScreen from "@/components/ui/loading";
+import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 
 const BackgroundSVG = () => (
   <svg
@@ -120,7 +121,7 @@ const [isInProgressDialogOpen, setIsInProgressDialogOpen] = useState(false);
 const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
 const [ setRejectionReason] = useState("");
 
-// Updated menu items for agent dashboard
+// Updated menu items for creator dashboard
 const menuItems = [
   {
     title: 'Home',
@@ -147,11 +148,17 @@ const menuItems = [
     onClick: () => navigate('/portfolio', { state: { userData } })
   },
   {
-    title: 'Profile Settings',
+    title: 'Profile',
     icon: User,
     view: 'profile',
     onClick: () => navigate('/profile', { state: { userData } })
-  }
+  },
+  {
+    title: 'Settings',
+    icon: Settings,
+    view: 'settings',
+    onClick: () => navigate('/settings', { state: { userData } })
+  }    
 ];
 
 // Fetch user details for in-progress ticket
@@ -925,6 +932,7 @@ const InProgressTicketDetailsDialog = () => {
   return (
     <div className={`min-h-screen flex justify-center`}>
       <BackgroundSVG className="z-0 "/>
+      <CyberCursorEffect />
       <aside className={`hidden md:block fixed left-0 top-0 h-full border-r border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900 z-30 transition-all duration-300 ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}>
@@ -935,7 +943,7 @@ const InProgressTicketDetailsDialog = () => {
         isCollapsed ? 'md:ml-20' : 'md:ml-64'
       }`}>
         <div className={`${isCollapsed ? 'w-[1024px]' : 'w-[896px]'} shadow-xl rounded-lg my-8 ${
-          isDarkMode ? 'bg-gray-800' : 'bg-white'} ${isCollapsed ? 'left-20' : 'left-64'} mb-0`}>
+          isDarkMode ? 'bg-gray-800' : 'bg-white'} ${isCollapsed ? 'left-20' : 'left-64'} pt-8 mb-0`}>
           <div className={`p-6 border-b ${
             isDarkMode ? 'border-gray-700' : 'border-gray-100'
           }`}>

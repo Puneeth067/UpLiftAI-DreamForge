@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,14 +23,77 @@ import {
   AlertTriangle,
   Mail,
   MessageCircle,
-  AlertOctagon
+  AlertOctagon,
+  MessageSquare,
+  Home,
+  Star,
+  Palette,
+  User,
+  Settings,
+  PanelLeftOpen,
+  PanelLeftClose
 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import PropTypes from 'prop-types';
+import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
+
+const BackgroundSVG = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+    preserveAspectRatio="xMidYMid slice"
+    viewBox="0 0 1440 900"
+  >
+    <defs>
+      <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#F8F0FF" stopOpacity="0.4" />
+        <stop offset="100%" stopColor="#F0E6FF" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="#D4BBFF" stopOpacity="0.1" />
+      </radialGradient>
+
+      <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#2A1352" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#1A0B38" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <filter id="blurFilter">
+        <feGaussianBlur stdDeviation="60" />
+      </filter>
+
+      <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-purple-200 dark:text-purple-900" opacity="0.3" />
+      </pattern>
+    </defs>
+   
+    {/* Light Mode Patterns */}
+    <g className="opacity-100 dark:opacity-0">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="200" cy="150" r="400" fill="url(#lightGradient)" filter="url(#blurFilter)" />
+      <circle cx="1200" cy="300" r="500" fill="url(#lightGradient)" opacity="0.4" filter="url(#blurFilter)" />
+      <circle cx="800" cy="600" r="300" fill="url(#accentGradient)" opacity="0.3" filter="url(#blurFilter)" />
+      <path d="M0,300 Q720,400 1440,300 Q720,500 0,300" fill="url(#accentGradient)" opacity="0.15" />
+      <ellipse cx="600" cy="750" rx="600" ry="300" fill="url(#lightGradient)" opacity="0.2" filter="url(#blurFilter)" />
+    </g>
+   
+    {/* Dark Mode Patterns */}
+    <g className="opacity-0 dark:opacity-100">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="300" cy="200" r="600" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+      <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#darkGradient)" opacity="0.25" />
+      <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#darkGradient)" opacity="0.2" filter="url(#blurFilter)" />
+      <circle cx="800" cy="750" r="400" fill="url(#darkGradient)" opacity="0.15" filter="url(#blurFilter)" />
+    </g>
+  </svg>
+);
 
 const SettingsPage = () => {
-  const { session, user } = useAuth();
+  const { session } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -40,6 +103,9 @@ const SettingsPage = () => {
   
   const [userData, setUserData] = useState(location.state?.userData);
   const userType = location.state?.userData.userType || 'user';
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [setActiveView] = useState('home');
+  const [activeItem, setActiveItem] = useState(null);
 
   const [settings, setSettings] = useState({
     darkMode: isDarkMode,
@@ -52,6 +118,137 @@ const SettingsPage = () => {
       marketingComms: false
     }
   });
+
+  // Updated menu items for creator dashboard
+  const menuItems = [
+    {
+      title: 'Home',
+      icon: Home,
+      view: 'home',
+      onClick: () => navigate('/agentdashboard', { state: { userData } })
+    },
+    {
+      title: 'Messages',
+      icon: MessageSquare,
+      view: 'tickets',
+      onClick: () => navigate('/agenttickets', { state: { userData } })
+    },
+    {
+      title: 'Featured Work',
+      icon: Star,
+      view: 'project',
+      onClick: () => navigate('/agentprojects', { state: { userData } })
+    },
+    {
+      title: 'Portfolio',
+      icon: Palette,
+      view: 'portfolio',
+      onClick: () => navigate('/portfolio', { state: { userData } })
+    },
+    {
+      title: 'Profile',
+      icon: User,
+      view: 'profile',
+      onClick: () => navigate('/profile', { state: { userData } })
+    },
+    {
+      title: 'Settings',
+      icon: Settings,
+      view: 'settings',
+      onClick: () => navigate('/settings', { state: { userData } })
+    }    
+  ];
+
+  const SidebarContent = () => (
+    <div className={`flex flex-col h-full bg-white dark:bg-gray-900 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
+          {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+          >
+            {isCollapsed ? 
+              <PanelLeftOpen  className="h-6 w-6 dark:text-white" /> : 
+              <PanelLeftClose className="h-6 w-6 dark:text-white" />
+            }
+          </button>
+        </div>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto p-4">
+        {menuItems.map((item, index) => (
+          <MenuItem key={index} item={item} index={index} />
+        ))}
+      </nav>
+
+      <div className="border-t border-gray-200 dark:border-gray-700 p-4 mt-auto">
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
+          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {userData?.avatar_url ? (
+              <img 
+                src={`/avatars/${userData.avatar_url}`}
+                alt={userData.fullname}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/avatars/user.png';
+                }}
+              />
+            ) : (
+              <img 
+                src="/avatars/user.png"
+                alt="Default User"
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{userData.email}</p>
+              {userData.department && (
+                <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{userData.department}</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  const MenuItem = ({ item, index }) => (
+    <div className="mb-2">
+      <button 
+        onClick={() => {
+          if (item.onClick) {
+            item.onClick();
+          } else {
+            setActiveView(item.view);
+            setActiveItem(activeItem === index ? null : index);
+          }
+        }}
+        className={`flex items-center w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-colors duration-200 ${
+          isCollapsed ? 'justify-center' : ''
+        }`}
+        title={isCollapsed ? item.title : ''}
+      >
+        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
+        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
+        
+      </button>
+    </div>
+  );
+
+  MenuItem.propTypes = {
+    item: PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      icon: PropTypes.elementType.isRequired,
+      view: PropTypes.string.isRequired,
+      onClick: PropTypes.func,
+    }).isRequired,
+    index: PropTypes.number.isRequired,
+  };
 
   // Get current user and settings on mount
   useEffect(() => {
@@ -220,6 +417,13 @@ const SettingsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <BackgroundSVG className="z-0 "/>
+      <CyberCursorEffect />
+      <aside className={`hidden md:block fixed left-0 top-0 h-full border-r border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900 z-30 transition-all duration-300 ${
+        isCollapsed ? 'w-20' : 'w-64'
+      }`}>
+        <SidebarContent />
+      </aside>
       <Toaster />
       {/* Header Section */}
       <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
