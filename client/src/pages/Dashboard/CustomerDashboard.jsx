@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, Bell, Settings, LogOut, Ticket, MessageSquare, User, ChevronRight, HeadphonesIcon } from 'lucide-react';
+import { Menu, Bell, Settings, LogOut, Ticket, MessageSquare, User, ChevronRight, Wand2 } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -58,7 +58,6 @@ const CustomerDashboard = () => {
   }, [location.state, navigate, loadUserTheme]);
 
   const [activeItem, setActiveItem] = useState(null);
-  const [activeView, setActiveView] = useState(null);
 
   const menuItems = [
     {
@@ -215,11 +214,16 @@ const CustomerDashboard = () => {
                 </SheetContent>
               </Sheet>
               
-              <div className="flex items-center space-x-2">
-                <HeadphonesIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                <span className="text-xl font-semibold dark:text-gray-100">Uplift-AI Assistance</span>
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <Wand2 className="h-8 w-8 relative text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    DreamForge
+                  </span>
+                </div>
               </div>
-            </div>
 
             <div className="flex items-center space-x-2">
               <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg relative transition-colors duration-200">
@@ -253,7 +257,7 @@ const CustomerDashboard = () => {
               
               <div className="space-y-6">
                 <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                  Your gateway to seamless customer support. We're here to make your experience smooth and efficient.
+                  Your gateway to seamless customer support. We`re here to make your experience smooth and efficient.
                 </p>
                 
                 <div className="grid md:grid-cols-2 gap-6 mt-8">

@@ -1,24 +1,24 @@
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback, memo} from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  Shield,
-  MessageCircle,
-  BarChart2,
-  Users,
+  Briefcase,
+  SearchCheck,
+  Star,
+  Target,
   ArrowRight,
-  Bot,
-  Clock,
+  Wand2,
+  Trophy,
   ChevronRight,
-  Info
+  Info,
+  Medal
 } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import CyberCursorEffect from '@/components/ui/CyberCursorEffect';
 import PropTypes from 'prop-types';
-
 const HomeBackground = () => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
@@ -152,41 +152,39 @@ const HomeBackground = () => (
 const FEATURES = {
   customer: [
     { 
-      icon: <Bot className="w-6 h-6" />, 
-      title: '24/7 AI Support', 
-      description: 'Get instant answers to your questions with our AI-powered chatbot' 
+      icon: <Trophy className="w-6 h-6" />, 
+      title: 'Showcase Portfolio', 
+      description: 'Display your best work and expertise to attract the right patrons' 
     },
     { 
-      icon: <MessageCircle className="w-6 h-6" />, 
-      title: 'Ticket Tracking', 
-      description: 'Track your support tickets and their status in real-time' 
+      icon: <Target className="w-6 h-6" />, 
+      title: 'Find Your Patrons', 
+      description: 'Connect with patrons who value your unique creative expertise' 
     },
     { 
-      icon: <Clock className="w-6 h-6" />, 
-      title: 'Quick Resolution', 
-      description: 'Experience faster resolution times with our intelligent system' 
+      icon: <Star className="w-6 h-6" />, 
+      title: 'Build Your Brand', 
+      description: 'Grow your reputation and establish yourself in your creative field' 
     }
   ],
   agent: [
     { 
-      icon: <BarChart2 className="w-6 h-6" />, 
-      title: 'Advanced Analytics', 
-      description: 'Access detailed insights and performance metrics' 
+      icon: <SearchCheck className="w-6 h-6" />, 
+      title: 'Find Expert Creators', 
+      description: 'Discover talented creators who match your project requirements' 
     },
     { 
-      icon: <Users className="w-6 h-6" />, 
-      title: 'Team Collaboration', 
-      description: 'Seamlessly work with team members on complex cases' 
+      icon: <Briefcase className="w-6 h-6" />, 
+      title: 'Post Projects', 
+      description: 'Share your creative needs and let creators bring your vision to life' 
     },
     { 
-      icon: <Shield className="w-6 h-6" />, 
-      title: 'AI Assistance', 
-      description: 'Let AI handle routine queries while you focus on complex issues' 
+      icon: <Medal className="w-6 h-6" />, 
+      title: 'Quality Assurance', 
+      description: 'Browse portfolios and reviews to find the perfect creative match' 
     }
   ]
 };
-
-
 
 const FeatureCard = memo(({ icon, title, description }) => {
   return (
@@ -260,7 +258,6 @@ const HomePage = () => {
   const [showAlert, setShowAlert] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
-
   const handleDashboardNavigation = useCallback(() => {
     if (user) {
       const dashboardType = user.user_metadata?.userType === 'agent' 
@@ -276,7 +273,7 @@ const HomePage = () => {
     } else {
       navigate('/auth', { 
         state: { 
-          userType: userType === 'customer' ? 'customer' : 'agent',
+          userType: userType === 'customer' ? 'agent' : 'customer',
           mode: 'register'
         } 
       });
@@ -286,7 +283,7 @@ const HomePage = () => {
   const handleSignIn = useCallback(() => {
     navigate('/auth', {
       state: {
-        userType: userType === 'customer' ? 'customer' : 'agent',
+        userType: userType === 'customer' ? 'agent' : 'customer',
         mode: 'login'
       }
     });
@@ -301,20 +298,19 @@ const HomePage = () => {
       const scrolledToBottom = windowHeight + scrollTop >= documentHeight - 100;
       setShowAlert(scrolledToBottom);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/70 dark:to-gray-800 cursor-none">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-50 to-rose-50 dark:from-indigo-900/70 dark:to-rose-900/70 cursor-none">
       <HomeBackground className="z-0"/>
       <CyberCursorEffect />
       <motion.nav 
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white/70 backdrop-blur-sm dark:bg-purple-900/70 shadow-sm dark:shadow-purple-900/10 sticky top-0 z-50"
+        className="bg-white/70 backdrop-blur-sm dark:bg-gray-900/70 shadow-sm sticky top-0 z-50"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -324,9 +320,9 @@ const HomePage = () => {
                 animate={{ rotate: 0, scale: 1 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
               >
-                <Bot className="h-8 w-8 text-purple-600 dark:text-purple-400" aria-hidden="true" />
+                <Wand2 className="h-8 w-8 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
               </motion.div>
-              <span className="ml-2 text-xl font-bold text-gray-900 dark:text-gray-100">AI Support Hub</span>
+              <span className="ml-2 text-xl font-bold text-gray-900 dark:text-gray-100">DreamForge</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button
@@ -335,7 +331,7 @@ const HomePage = () => {
                 className="transition-all"
                 aria-pressed={userType === 'customer'}
               >
-                Customer
+                Creator
               </Button>
               <Button
                 variant={userType === 'agent' ? 'default' : 'outline'}
@@ -343,7 +339,7 @@ const HomePage = () => {
                 className="transition-all"
                 aria-pressed={userType === 'agent'}
               >
-                Support Agent
+                Patron
               </Button>
               <Button
                 variant="outline"
@@ -369,16 +365,16 @@ const HomePage = () => {
                 <div className="sm:text-center lg:text-left">
                   <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-gray-100 sm:text-5xl md:text-6xl">
                     <span className="block">
-                      {userType === 'customer' ? 'Get Support' : 'Provide Support'}
+                      {userType === 'customer' ? 'Showcase Your Expertise' : 'Find Your Perfect Creator'}
                     </span>
-                    <span className="block text-blue-600 dark:text-blue-400">
-                      {userType === 'customer' ? 'Powered by AI' : 'Enhanced by AI'}
+                    <span className="block text-indigo-600 dark:text-indigo-400">
+                      {userType === 'customer' ? 'Connect with Dream Projects' : 'Discover Expert Talent'}
                     </span>
                   </h1>
                   <p className="mt-3 text-base text-gray-500 dark:text-gray-400 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                     {userType === 'customer'
-                      ? 'Experience lightning-fast support with our AI-powered system. Get instant answers or connect with our expert support team.'
-                      : 'Streamline your support workflow with AI assistance. Handle more tickets efficiently while maintaining high-quality customer service.'}
+                      ? `Showcase your portfolio, highlight your expertise, and connect with patrons who value your unique creative skills. Build your brand and grow your creative career.`
+                      : `Find the perfect creator for your project. Browse portfolios, review expertise, and connect with talented professionals who can bring your vision to life.`}
                   </p>
                   <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                     <motion.div
@@ -387,10 +383,10 @@ const HomePage = () => {
                     >
                       <Button 
                         onClick={handleGetStarted}
-                        className="w-full sm:w-auto px-8 py-3 text-base font-medium rounded-md shadow dark:shadow-gray-900/10"
+                        className="w-full sm:w-auto px-8 py-3 text-base font-medium rounded-md shadow"
                         size="lg"
                       >
-                        {userType === 'customer' ? 'Get Started' : 'Join as Agent'}
+                        {userType === 'customer' ? 'Showcase Portfolio' : 'Browse Creators'}
                         <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
                       </Button>
                     </motion.div>
@@ -415,7 +411,7 @@ const HomePage = () => {
                 id="features-heading" 
                 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 sm:text-4xl"
               >
-                {userType === 'customer' ? 'Why Choose Our Support System?' : 'Empower Your Support Team'}
+                {userType === 'customer' ? 'Amplify Your Creative Journey' : 'Commission Unique Creations'}
               </h2>
             </div>
 
@@ -455,13 +451,13 @@ const HomePage = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
-          className="bg-purple-50 mb-4 dark:bg-purple-900/20 py-12"
+          className="bg-indigo-50 mb-4 dark:bg-indigo-900/20 py-12"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl">
-              <span className="block">Ready to get started?</span>
-              <span className="block text-purple-600 dark:text-purple-400">
-                {userType === 'customer' ? 'Get support in seconds.' : 'Join our support team.'}
+              <span className="block">Ready to dream bigger?</span>
+              <span className="block text-indigo-600 dark:text-indigo-400">
+                {userType === 'customer' ? 'Your next masterpiece awaits.' : 'Find your perfect creator.'}
               </span>
             </h2>
             <div className="mt-8">
@@ -493,9 +489,9 @@ const HomePage = () => {
             className="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-[100]"
           >
             <Alert
-              className="bg-purple-100/90 dark:bg-purple-900/90 
+              className="bg-indigo-100/90 dark:bg-indigo-900/90 
                 backdrop-blur-md 
-                border-purple-200 dark:border-purple-800
+                border-indigo-200 dark:border-indigo-800
                 shadow-lg rounded-xl
                 transition-all duration-300"
               role="status"
@@ -506,10 +502,10 @@ const HomePage = () => {
                   animate={{ scale: 1 }}
                   className="mr-3"
                 >
-                  <Info className="h-5 w-5 text-blue-600 dark:text-blue-300" />
+                  <Info className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
                 </motion.div>
                 <span className="text-gray-700 dark:text-gray-200">
-                  Currently showing the {userType === 'customer' ? 'customer' : 'support agent'} view. 
+                  Currently showing the {userType === 'customer' ? 'creator' : 'patron'} view. 
                   Toggle above to see different perspectives.
                 </span>
               </AlertDescription>

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Mail, Lock, User, Building, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff} from 'lucide-react';
+import { Mail, Lock, User, Palette, Sparkles, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, Link, Wand2 } from 'lucide-react';
 import { supabase } from '../../utils/supabase.js';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 
@@ -60,10 +60,11 @@ const AuthBackgroundSVG = () => (
 );
 
 const DEPARTMENTS = [
-  'Technical Support',
-  'Customer Service',
-  'Billing Support',
-  'Product Support'
+  'Visual Artist',
+  'Musician',
+  'Writer',
+  'Digital Creator',
+  'Mixed Media Artist'
 ];
 
 const DEFAULT_FORM_DATA = {
@@ -73,6 +74,7 @@ const DEFAULT_FORM_DATA = {
   confirmPassword: '',
   department: '', 
   phoneNumber: '',
+  portfolio: '',
 };
 
 // Phone formatting function
@@ -86,6 +88,16 @@ const formatPhoneNumber = (value) => {
     return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3)}`;
   }
   return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3, 6)} ${phoneNumber.slice(6, 10)}`;
+};
+
+const validatePortfolioUrl = (url) => {
+  if (!url) return true; // Optional field
+  try {
+    new URL(url);
+    return /^(http|https):\/\/[^ "]+$/.test(url); // Ensures URL starts with http(s)
+  } catch {
+    return false;
+  }
 };
 
 const AuthPages = () => {
@@ -170,6 +182,9 @@ const AuthPages = () => {
         if (phoneDigits.length !== 10) {
           newErrors.phoneNumber = 'Please enter a valid 10-digit phone number';
         }
+      }
+      if (formData.portfolio && !validatePortfolioUrl(formData.portfolio)) {
+        newErrors.portfolio = 'Please enter a valid URL starting with http:// or https://';
       }
     }
   
@@ -492,14 +507,14 @@ const AuthPages = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 relative overflow-hidden cursor-none">
+    <div className="min-h-screen min-w-[42rem] bg-white dark:bg-gray-900 relative overflow-x-auto overflow-y-hidden cursor-none">
       <AuthBackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
       <div className="relative z-10 max-w-lg mx-auto pt-12 px-4">
         {showSuccess && (
-          <Alert className="mb-4 bg-green-100 dark:bg-green-900 border-l-4 border-green-500 text-green-700 dark:text-green-200 p-4">
+          <Alert className="mb-4 bg-violet-100 dark:bg-violet-900 border-l-4 border-violet-500 text-violet-700 dark:text-violet-200 p-4">
             <AlertDescription>
-              {authMode === 'login' ? 'Successfully logged in!' : 'Account created successfully!'}
+              {authMode === 'login' ? 'Welcome back to DreamForge!' : 'Welcome to DreamForge! Let\'s create something amazing.'}
             </AlertDescription>
           </Alert>
         )}
@@ -528,13 +543,16 @@ const AuthPages = () => {
         {!showVerificationAlert && (
           <Card className="w-full dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="dark:text-gray-100">
-                {authMode === 'login' ? 'Welcome back' : 'Create an account'}
+              <div className="flex items-center justify-center mb-4">
+                <Wand2 className="h-8 w-8 text-violet-600 dark:text-violet-400" />
+              </div>
+              <CardTitle className="text-center dark:text-gray-100">
+                {authMode === 'login' ? 'Welcome to DreamForge' : 'Join DreamForge'}
               </CardTitle>
-              <CardDescription className="dark:text-gray-400">
+              <CardDescription className="text-center dark:text-gray-400">
                 {authMode === 'login' 
-                  ? 'Enter your credentials to access your account' 
-                  : 'Choose your account type and fill in your details'}
+                  ? 'Sign in to continue your creative journey' 
+                  : 'Choose your role in the creative community'}
               </CardDescription>
             </CardHeader>
             <CardContent className="w-full space-y-4 text-left">
@@ -563,12 +581,12 @@ const AuthPages = () => {
                         onMouseLeave={(e) => handleButtonHover(e, false, type)}
                       >
                         {type === 'customer' ? (
-                          <User className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+                          <Palette className="h-6 w-6 text-violet-600 dark:text-violet-400" />
                         ) : (
-                          <Building className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+                          <Sparkles className="h-6 w-6 text-violet-600 dark:text-violet-400" />
                         )}
                         <span className="text-sm text-gray-700 dark:text-gray-300">
-                          {type === 'customer' ? 'Customer' : 'Support Agent'}
+                          {type === 'customer' ? 'Patron' : 'Creator'}
                         </span>
                       </button>
                     ))}
@@ -582,8 +600,9 @@ const AuthPages = () => {
                     {renderInput('Full Name', 'fullName', 'text', 'Enter your full name', <User />)}
 
                     {userType === 'agent' && (
+                      <>
                       <div>
-                        <label className="text-sm text-gray-700 dark:text-gray-300 font-bold">Department</label>
+                        <label className="text-sm text-gray-700 dark:text-gray-300 font-bold">Speciality</label>
                         <select
                           name="department"
                           value={formData.department}
@@ -593,12 +612,14 @@ const AuthPages = () => {
                             isLoading ? 'opacity-50 cursor-not-allowed' : ''
                           }`}
                         >
-                          <option value="">Select Department</option>
+                          <option value="">Choose Speciality</option>
                           {DEPARTMENTS.map((dept) => (
                             <option key={dept} value={dept}>{dept}</option>
                           ))}
                         </select>
                       </div>
+                      {renderInput('Portfolio URL', 'portfolio', 'url', 'https://your-portfolio.com', <Link />)}
+                    </>  
                     )}
 
                     {userType === 'customer' && 
@@ -638,7 +659,7 @@ const AuthPages = () => {
               <p className="text-sm text-center w-full dark:text-gray-300">
                 {authMode === 'login' ? (
                   <>
-                    Don`t have an account?{' '}
+                    New to DreamForge?{' '}
                     <button
                       onClick={() => !isLoading && switchMode('register')}
                       disabled={isLoading}
@@ -646,7 +667,7 @@ const AuthPages = () => {
                         isLoading ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
-                      Sign up
+                      Join the community
                     </button>
                   </>
                 ) : (

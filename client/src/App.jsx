@@ -21,6 +21,7 @@ const CustomerTickets = lazy(() => import('./pages/Tickets/CustomerTickets'));
 const AgentTickets = lazy(() => import('./pages/Tickets/AgentTickets'));
 const SettingsPage = lazy(() => import('./pages/Profile/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/Profile/ProfilePage'));
+const AgentPortfolio = lazy(() => import('./pages/Portfolio/AgentPortfolio'));
 // const TicketsPage = lazy(() => import('./pages/Tickets/TicketsPage'));
 // const TicketDetailsPage = lazy(() => import('./pages/Tickets/TicketDetailsPage'));
 const NotFoundPage = lazy(() => import('./pages/Error/NotFoundPage'));
@@ -49,7 +50,8 @@ const ROUTES = {
     AGENT: {
       DASHBOARD: '/agentdashboard',
       CHAT: '/agentchatinterface',
-      TICKET: '/agenttickets'
+      TICKET: '/agenttickets',
+      PORTFOLIO: '/portfolio'
     },
     COMMON: {
       PROFILE: '/profile',
@@ -126,7 +128,12 @@ function App() {
                 }
               />
 
-              
+              <Route
+                path={ROUTES.PROTECTED.AGENT.PORTFOLIO}
+                element={
+                  <AgentPortfolio />
+                }
+              />            
 
               <Route
                 path={ROUTES.PROTECTED.AGENT.TICKET}

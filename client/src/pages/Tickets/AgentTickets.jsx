@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import PropTypes from 'prop-types';
 import {
   Card,
   CardContent
@@ -12,13 +13,12 @@ import {
   CircleSlash, 
   MessageSquare, 
   Search, 
-  Timer, 
-  ArrowLeft,
   Clock,
   User,
   X,
   CheckCircle2,
-  XCircle
+  XCircle,
+  PanelLeftOpen, PanelLeftClose,Home,Palette,Star, Sparkles, Paintbrush
 } from "lucide-react";
 import { supabase } from "@/utils/supabase";
 import { useTheme } from '../../contexts/ThemeContext';
@@ -31,11 +31,64 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import LoadingScreen from "@/components/ui/loading";
+
+const BackgroundSVG = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+    preserveAspectRatio="xMidYMid slice"
+    viewBox="0 0 1440 900"
+  >
+    <defs>
+      <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#F8F0FF" stopOpacity="0.4" />
+        <stop offset="100%" stopColor="#F0E6FF" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="#D4BBFF" stopOpacity="0.1" />
+      </radialGradient>
+
+      <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#2A1352" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#1A0B38" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <filter id="blurFilter">
+        <feGaussianBlur stdDeviation="60" />
+      </filter>
+
+      <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-purple-200 dark:text-purple-900" opacity="0.3" />
+      </pattern>
+    </defs>
+   
+    {/* Light Mode Patterns */}
+    <g className="opacity-100 dark:opacity-0">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="200" cy="150" r="400" fill="url(#lightGradient)" filter="url(#blurFilter)" />
+      <circle cx="1200" cy="300" r="500" fill="url(#lightGradient)" opacity="0.4" filter="url(#blurFilter)" />
+      <circle cx="800" cy="600" r="300" fill="url(#accentGradient)" opacity="0.3" filter="url(#blurFilter)" />
+      <path d="M0,300 Q720,400 1440,300 Q720,500 0,300" fill="url(#accentGradient)" opacity="0.15" />
+      <ellipse cx="600" cy="750" rx="600" ry="300" fill="url(#lightGradient)" opacity="0.2" filter="url(#blurFilter)" />
+    </g>
+   
+    {/* Dark Mode Patterns */}
+    <g className="opacity-0 dark:opacity-100">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="300" cy="200" r="600" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+      <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#darkGradient)" opacity="0.25" />
+      <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#darkGradient)" opacity="0.2" filter="url(#blurFilter)" />
+      <circle cx="800" cy="750" r="400" fill="url(#darkGradient)" opacity="0.15" filter="url(#blurFilter)" />
+    </g>
+  </svg>
+);
 
 const AgentTickets = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const userData = location.state?.userData;
   const { isDarkMode, loadUserTheme } = useTheme();
 
   const [openTickets, setOpenTickets] = useState([]);
@@ -44,6 +97,9 @@ const AgentTickets = () => {
   const [rejectedTickets, setRejectedTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [activeItem, setActiveItem] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [setActiveView] = useState('tickets')
   
   const [selectedResolvedTicket, setSelectedResolvedTicket] = useState(null);
   const [isResolvedDialogOpen, setIsResolvedDialogOpen] = useState(false);
@@ -52,6 +108,9 @@ const AgentTickets = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [ticketDetails, setTicketDetails] = useState(null);
+  const [userData, setProfileData] = useState(location.state?.userData);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // New state for in-progress ticket dialog
 const [inProgressTicketUser, setInProgressTicketUser] = useState(null);
@@ -60,6 +119,40 @@ const [isInProgressDialogOpen, setIsInProgressDialogOpen] = useState(false);
 // New state for rejection dialog
 const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
 const [ setRejectionReason] = useState("");
+
+// Updated menu items for agent dashboard
+const menuItems = [
+  {
+    title: 'Home',
+    icon: Home,
+    view: 'home',
+    onClick: () => navigate('/agentdashboard', { state: { userData } })
+  },
+  {
+    title: 'Messages',
+    icon: MessageSquare,
+    view: 'tickets',
+    onClick: () => navigate('/agenttickets', { state: { userData } })
+  },
+  {
+    title: 'Featured Work',
+    icon: Star,
+    view: 'project',
+    onClick: () => navigate('/agentprojects', { state: { userData } })
+  },
+  {
+    title: 'Portfolio',
+    icon: Palette,
+    view: 'portfolio',
+    onClick: () => navigate('/portfolio', { state: { userData } })
+  },
+  {
+    title: 'Profile Settings',
+    icon: User,
+    view: 'profile',
+    onClick: () => navigate('/profile', { state: { userData } })
+  }
+];
 
 // Fetch user details for in-progress ticket
 const fetchInProgressTicketUserDetails = async (userId) => {
@@ -185,6 +278,32 @@ const InProgressTicketDetailsDialog = () => {
 
     loadUserTheme(userData.id);
 
+    // Fetch profile data from Supabase
+    const fetchProfileData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userData.id)
+          .single();
+
+        if (error) throw error;
+        
+        if (data) {
+          setProfileData(data);
+        } else {
+          throw new Error('Profile not found');
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+
     async function fetchAllTickets() {
       setIsLoading(true);
       const { data: tickets, error } = await supabase
@@ -294,11 +413,11 @@ const InProgressTicketDetailsDialog = () => {
   const getStatusColor = (status) => {
     const colors = {
       active: isDarkMode 
-        ? "bg-blue-500/20 text-blue-400 border-blue-800"
-        : "bg-blue-500/10 text-blue-500 border-blue-200",
+        ? "bg-purple-500/20 text-purple-400 border-purple-800"
+        : "bg-purple-500/10 text-purple-500 border-purple-200",
       in_progress: isDarkMode
-        ? "bg-yellow-500/20 text-yellow-400 border-yellow-800"
-        : "bg-yellow-500/10 text-yellow-600 border-yellow-200",
+        ? "bg-blue-500/20 text-blue-400 border-blue-800"
+        : "bg-blue-500/10 text-blue-600 border-blue-200",
       resolved: isDarkMode
         ? "bg-green-500/20 text-green-400 border-green-800"
         : "bg-green-500/10 text-green-600 border-green-200",
@@ -306,27 +425,23 @@ const InProgressTicketDetailsDialog = () => {
         ? "bg-red-500/20 text-red-400 border-red-800"
         : "bg-red-500/10 text-red-500 border-red-200"
     };
-    return colors[status] || (isDarkMode 
-      ? "bg-gray-500/20 text-gray-400 border-gray-800"
-      : "bg-gray-500/10 text-gray-600 border-gray-200");
+    return colors[status] || colors.default;
   };
 
   const getPriorityColor = (priority) => {
     const colors = {
       high: isDarkMode
-        ? "bg-red-500/20 text-red-400 border-red-800"
-        : "bg-red-500/10 text-red-500 border-red-200",
+        ? "bg-pink-500/20 text-pink-400 border-pink-800"
+        : "bg-pink-500/10 text-pink-500 border-pink-200",
       medium: isDarkMode
-        ? "bg-yellow-500/20 text-yellow-400 border-yellow-800"
-        : "bg-yellow-500/10 text-yellow-600 border-yellow-200",
+        ? "bg-violet-500/20 text-violet-400 border-violet-800"
+        : "bg-violet-500/10 text-violet-600 border-violet-200",
       low: isDarkMode
-        ? "bg-green-500/20 text-green-400 border-green-800"
-        : "bg-green-500/10 text-green-600 border-green-200"
+        ? "bg-indigo-500/20 text-indigo-400 border-indigo-800"
+        : "bg-indigo-500/10 text-indigo-600 border-indigo-200"
     };
-    return colors[priority] || (isDarkMode
-      ? "bg-gray-500/20 text-gray-400 border-gray-800"
-      : "bg-gray-500/10 text-gray-600 border-gray-200");
-  };
+    return colors[priority];
+  };;
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -588,57 +703,57 @@ const InProgressTicketDetailsDialog = () => {
     );
   };
 
-  const renderTicketCard = (ticket) => (
+  const renderRequestCard = (request) => (
     <Card 
-      key={ticket.id} 
+      key={request.id} 
       className={`group transition-all duration-200 hover:shadow-md border-l-4 cursor-pointer ${
         isDarkMode ? 'bg-gray-800 hover:bg-gray-800/80' : 'bg-white hover:bg-gray-50'
       }`}
       style={{
-        borderLeftColor: ticket.priority === 'high' ? '#ef4444' : 
-                        ticket.priority === 'medium' ? '#eab308' : '#22c55e'
+        borderLeftColor: request.priority === 'high' ? '#ec4899' : 
+                        request.priority === 'medium' ? '#8b5cf6' : '#6366f1'
       }}
-      onClick={() => handleTicketClick(ticket)}
+      onClick={() => handleTicketClick(request)}
     >
       <CardContent className="pt-6">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-3 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className={`font-semibold text-lg group-hover:text-blue-500 transition-colors ${
+              <Sparkles className="h-5 w-5 text-purple-500" />
+              <h3 className={`font-semibold text-lg group-hover:text-purple-500 transition-colors ${
                 isDarkMode ? 'text-gray-100' : 'text-gray-900'
               }`}>
-                {ticket.issue_type}
+                {request.issue_type}
               </h3>
             </div>
             <div className={`flex items-center gap-3 text-sm ${
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}>
               <div className="flex items-center gap-1">
-                <MessageSquare size={14} />
-                <span>#{ticket.id}</span>
+                <Paintbrush size={14} />
+                <span>Project #{request.id}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Clock size={14} />
-                <span>Created {formatDate(ticket.created_at)}</span>
+                <span>Received {formatDate(request.created_at)}</span>
               </div>
               <div className="flex items-center gap-1">
-                <Timer size={14} />
-                <span>Updated {formatDate(ticket.last_update)}</span>
+                <User size={14} />
+                <span>Patron ID: {request.user_id}</span>
               </div>
-              {ticket.user_id && (
-                <div className="flex items-center gap-1">
-                  <User size={14} />
-                  <span>User ID: {ticket.user_id}</span>
-                </div>
-              )}
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className={`${getStatusColor(ticket.status)} capitalize`}>
-              {ticket.status.replace('_', ' ')}
+            <Badge variant="outline" className={`${getStatusColor(request.status)} capitalize`}>
+              {request.status === 'active' ? 'New Request' :
+               request.status === 'in_progress' ? 'In Creation' :
+               request.status === 'resolved' ? 'Completed' :
+               'Declined'}
             </Badge>
-            <Badge variant="outline" className={`${getPriorityColor(ticket.priority)} capitalize`}>
-              {ticket.priority}
+            <Badge variant="outline" className={`${getPriorityColor(request.priority)} capitalize`}>
+              {request.priority === 'high' ? 'Rush' :
+               request.priority === 'medium' ? 'Standard' :
+               'Flexible'}
             </Badge>
           </div>
         </div>
@@ -652,17 +767,103 @@ const InProgressTicketDetailsDialog = () => {
         <CircleSlash className={`mx-auto h-12 w-12 ${
           isDarkMode ? 'text-gray-600' : 'text-gray-400'
         } mb-4`} />
-        <h3 className={`text-lg font-medium mb-1 ${
-          isDarkMode ? 'text-gray-100' : 'text-gray-900'
-        }`}>
-          No tickets found
-        </h3>
-        <p className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>
+            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>
           {message}
         </p>
       </CardContent>
     </Card>
   );
+
+  const SidebarContent = () => (
+    <div className={`flex flex-col h-full bg-white dark:bg-gray-900 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
+          {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+          >
+            {isCollapsed ? 
+              <PanelLeftOpen  className="h-6 w-6 dark:text-white" /> : 
+              <PanelLeftClose className="h-6 w-6 dark:text-white" />
+            }
+          </button>
+        </div>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto p-4">
+        {menuItems.map((item, index) => (
+          <MenuItem key={index} item={item} index={index} />
+        ))}
+      </nav>
+
+      <div className="border-t border-gray-200 dark:border-gray-700 p-4 mt-auto">
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
+          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {userData?.avatar_url ? (
+              <img 
+                src={`/avatars/${userData.avatar_url}`}
+                alt={userData.fullname}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/avatars/user.png';
+                }}
+              />
+            ) : (
+              <img 
+                src="/avatars/user.png"
+                alt="Default User"
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{userData.email}</p>
+              {userData.department && (
+                <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{userData.department}</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  const MenuItem = ({ item, index }) => (
+    <div className="mb-2">
+      <button 
+        onClick={() => {
+          if (item.onClick) {
+            item.onClick();
+          } else {
+            setActiveView(item.view);
+            setActiveItem(activeItem === index ? null : index);
+          }
+        }}
+        className={`flex items-center w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-colors duration-200 ${
+          isCollapsed ? 'justify-center' : ''
+        }`}
+        title={isCollapsed ? item.title : ''}
+      >
+        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
+        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
+        
+      </button>
+    </div>
+  );
+
+  MenuItem.propTypes = {
+    item: PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      icon: PropTypes.elementType.isRequired,
+      view: PropTypes.string.isRequired,
+      onClick: PropTypes.func,
+    }).isRequired,
+    index: PropTypes.number.isRequired,
+  };
 
   const filteredOpenTickets = openTickets.filter((ticket) =>
     ticket.issue_type.toLowerCase().includes(searchTerm.toLowerCase())
@@ -709,41 +910,50 @@ const InProgressTicketDetailsDialog = () => {
     );
   }
 
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-lg text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`min-h-screen flex justify-center ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
-      <div className={`w-[1024px] shadow-xl rounded-lg my-8 ${
-        isDarkMode ? 'bg-gray-800' : 'bg-white'
+    <div className={`min-h-screen flex justify-center`}>
+      <BackgroundSVG className="z-0 "/>
+      <aside className={`hidden md:block fixed left-0 top-0 h-full border-r border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900 z-30 transition-all duration-300 ${
+        isCollapsed ? 'w-20' : 'w-64'
       }`}>
-        <div className={`p-6 border-b ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-100'
-        }`}>
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              className={`hover:bg-gray-700 ${
-                isDarkMode ? 'text-gray-300 hover:text-gray-100' : 'text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => navigate('/agentdashboard', { state: { userData } })}
-            >
-              <ArrowLeft size={16} className="mr-2" />
-              Back
-            </Button>
-            <div className="flex-1">
-              <h1 className={`text-2xl font-bold ${
-                isDarkMode ? 'text-gray-100' : 'text-gray-900'
-              }`}>
-                Agent Ticket Management
-              </h1>
-              <p className={`text-sm mt-1 ${
-                isDarkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}>
-                View and manage all support tickets
-              </p>
+        <SidebarContent />
+      </aside>
+
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+        isCollapsed ? 'md:ml-20' : 'md:ml-64'
+      }`}>
+        <div className={`${isCollapsed ? 'w-[1024px]' : 'w-[896px]'} shadow-xl rounded-lg my-8 ${
+          isDarkMode ? 'bg-gray-800' : 'bg-white'} ${isCollapsed ? 'left-20' : 'left-64'} mb-0`}>
+          <div className={`p-6 border-b ${
+            isDarkMode ? 'border-gray-700' : 'border-gray-100'
+          }`}>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <h1 className={`text-2xl font-bold ${
+                  isDarkMode ? 'text-gray-100' : 'text-gray-900'
+                }`}>
+                  Creative Project Requests
+                </h1>
+                <p className={`text-sm mt-1 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  Manage your patron requests and bring dreams to life
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
         <div className={`p-6 border-b ${
           isDarkMode ? 'border-gray-700' : 'border-gray-100'
@@ -756,7 +966,7 @@ const InProgressTicketDetailsDialog = () => {
               className={`pl-10 ${
                 isDarkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : ''
               }`}
-              placeholder="Search tickets by issue type..."
+              placeholder="Search messages from patrons..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -764,33 +974,33 @@ const InProgressTicketDetailsDialog = () => {
         </div>
 
         <div className="p-6">
-          <Tabs defaultValue="active" className="space-y-6">
-          <TabsList className={isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50/80'}>
-            <TabsTrigger value="active" className="gap-2">
-              Tickets Assigned
-              {openTickets.length > 0 && (
-                <Badge variant="secondary">{openTickets.length}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="in_progress" className="gap-2">
-              In Progress
-              {inProgressTickets.length > 0 && (
-                <Badge variant="secondary">{inProgressTickets.length}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="resolved" className="gap-2">
-              Resolved
-              {resolvedTickets.length > 0 && (
-                <Badge variant="secondary">{resolvedTickets.length}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="rejected" className="gap-2"> {/* New tab for rejected tickets */}
-              Rejected
-              {rejectedTickets.length > 0 && (
-                <Badge variant="secondary">{rejectedTickets.length}</Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
+            <Tabs defaultValue="active" className="space-y-6">
+              <TabsList className={isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50/80'}>
+                <TabsTrigger value="active" className="gap-2">
+                  New Requests
+                  {openTickets.length > 0 && (
+                    <Badge variant="secondary">{openTickets.length}</Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="in_progress" className="gap-2">
+                  In Creation
+                  {inProgressTickets.length > 0 && (
+                    <Badge variant="secondary">{inProgressTickets.length}</Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="resolved" className="gap-2">
+                  Accepted
+                  {resolvedTickets.length > 0 && (
+                    <Badge variant="secondary">{resolvedTickets.length}</Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="rejected" className="gap-2">
+                  Declined
+                  {rejectedTickets.length > 0 && (
+                    <Badge variant="secondary">{rejectedTickets.length}</Badge>
+                  )}
+                </TabsTrigger>
+              </TabsList>
 
             <TabsContent value="active" className="space-y-4">
               {isLoading ? (
@@ -803,12 +1013,12 @@ const InProgressTicketDetailsDialog = () => {
                   </p>
                 </div>
               ) : filteredOpenTickets.length > 0 ? (
-                filteredOpenTickets.map(renderTicketCard)
+                filteredOpenTickets.map(renderRequestCard)
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No active tickets match your search"
-                    : "No active tickets available"
+                    ? "No requests match your search"
+                    : "No requests available"
                 )
               )}
             </TabsContent>
@@ -824,12 +1034,12 @@ const InProgressTicketDetailsDialog = () => {
                   </p>
                 </div>
               ) : filteredInProgressTickets.length > 0 ? (
-                filteredInProgressTickets.map(renderTicketCard)
+                filteredInProgressTickets.map(renderRequestCard)
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No in-progress tickets match your search"
-                    : "No tickets in progress"
+                    ? "No in-progress creation match your search"
+                    : "No creations in progress"
                 )
               )}
             </TabsContent>
@@ -845,12 +1055,12 @@ const InProgressTicketDetailsDialog = () => {
                   </p>
                 </div>
               ) : filteredResolvedTickets.length > 0 ? (
-                filteredResolvedTickets.map(renderTicketCard)
+                filteredResolvedTickets.map(renderRequestCard)
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No resolved tickets match your search"
-                    : "No resolved tickets available"
+                    ? "No accepted creations match your search"
+                    : "No accepted creations available"
                 )
               )}
             </TabsContent>
@@ -866,18 +1076,19 @@ const InProgressTicketDetailsDialog = () => {
                   </p>
                 </div>
               ) : filteredRejectedTickets.length > 0 ? (
-                filteredRejectedTickets.map(renderTicketCard)
+                filteredRejectedTickets.map(renderRequestCard)
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No rejected tickets match your search"
-                    : "No rejected tickets available"
+                    ? "No declined creations match your search"
+                    : "No declined creations available"
                 )
               )}
             </TabsContent>
           </Tabs>
         </div>
       </div>
+    </div>
 
       {/* Ticket Details Dialog */}
       <TicketDetailsDialog />
