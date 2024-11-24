@@ -141,6 +141,27 @@ const ProfilePage = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [setActiveView] = useState('profile');
   const [activeItem, setActiveItem] = useState(null);
+  const [hoverTimeout, setHoverTimeout] = useState(null);
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    setIsCollapsed(false);
+  };
+
+  const handleMouseLeave = () => {
+    // Add a small delay before collapsing to make the interaction smoother
+    const timeout = setTimeout(() => {
+      setIsCollapsed(true);
+    }, 400); // 300ms delay
+    setHoverTimeout(timeout);
+  };
+
+  // Clear timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+    };
+  }, [hoverTimeout]);
 
   // Updated menu items for creator dashboard
   const menuItems = [
@@ -183,31 +204,32 @@ const ProfilePage = () => {
   ];
 
   const SidebarContent = () => (
-    <div className={`flex flex-col h-full bg-white dark:bg-gray-900 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div 
+      className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
         <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
           {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
-          <button 
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-          >
+          <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
             {isCollapsed ? 
-              <PanelLeftOpen  className="h-6 w-6 dark:text-white" /> : 
+              <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
               <PanelLeftClose className="h-6 w-6 dark:text-white" />
             }
-          </button>
+          </div>
         </div>
       </div>
-
+  
       <nav className="flex-1 overflow-y-auto p-4">
         {menuItems.map((item, index) => (
           <MenuItem key={index} item={item} index={index} />
         ))}
       </nav>
-
-      <div className="border-t border-gray-200 dark:border-gray-700 p-4 mt-auto">
+  
+      <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {userData?.avatar_url ? (
               <img 
                 src={`${userData.avatar_url}`}
@@ -229,9 +251,9 @@ const ProfilePage = () => {
           {!isCollapsed && (
             <div className="min-w-0">
               <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{userData.email}</p>
+              <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
               {userData.department && (
-                <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{userData.department}</p>
+                <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
               )}
             </div>
           )}
@@ -239,7 +261,7 @@ const ProfilePage = () => {
       </div>
     </div>
   );
-
+  
   const MenuItem = ({ item, index }) => (
     <div className="mb-2">
       <button 
@@ -251,14 +273,13 @@ const ProfilePage = () => {
             setActiveItem(activeItem === index ? null : index);
           }
         }}
-        className={`flex items-center w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-colors duration-200 ${
+        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
           isCollapsed ? 'justify-center' : ''
         }`}
         title={isCollapsed ? item.title : ''}
       >
         <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
         {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-        
       </button>
     </div>
   );
@@ -281,8 +302,6 @@ const ProfilePage = () => {
   }, [userId, loadUserTheme]);
 
   const fetchAvatars = async () => {
-    // In a real implementation, you might want to fetch this list from an API
-    // For now, we'll hardcode the list based on your public/avatars directory
     const avatarList = [
       'agent-boy.png', 'agent-girl.png', 'astronaut.png', 'bear.png',
       'bot.png', 'cat.png', 'cool-.png', 'cow.png', 'dog.png',
@@ -369,45 +388,6 @@ const ProfilePage = () => {
     }
   };
 
-  // const handleAvatarSelect = async (avatar) => {
-  //   // Update the local state immediately
-  //   setSelectedAvatar(avatar);
-    
-  //   try {
-  //     // Optionally, update the avatar in Supabase immediately
-  //     const { error } = await supabase
-  //       .from('profiles')
-  //       .update({ avatar_url: avatar })
-  //       .eq('id', userId);
-
-  //     if (error) throw error;
-
-  //     // Update the local profile state
-  //     setProfile(prev => ({
-  //       ...prev,
-  //       avatar_url: avatar
-  //     }));
-
-  //     // Close the avatar dialog
-  //     setAvatarDialogOpen(false);
-
-  //     // Show a toast notification
-  //     toast({
-  //       title: "Avatar Updated",
-  //       description: "Your avatar has been updated successfully",
-  //       className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
-  //     });
-  //   } catch (error) {
-  //     console.error('Error updating avatar:', error);
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to update avatar",
-  //       variant: "destructive",
-  //       className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
-  //     });
-  //   }
-  // };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
@@ -432,197 +412,6 @@ const ProfilePage = () => {
       department: value
     }));
   };
-  
-  // const [isUploading, setIsUploading] = useState(false);
-  // const fileInputRef = useRef(null);
-
-  // const renderAvatarDialog = () => {
-  //     const handleFileSelect = async (e) => {
-  //     const file = e.target.files?.[0];
-  //     if (!file) return;
-
-  //     // Validate file type
-  //     const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-  //     if (!validImageTypes.includes(file.type)) {
-  //       toast({
-  //         title: "Error",
-  //         description: "Please select a valid image file (JPEG, PNG, GIF, or WebP)",
-  //         variant: "destructive",
-  //         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
-  //       });
-  //       return;
-  //     }
-
-  //     // Validate file size (max 5MB)
-  //     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-  //     if (file.size > MAX_FILE_SIZE) {
-  //       toast({
-  //         title: "Error",
-  //         description: "Image size should be less than 5MB",
-  //         variant: "destructive",
-  //         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
-  //       });
-  //       return;
-  //     }
-
-  //     try {
-  //       setIsUploading(true);
-    
-  //       // Create a unique file path that includes the user's ID
-  //       const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-  //       const sanitizedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt) ? fileExt : 'jpg';
-  //       // Make sure userId is auth.uid()
-  //       const fileName = `${userData.id}-${Date.now()}.${sanitizedExt}`; // Use auth.user().id instead of userId
-  //       const filePath = `avatars/${fileName}`;
-    
-  //       // Upload to Supabase Storage with specific options
-  //       const { error: uploadError, data: uploadData } = await supabase.storage
-  //         .from('user-avatars')
-  //         .upload(filePath, file, {
-  //           cacheControl: '3600',
-  //           upsert: false,
-  //           contentType: file.type // Explicitly set the content type
-  //       });
-
-  //       if (uploadError) {
-  //         console.error('Upload error:', uploadError);
-  //         throw new Error(uploadError.message || 'Failed to upload image');
-  //       }
-
-  //       if (!uploadData?.path) {
-  //         throw new Error('Upload successful but no path returned');
-  //       }
-
-  //       // Get the public URL
-  //       const { data: { publicUrl } } = supabase.storage
-  //         .from('user-avatars')
-  //         .getPublicUrl(filePath);
-
-  //       if (!publicUrl) {
-  //         throw new Error('Failed to get public URL');
-  //       }
-
-  //       // Update profile with new avatar URL
-  //       const { error: updateError } = await supabase
-  //         .from('profiles')
-  //         .update({ 
-  //           avatar_url: publicUrl,
-  //           is_custom_avatar: true,
-  //           updated_at: new Date().toISOString()
-  //         })
-  //         .eq('id', userId);
-
-  //       if (updateError) {
-  //         throw new Error(updateError.message || 'Failed to update profile');
-  //       }
-
-  //       // Update local state
-  //       setSelectedAvatar(publicUrl);
-  //       setProfile(prev => ({
-  //         ...prev,
-  //         avatar_url: publicUrl,
-  //         is_custom_avatar: true,
-  //         updated_at: new Date().toISOString()
-  //       }));
-
-  //       // Close dialog
-  //       setAvatarDialogOpen(false);
-
-  //       toast({
-  //         title: "Success",
-  //         description: "Avatar uploaded successfully",
-  //         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
-  //       });
-  //     } catch (error) {
-  //       console.error('Error uploading avatar:', error);
-  //       toast({
-  //         title: "Error",
-  //         description: error instanceof Error ? error.message : "Failed to upload avatar",
-  //         variant: "destructive",
-  //         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
-  //       });
-  //     } finally {
-  //       setIsUploading(false);
-  //     }
-  //   };
-      
-  //   return (
-  //     <Dialog open={avatarDialogOpen} onOpenChange={setAvatarDialogOpen}>
-  //       <DialogContent className="max-w-2xl">
-  //         <DialogHeader>
-  //           <DialogTitle>Choose Your Avatar</DialogTitle>
-  //         </DialogHeader>
-  
-  //         {/* Upload Section */}
-  //         <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
-  //           <h3 className={`text-sm font-medium mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-  //             Upload Custom Avatar
-  //           </h3>
-  //           <div className="flex items-center gap-4">
-  //             <Button
-  //               onClick={() => fileInputRef.current?.click()}
-  //               disabled={isUploading}
-  //               className="relative"
-  //             >
-  //               {isUploading ? (
-  //                 <div className="flex items-center gap-2">
-  //                   <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-  //                   Uploading...
-  //                 </div>
-  //               ) : (
-  //                 <>
-  //                   <Camera className="h-4 w-4 mr-2" />
-  //                   Upload Image
-  //                 </>
-  //               )}
-  //             </Button>
-  //             <input
-  //               ref={fileInputRef}
-  //               type="file"
-  //               accept="image/*"
-  //               onChange={handleFileSelect}
-  //               className="hidden"
-  //             />
-  //             <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-  //               Max file size: 5MB
-  //             </p>
-  //           </div>
-  //         </div>
-  
-  //         {/* Default Avatars Section */}
-  //         <h3 className={`text-sm font-medium mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-  //           Default Avatars
-  //         </h3>
-  //         <ScrollArea className="h-[300px]">
-  //           <div className="grid grid-cols-4 gap-4 p-4">
-  //             {avatars.map((avatar) => (
-  //               <button
-  //                 key={avatar}
-  //                 onClick={() => handleAvatarSelect(avatar)}
-  //                 className={`relative rounded-lg p-2 transition-all ${
-  //                   isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-  //                 } ${
-  //                   selectedAvatar === avatar ? 'ring-2 ring-blue-500' : ''
-  //                 }`}
-  //               >
-  //                 <img
-  //                   src={`/avatars/${avatar}`}
-  //                   alt={avatar}
-  //                   className="w-full h-auto rounded-lg"
-  //                 />
-  //                 {selectedAvatar === avatar && (
-  //                   <div className="absolute inset-0 bg-blue-500 bg-opacity-10 rounded-lg flex items-center justify-center">
-  //                     <CheckCircle className="w-6 h-6 text-blue-500" />
-  //                   </div>
-  //                 )}
-  //               </button>
-  //             ))}
-  //           </div>
-  //         </ScrollArea>
-  //       </DialogContent>
-  //     </Dialog>
-  //   );
-  // };
 
   const handleEditToggle = () => {
     setEditing(!editing);
@@ -861,9 +650,13 @@ const ProfilePage = () => {
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
-      <aside className={`hidden md:block fixed left-0 top-0 h-full border-r border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900 z-30 transition-all duration-300 ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}>
+      <aside 
+        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
+          isCollapsed ? 'w-20' : 'w-64'
+        }`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         <SidebarContent />
       </aside>
       <Toaster />
@@ -883,14 +676,6 @@ const ProfilePage = () => {
       />
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <div className="flex items-center mb-8">
-          <Button
-            variant="ghost"
-            className={`mr-4 ${isDarkMode ? 'text-gray-100 hover:bg-gray-800' : 'text-gray-900 hover:bg-gray-100'}`}
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back
-          </Button>
           <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
             Profile Details
           </h1>

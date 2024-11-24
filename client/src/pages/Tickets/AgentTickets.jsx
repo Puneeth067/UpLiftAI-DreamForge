@@ -120,6 +120,27 @@ const [isInProgressDialogOpen, setIsInProgressDialogOpen] = useState(false);
 // New state for rejection dialog
 const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
 const [ setRejectionReason] = useState("");
+const [hoverTimeout, setHoverTimeout] = useState(null);
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    setIsCollapsed(false);
+  };
+
+  const handleMouseLeave = () => {
+    // Add a small delay before collapsing to make the interaction smoother
+    const timeout = setTimeout(() => {
+      setIsCollapsed(true);
+    }, 400); // 300ms delay
+    setHoverTimeout(timeout);
+  };
+
+  // Clear timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+    };
+  }, [hoverTimeout]);
 
 // Updated menu items for creator dashboard
 const menuItems = [
@@ -782,31 +803,32 @@ const InProgressTicketDetailsDialog = () => {
   );
 
   const SidebarContent = () => (
-    <div className={`flex flex-col h-full bg-white dark:bg-gray-900 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div 
+      className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
         <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
           {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
-          <button 
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-          >
+          <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
             {isCollapsed ? 
-              <PanelLeftOpen  className="h-6 w-6 dark:text-white" /> : 
+              <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
               <PanelLeftClose className="h-6 w-6 dark:text-white" />
             }
-          </button>
+          </div>
         </div>
       </div>
-
+  
       <nav className="flex-1 overflow-y-auto p-4">
         {menuItems.map((item, index) => (
           <MenuItem key={index} item={item} index={index} />
         ))}
       </nav>
-
-      <div className="border-t border-gray-200 dark:border-gray-700 p-4 mt-auto">
+  
+      <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {userData?.avatar_url ? (
               <img 
                 src={`${userData.avatar_url}`}
@@ -828,9 +850,9 @@ const InProgressTicketDetailsDialog = () => {
           {!isCollapsed && (
             <div className="min-w-0">
               <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{userData.email}</p>
+              <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
               {userData.department && (
-                <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{userData.department}</p>
+                <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
               )}
             </div>
           )}
@@ -838,7 +860,7 @@ const InProgressTicketDetailsDialog = () => {
       </div>
     </div>
   );
-
+  
   const MenuItem = ({ item, index }) => (
     <div className="mb-2">
       <button 
@@ -850,14 +872,13 @@ const InProgressTicketDetailsDialog = () => {
             setActiveItem(activeItem === index ? null : index);
           }
         }}
-        className={`flex items-center w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-colors duration-200 ${
+        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
           isCollapsed ? 'justify-center' : ''
         }`}
         title={isCollapsed ? item.title : ''}
       >
         <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
         {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-        
       </button>
     </div>
   );
@@ -933,9 +954,13 @@ const InProgressTicketDetailsDialog = () => {
     <div className={`min-h-screen flex justify-center`}>
       <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
-      <aside className={`hidden md:block fixed left-0 top-0 h-full border-r border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900 z-30 transition-all duration-300 ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}>
+      <aside 
+        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
+          isCollapsed ? 'w-20' : 'w-64'
+        }`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         <SidebarContent />
       </aside>
 
