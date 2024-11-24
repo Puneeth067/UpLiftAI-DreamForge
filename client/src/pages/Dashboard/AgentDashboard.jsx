@@ -10,6 +10,17 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import LoadingScreen from "@/components/ui/loading";
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../utils/supabase.js';
@@ -208,12 +219,12 @@ const AgentDashboard = () => {
           <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {userData?.avatar_url ? (
               <img 
-                src={`/avatars/${userData.avatar_url}`}
+                src={`${userData.avatar_url}`}
                 alt={userData.fullname}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/avatars/user.png';
+                  e.target.src = `/avatars/${userData.avatar_url}`;
                 }}
               />
             ) : (
@@ -308,18 +319,30 @@ const AgentDashboard = () => {
               </div>
 
             <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg relative">
-                <Bell className="h-6 w-6 dark:text-white" />
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
-              </button>
-              <button 
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden sm:block"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-6 w-6 dark:text-white" />
-              </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden sm:block">
+                    <LogOut className="h-6 w-6 dark:text-white" />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="sm:max-w-[425px]">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to log out? You`ll need to sign in again to access the DreamForge.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleLogout}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    Log out
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             </div>
           </div>
         </header>

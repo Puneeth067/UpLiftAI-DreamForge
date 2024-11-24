@@ -23,6 +23,7 @@ import { supabase } from '@/utils/supabase';
 import PropTypes from 'prop-types';
 import { useTheme } from '../../contexts/ThemeContext';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
+import { v4 as uuidv4 } from 'uuid';
 
 const BackgroundSVG = () => (
   <svg
@@ -91,6 +92,7 @@ const AgentPortfolio = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [setActiveView] = useState('portfolio');
   const [activeItem, setActiveItem] = useState(null);
+
 
   useEffect(() => {
     fetchPortfolioData();
@@ -221,7 +223,7 @@ const AgentPortfolio = () => {
           <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {userData?.avatar_url ? (
               <img 
-                src={`/avatars/${userData.avatar_url}`}
+                src={`${userData.avatar_url}`}
                 alt={userData.fullname}
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -250,6 +252,153 @@ const AgentPortfolio = () => {
       </div>
     </div>
   );
+
+  // Add this function to handle file upload to Supabase storage
+const uploadProjectImage = async (file, userId) => {
+  try {
+    if (!file) return null;
+
+    // Create a unique file name
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${uuidv4()}.${fileExt}`;
+    const filePath = `${userId}/projects/${fileName}`;
+
+    // Upload the file to Supabase storage
+    const { data, error: uploadError } = await supabase.storage
+      .from('project-images')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    // Get the public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('project-images')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    return null;
+  }
+};
+
+// Add this component for the image upload dialog
+const AddProjectDialog = ({ onAdd }) => {
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const imageUrl = await uploadProjectImage(imageFile, userData.id);
+      
+      const newProject = {
+        title,
+        description,
+        image: imageUrl || '/api/placeholder/600/400'
+      };
+
+      onAdd(newProject);
+    } catch (error) {
+      console.error('Error adding project:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <Plus className="w-4 h-4 mr-2" />
+          Add Project
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add New Project</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="project-image">Project Image</Label>
+            <div className="flex flex-col items-center gap-4">
+              {preview && (
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+              )}
+              <Input
+                id="project-image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </div>
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? 'Adding...' : 'Add Project'}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+AddProjectDialog.propTypes = {
+  onAdd: PropTypes.func.isRequired,
+};
+
+// Add this function to delete images from storage
+const deleteProjectImage = async (imageUrl) => {
+  try {
+    if (!imageUrl || imageUrl.startsWith('/api/placeholder')) return;
+
+    // Extract the file path from the URL
+    const filePath = imageUrl.split('/').slice(-2).join('/');
+
+    const { error } = await supabase.storage
+      .from('project-images')
+      .remove([filePath]);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error deleting image:', error);
+  }
+};
 
   const MenuItem = ({ item, index }) => (
     <div className="mb-2">
@@ -282,6 +431,22 @@ const AgentPortfolio = () => {
       onClick: PropTypes.func,
     }).isRequired,
     index: PropTypes.number.isRequired,
+  };
+
+  const handleEmailClick = () => {
+    if (userProfile?.email) {
+      window.open(`mailto:${userProfile.email}`, '_blank');
+    }
+  };
+
+  const handlePortfolioClick = () => {
+    if (userProfile?.portfolio) {
+      // Ensure URL has proper protocol
+      const url = userProfile.portfolio.startsWith('http') 
+        ? userProfile.portfolio 
+        : `https://${userProfile.portfolio}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   if (loading) {
@@ -335,13 +500,13 @@ const AgentPortfolio = () => {
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="relative">
               <Avatar className="w-48 h-48">
-                <AvatarImage 
-                src={`/avatars/${userData.avatar_url}`}
-                alt={userData.fullname} 
-                />
-                <AvatarFallback className="text-4xl">
-                  {userData?.fullname?.charAt(0)}
-                </AvatarFallback>
+              <AvatarImage 
+              src={`${userData ? userData.avatar_url :  'avatars/user.png' }`} 
+              alt={userData?.fullname} 
+            />
+            <AvatarFallback>
+              <img src={`/avatars/${userData?.avatar_url}`} alt="Default Avatar" />
+            </AvatarFallback>
               </Avatar>
             </div>
             
@@ -373,15 +538,25 @@ const AgentPortfolio = () => {
 
               <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                 <div>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleEmailClick}
+                    disabled={!userProfile?.email}
+                  >
                     <Mail className="w-4 h-4 mr-2" />
-                    {userProfile?.email}
-                  </Button> 
+                    {userProfile?.email || 'Email not available'}
+                  </Button>
                 </div>
                 <div>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handlePortfolioClick}
+                    disabled={!userProfile?.portfolio}
+                  >
                     <Globe className="w-4 h-4 mr-2" />
-                    Portfolio
+                    {userProfile?.portfolio || 'Portfolio not available'}
                   </Button>
                 </div>
               </div>
@@ -395,7 +570,7 @@ const AgentPortfolio = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <CardHeader>
+          <CardHeader className="text-left">
             <CardTitle>Skills & Expertise</CardTitle>
           </CardHeader>
           <CardContent>
@@ -460,20 +635,14 @@ const AgentPortfolio = () => {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Featured Projects</CardTitle>
             {isEditing && (
-              <Button 
-                variant="outline"
-                onClick={() => setPortfolioData({
-                  ...portfolioData,
-                  projects: [...portfolioData.projects, {
-                    title: "New Project",
-                    description: "Project Description",
-                    image: "/api/placeholder/600/400"
-                  }]
-                })}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Project
-              </Button>
+              <AddProjectDialog
+                onAdd={(newProject) => {
+                  setPortfolioData({
+                    ...portfolioData,
+                    projects: [...portfolioData.projects, newProject]
+                  });
+                }}
+              />
             )}
           </CardHeader>
           <CardContent>
@@ -496,7 +665,11 @@ const AgentPortfolio = () => {
                         <Button
                           variant="secondary"
                           size="icon"
-                          onClick={() => {
+                          onClick={async () => {
+                            // Delete the image from storage first
+                            await deleteProjectImage(project.image);
+                            
+                            // Then remove the project from the state
                             const newProjects = portfolioData.projects.filter((_, i) => i !== index);
                             setPortfolioData({ ...portfolioData, projects: newProjects });
                           }}
@@ -539,6 +712,7 @@ const AgentPortfolio = () => {
             </div>
           </CardContent>
           </MotionCard>
+
           {/* Experience Timeline */}
         <MotionCard
           initial={{ opacity: 0, y: 20 }}
@@ -701,7 +875,7 @@ const AgentPortfolio = () => {
                         {exp.period}
                       </div>
                     </div>
-                    <p className="mt-2">{exp.description}</p>
+                    <p className="mt-2 text-left">{exp.description}</p>
                   </div>
                 </motion.div>
               ))}
@@ -715,17 +889,17 @@ const AgentPortfolio = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <CardHeader>
+          <CardHeader className="text-left">
             <CardTitle>Connect With Me</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries({
-                github: { icon: Github, label: "GitHub" },
-                twitter: { icon: Twitter, label: "Twitter" },
-                instagram: { icon: Instagram, label: "Instagram" },
-                linkedin: { icon: Linkedin, label: "LinkedIn" }
-              }).map(([key, { icon: Icon, label }]) => (
+                github: { icon: Github, label: "GitHub", baseUrl: "https://github.com/" },
+                twitter: { icon: Twitter, label: "Twitter", baseUrl: "https://twitter.com/" },
+                instagram: { icon: Instagram, label: "Instagram", baseUrl: "https://instagram.com/" },
+                linkedin: { icon: Linkedin, label: "LinkedIn", baseUrl: "https://linkedin.com/in/" }
+              }).map(([key, { icon: Icon, label, baseUrl }]) => (
                 <div key={key} className="flex items-center gap-4">
                   <Icon className="w-5 h-5" />
                   {isEditing ? (
@@ -740,14 +914,23 @@ const AgentPortfolio = () => {
                           }
                         });
                       }}
-                      placeholder={`${label} URL`}
+                      placeholder={`${label} username`}
                     />
                   ) : portfolioData.social_links[key] ? (
                     <a
-                      href={portfolioData.social_links[key]}
+                      href={portfolioData.social_links[key].startsWith('http') 
+                        ? portfolioData.social_links[key] 
+                        : `${baseUrl}${portfolioData.social_links[key]}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const url = portfolioData.social_links[key].startsWith('http')
+                          ? portfolioData.social_links[key]
+                          : `${baseUrl}${portfolioData.social_links[key]}`;
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                      }}
                     >
                       {portfolioData.social_links[key]}
                     </a>

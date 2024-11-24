@@ -187,12 +187,12 @@ const SettingsPage = () => {
           <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {userData?.avatar_url ? (
               <img 
-                src={`/avatars/${userData.avatar_url}`}
+                src={`${userData.avatar_url}`}
                 alt={userData.fullname}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/avatars/user.png';
+                  e.target.src = `/avatars/${userData.avatar_url}`;
                 }}
               />
             ) : (

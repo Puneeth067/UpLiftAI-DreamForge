@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion} from 'framer-motion';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
+import AvatarDialog from './AvatarDialog';
 
 
 const BackgroundSVG = () => (
@@ -209,12 +210,12 @@ const ProfilePage = () => {
           <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {userData?.avatar_url ? (
               <img 
-                src={`/avatars/${userData.avatar_url}`}
+                src={`${userData.avatar_url}`}
                 alt={userData.fullname}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/avatars/user.png';
+                  e.target.src = `/avatars/${userData.avatar_url}`;
                 }}
               />
             ) : (
@@ -368,45 +369,44 @@ const ProfilePage = () => {
     }
   };
 
-  const handleAvatarSelect = async (avatar) => {
-    // Update the local state immediately
-    setSelectedAvatar(avatar);
+  // const handleAvatarSelect = async (avatar) => {
+  //   // Update the local state immediately
+  //   setSelectedAvatar(avatar);
     
-    try {
-      // Optionally, update the avatar in Supabase immediately
-      const { error } = await supabase
-        .from('profiles')
-        .update({ avatar_url: avatar })
-        .eq('id', userId);
+  //   try {
+  //     // Optionally, update the avatar in Supabase immediately
+  //     const { error } = await supabase
+  //       .from('profiles')
+  //       .update({ avatar_url: avatar })
+  //       .eq('id', userId);
 
-      if (error) throw error;
+  //     if (error) throw error;
 
-      // Update the local profile state
-      setProfile(prev => ({
-        ...prev,
-        avatar_url: avatar
-      }));
+  //     // Update the local profile state
+  //     setProfile(prev => ({
+  //       ...prev,
+  //       avatar_url: avatar
+  //     }));
 
-      // Close the avatar dialog
-      setAvatarDialogOpen(false);
+  //     // Close the avatar dialog
+  //     setAvatarDialogOpen(false);
 
-      // Show a toast notification
-      toast({
-        title: "Avatar Updated",
-        description: "Your avatar has been updated successfully",
-        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
-      });
-    } catch (error) {
-      console.error('Error updating avatar:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update avatar",
-        variant: "destructive",
-        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
-      });
-    }
-  };
-
+  //     // Show a toast notification
+  //     toast({
+  //       title: "Avatar Updated",
+  //       description: "Your avatar has been updated successfully",
+  //       className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+  //     });
+  //   } catch (error) {
+  //     console.error('Error updating avatar:', error);
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to update avatar",
+  //       variant: "destructive",
+  //       className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+  //     });
+  //   }
+  // };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -432,41 +432,197 @@ const ProfilePage = () => {
       department: value
     }));
   };
+  
+  // const [isUploading, setIsUploading] = useState(false);
+  // const fileInputRef = useRef(null);
 
+  // const renderAvatarDialog = () => {
+  //     const handleFileSelect = async (e) => {
+  //     const file = e.target.files?.[0];
+  //     if (!file) return;
 
-  const renderAvatarDialog = () => (
-    <Dialog open={avatarDialogOpen} onOpenChange={setAvatarDialogOpen}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Choose Your Avatar</DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="h-[400px] p-4">
-          <div className="grid grid-cols-4 gap-4">
-            {avatars.map((avatar) => (
-              <button
-                key={avatar}
-                onClick={() => handleAvatarSelect(avatar)}
-                className={`relative rounded-lg p-2 transition-all hover:bg-gray-100 ${
-                  selectedAvatar === avatar ? 'ring-2 ring-blue-500' : ''
-                }`}
-              >
-                <img
-                  src={`/avatars/${avatar}`}
-                  alt={avatar}
-                  className="w-full h-auto rounded-lg"
-                />
-                {selectedAvatar === avatar && (
-                  <div className="absolute inset-0 bg-blue-500 bg-opacity-10 rounded-lg flex items-center justify-center">
-                    <CheckCircle className="w-6 h-6 text-blue-500" />
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
-  );
+  //     // Validate file type
+  //     const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  //     if (!validImageTypes.includes(file.type)) {
+  //       toast({
+  //         title: "Error",
+  //         description: "Please select a valid image file (JPEG, PNG, GIF, or WebP)",
+  //         variant: "destructive",
+  //         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+  //       });
+  //       return;
+  //     }
+
+  //     // Validate file size (max 5MB)
+  //     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+  //     if (file.size > MAX_FILE_SIZE) {
+  //       toast({
+  //         title: "Error",
+  //         description: "Image size should be less than 5MB",
+  //         variant: "destructive",
+  //         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+  //       });
+  //       return;
+  //     }
+
+  //     try {
+  //       setIsUploading(true);
+    
+  //       // Create a unique file path that includes the user's ID
+  //       const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  //       const sanitizedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt) ? fileExt : 'jpg';
+  //       // Make sure userId is auth.uid()
+  //       const fileName = `${userData.id}-${Date.now()}.${sanitizedExt}`; // Use auth.user().id instead of userId
+  //       const filePath = `avatars/${fileName}`;
+    
+  //       // Upload to Supabase Storage with specific options
+  //       const { error: uploadError, data: uploadData } = await supabase.storage
+  //         .from('user-avatars')
+  //         .upload(filePath, file, {
+  //           cacheControl: '3600',
+  //           upsert: false,
+  //           contentType: file.type // Explicitly set the content type
+  //       });
+
+  //       if (uploadError) {
+  //         console.error('Upload error:', uploadError);
+  //         throw new Error(uploadError.message || 'Failed to upload image');
+  //       }
+
+  //       if (!uploadData?.path) {
+  //         throw new Error('Upload successful but no path returned');
+  //       }
+
+  //       // Get the public URL
+  //       const { data: { publicUrl } } = supabase.storage
+  //         .from('user-avatars')
+  //         .getPublicUrl(filePath);
+
+  //       if (!publicUrl) {
+  //         throw new Error('Failed to get public URL');
+  //       }
+
+  //       // Update profile with new avatar URL
+  //       const { error: updateError } = await supabase
+  //         .from('profiles')
+  //         .update({ 
+  //           avatar_url: publicUrl,
+  //           is_custom_avatar: true,
+  //           updated_at: new Date().toISOString()
+  //         })
+  //         .eq('id', userId);
+
+  //       if (updateError) {
+  //         throw new Error(updateError.message || 'Failed to update profile');
+  //       }
+
+  //       // Update local state
+  //       setSelectedAvatar(publicUrl);
+  //       setProfile(prev => ({
+  //         ...prev,
+  //         avatar_url: publicUrl,
+  //         is_custom_avatar: true,
+  //         updated_at: new Date().toISOString()
+  //       }));
+
+  //       // Close dialog
+  //       setAvatarDialogOpen(false);
+
+  //       toast({
+  //         title: "Success",
+  //         description: "Avatar uploaded successfully",
+  //         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+  //       });
+  //     } catch (error) {
+  //       console.error('Error uploading avatar:', error);
+  //       toast({
+  //         title: "Error",
+  //         description: error instanceof Error ? error.message : "Failed to upload avatar",
+  //         variant: "destructive",
+  //         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+  //       });
+  //     } finally {
+  //       setIsUploading(false);
+  //     }
+  //   };
+      
+  //   return (
+  //     <Dialog open={avatarDialogOpen} onOpenChange={setAvatarDialogOpen}>
+  //       <DialogContent className="max-w-2xl">
+  //         <DialogHeader>
+  //           <DialogTitle>Choose Your Avatar</DialogTitle>
+  //         </DialogHeader>
+  
+  //         {/* Upload Section */}
+  //         <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+  //           <h3 className={`text-sm font-medium mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+  //             Upload Custom Avatar
+  //           </h3>
+  //           <div className="flex items-center gap-4">
+  //             <Button
+  //               onClick={() => fileInputRef.current?.click()}
+  //               disabled={isUploading}
+  //               className="relative"
+  //             >
+  //               {isUploading ? (
+  //                 <div className="flex items-center gap-2">
+  //                   <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+  //                   Uploading...
+  //                 </div>
+  //               ) : (
+  //                 <>
+  //                   <Camera className="h-4 w-4 mr-2" />
+  //                   Upload Image
+  //                 </>
+  //               )}
+  //             </Button>
+  //             <input
+  //               ref={fileInputRef}
+  //               type="file"
+  //               accept="image/*"
+  //               onChange={handleFileSelect}
+  //               className="hidden"
+  //             />
+  //             <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+  //               Max file size: 5MB
+  //             </p>
+  //           </div>
+  //         </div>
+  
+  //         {/* Default Avatars Section */}
+  //         <h3 className={`text-sm font-medium mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+  //           Default Avatars
+  //         </h3>
+  //         <ScrollArea className="h-[300px]">
+  //           <div className="grid grid-cols-4 gap-4 p-4">
+  //             {avatars.map((avatar) => (
+  //               <button
+  //                 key={avatar}
+  //                 onClick={() => handleAvatarSelect(avatar)}
+  //                 className={`relative rounded-lg p-2 transition-all ${
+  //                   isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+  //                 } ${
+  //                   selectedAvatar === avatar ? 'ring-2 ring-blue-500' : ''
+  //                 }`}
+  //               >
+  //                 <img
+  //                   src={`/avatars/${avatar}`}
+  //                   alt={avatar}
+  //                   className="w-full h-auto rounded-lg"
+  //                 />
+  //                 {selectedAvatar === avatar && (
+  //                   <div className="absolute inset-0 bg-blue-500 bg-opacity-10 rounded-lg flex items-center justify-center">
+  //                     <CheckCircle className="w-6 h-6 text-blue-500" />
+  //                   </div>
+  //                 )}
+  //               </button>
+  //             ))}
+  //           </div>
+  //         </ScrollArea>
+  //       </DialogContent>
+  //     </Dialog>
+  //   );
+  // };
 
   const handleEditToggle = () => {
     setEditing(!editing);
@@ -512,11 +668,11 @@ const ProfilePage = () => {
         <div className="relative group">
           <Avatar className={`h-32 w-32 ${isDarkMode ? 'ring-gray-800' : 'ring-white'} ring-4 shadow-lg`}>
             <AvatarImage 
-              src={`/avatars/${editing ? selectedAvatar : (profile?.avatar_url || 'user.png')}`} 
+              src={`${editing ? selectedAvatar : (profile?.avatar_url || 'user.png')}`} 
               alt={profile?.fullname} 
             />
             <AvatarFallback>
-              <img src="/avatars/user.png" alt="Default Avatar" />
+              <img src={`/avatars/${profile?.avatar_url}`} alt="Default Avatar" />
             </AvatarFallback>
           </Avatar>
           {editing && (
@@ -711,7 +867,20 @@ const ProfilePage = () => {
         <SidebarContent />
       </aside>
       <Toaster />
-      {renderAvatarDialog()}
+      {/* {renderAvatarDialog()} */}
+      <AvatarDialog
+        avatarDialogOpen={avatarDialogOpen}
+        setAvatarDialogOpen={setAvatarDialogOpen}
+        selectedAvatar={selectedAvatar}
+        setSelectedAvatar={setSelectedAvatar}
+        userId={userId}
+        supabase={supabase}
+        profile={userData}
+        setProfile={setProfile}
+        isDarkMode={isDarkMode}
+        toast={toast}
+        avatars={avatars}
+      />
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <div className="flex items-center mb-8">
           <Button
