@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion} from 'framer-motion';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -8,8 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster"
 import { useTheme } from '../../contexts/ThemeContext';
@@ -23,7 +21,6 @@ import {
   Save,
   X,
   Clock,
-  ArrowLeft,
   CheckCircle,
   Camera,
   Info,

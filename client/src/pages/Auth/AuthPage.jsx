@@ -283,6 +283,7 @@ const AuthPages = () => {
             userType: profileData?.usertype || authData.user.user_metadata?.userType || 'customer',
             department: profileData?.department || authData.user.user_metadata?.department,
             phoneNumber: profileData?.phonenumber || authData.user.user_metadata?.phoneNumber,
+            portfolio: profileData?.portfolio || authData.user.user_metadata?.portfolio,
           };
 
           const dashboardPath = userData.userType === 'agent' ? '/agentdashboard' : '/customerdashboard';
@@ -307,6 +308,7 @@ const AuthPages = () => {
               userType: authData.user.user_metadata?.userType || 'customer',
               department: authData.user.user_metadata?.department,
               phoneNumber: authData.user.user_metadata?.phoneNumber,
+              portfolio: authData.user.user_metadata?.portfolio,
             };
 
             const dashboardPath = userData.userType === 'agent' ? '/agentdashboard' : '/customerdashboard';
@@ -329,6 +331,14 @@ const AuthPages = () => {
           setApiError('Full name is required');
           setIsLoading(false);
           return;
+        }
+
+        if (userType === 'agent' && formData.portfolio) {
+          if (!validatePortfolioUrl(formData.portfolio)) {
+            setApiError('Please provide a valid portfolio URL');
+            setIsLoading(false);
+            return;
+          }
         }
          
          // Check if email exists
@@ -356,6 +366,7 @@ const AuthPages = () => {
               userType: userType,
               department: formData.department,
               phoneNumber: formData.phoneNumber,
+              portfolio: formData.portfolio,
             },
           },
         });
@@ -372,8 +383,11 @@ const AuthPages = () => {
           email: formData.email,
           department: userType === 'agent' ? formData.department : null,
           phonenumber: userType === 'customer' ? formData.phoneNumber : null,
+          portfolio: userType === 'agent' ? formData.portfolio : null,
           usertype: userType,
         };
+
+        console.log('Profile Data Before Insert:', profileData);
 
         try {
 
