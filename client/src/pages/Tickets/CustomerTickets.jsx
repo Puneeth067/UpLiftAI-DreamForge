@@ -13,13 +13,17 @@ import {
   CircleSlash, 
   MessageSquare, 
   Search, 
-  Timer, 
-  ArrowLeft,
+  Timer,
   Clock,
   XCircle,
   MessageCircle,
   CheckCircle2,
-  CheckCircle
+  CheckCircle,
+  User,
+  Home,
+  Settings,
+  PanelLeftOpen,
+  PanelLeftClose
 } from "lucide-react";
 import { 
   Dialog, 
@@ -30,10 +34,66 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { supabase } from "@/utils/supabase";
+import { Separator } from "@/components/ui/separator";
 import { useTheme } from '../../contexts/ThemeContext';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import PropTypes from 'prop-types';
 import { toast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
+
+const BackgroundSVG = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+    preserveAspectRatio="xMidYMid slice"
+    viewBox="0 0 1440 900"
+  >
+    <defs>
+      <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#F8F0FF" stopOpacity="0.4" />
+        <stop offset="100%" stopColor="#F0E6FF" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="#D4BBFF" stopOpacity="0.1" />
+      </radialGradient>
+
+      <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#2A1352" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#1A0B38" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <filter id="blurFilter">
+        <feGaussianBlur stdDeviation="60" />
+      </filter>
+
+      <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-purple-200 dark:text-purple-900" opacity="0.3" />
+      </pattern>
+    </defs>
+   
+    {/* Light Mode Patterns */}
+    <g className="opacity-100 dark:opacity-0">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="200" cy="150" r="400" fill="url(#lightGradient)" filter="url(#blurFilter)" />
+      <circle cx="1200" cy="300" r="500" fill="url(#lightGradient)" opacity="0.4" filter="url(#blurFilter)" />
+      <circle cx="800" cy="600" r="300" fill="url(#accentGradient)" opacity="0.3" filter="url(#blurFilter)" />
+      <path d="M0,300 Q720,400 1440,300 Q720,500 0,300" fill="url(#accentGradient)" opacity="0.15" />
+      <ellipse cx="600" cy="750" rx="600" ry="300" fill="url(#lightGradient)" opacity="0.2" filter="url(#blurFilter)" />
+    </g>
+   
+    {/* Dark Mode Patterns */}
+    <g className="opacity-0 dark:opacity-100">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="300" cy="200" r="600" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+      <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#darkGradient)" opacity="0.25" />
+      <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#darkGradient)" opacity="0.2" filter="url(#blurFilter)" />
+      <circle cx="800" cy="750" r="400" fill="url(#darkGradient)" opacity="0.15" filter="url(#blurFilter)" />
+    </g>
+  </svg>
+);
 
 const CustomerTickets = () => {
   const location = useLocation();
@@ -53,7 +113,114 @@ const CustomerTickets = () => {
   const [selectedRejectedTicket, setSelectedRejectedTicket] = useState(null);
   const [selectedInProgressTicket, setSelectedInProgressTicket] = useState(null);
   const [agentProfiles, setAgentProfiles] = useState({});
+  const [activeItem, setActiveItem] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [setActiveView] = useState('home');
+  const [hoverTimeout, setHoverTimeout] = useState(null);
+  const [showTicketDialog, setShowTicketDialog] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [ticketData, setTicketData] = useState({
+    type: '',
+    priority: 'medium',
+    description: ''
+  });
+
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    setIsCollapsed(false);
+  };
+
+  const handleMouseLeave = () => {
+    // Add a small delay before collapsing to make the interaction smoother
+    const timeout = setTimeout(() => {
+      setIsCollapsed(true);
+    }, 400); // 300ms delay
+    setHoverTimeout(timeout);
+  };
+
+  // Clear timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+    };
+  }, [hoverTimeout]);
+
   
+  const handleTicketSubmit = async () => {
+    if (!userData?.id) {
+      alert("User data is missing. Please try logging in again.");
+      return;
+    }
+  
+    if (!ticketData.type || !ticketData.description) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+  
+    setUploading(true);
+  
+    try {
+      // Log the request payload for debugging
+      console.log('Creating ticket with payload:', {
+        user_id: userData.id,
+        issue_type: ticketData.type,
+        priority: ticketData.priority,
+        description: ticketData.description,
+        status: 'active'
+      });
+  
+      const { data: ticket, error } = await supabase
+        .from('tickets')
+        .insert([
+          {
+            user_id: userData.id,
+            issue_type: ticketData.type,
+            priority: ticketData.priority,
+            description: ticketData.description,
+            status: 'active'
+          }
+        ]);
+  
+      if (error) {
+        // Log detailed error information
+        console.error('Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+  
+      setShowTicketDialog(false);
+                     
+      setTicketData({
+        type: '',
+        priority: 'medium',
+        description: ''
+      });
+      
+      setTimeout(() => window.location.href = '/customertickets', 2000);
+      
+    } catch (error) {
+      console.error('Full error object:', error);
+      
+      // More user-friendly error message
+      let errorMessage = 'Failed to create ticket. ';
+      if (error.message) {
+        errorMessage += error.message;
+      } else if (error.details) {
+        errorMessage += error.details;
+      } else {
+        errorMessage += 'Please try again later.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Modified fetchTickets function to be reusable
   const fetchTickets = useCallback(async () => {
@@ -112,6 +279,125 @@ const CustomerTickets = () => {
     loadUserTheme(userData.id);
     fetchTickets();
   }, [userData?.id, loadUserTheme, fetchTickets]);
+
+  // Updated menu items for creator dashboard
+  const menuItems = [
+    {
+      title: 'Home',
+      icon: Home,
+      view: 'home',
+      onClick: () => navigate('/customerdashboard', { state: { userData } })
+    },
+    {
+      title: 'Messages',
+      icon: MessageSquare,
+      view: 'tickets',
+      onClick: () => navigate('/customertickets', { state: { userData } })
+    },
+    {
+      title: 'Profile',
+      icon: User,
+      view: 'profile',
+      onClick: () => navigate('/profile', { state: { userData } })
+    },
+    {
+      title: 'Settings',
+      icon: Settings,
+      view: 'settings',
+      onClick: () => navigate('/settings', { state: { userData } })
+    }    
+  ];
+
+  const SidebarContent = () => (
+    <div 
+      className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
+        <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
+          {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
+          <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
+            {isCollapsed ? 
+              <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
+              <PanelLeftClose className="h-6 w-6 dark:text-white" />
+            }
+          </div>
+        </div>
+      </div>
+  
+      <nav className="flex-1 overflow-y-auto p-4">
+        {menuItems.map((item, index) => (
+          <MenuItem key={index} item={item} index={index} />
+        ))}
+      </nav>
+  
+      <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
+          <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {userData?.avatar_url ? (
+              <img 
+                src={`${userData.avatar_url}`}
+                alt={userData.fullname}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = `/avatars/${userData.avatar_url}`;
+                }}
+              />
+            ) : (
+              <img 
+                src="/avatars/user.png"
+                alt="Default User"
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
+              <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
+              {userData.department && (
+                <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+  
+  const MenuItem = ({ item, index }) => (
+    <div className="mb-2">
+      <button 
+        onClick={() => {
+          if (item.onClick) {
+            item.onClick();
+          } else {
+            setActiveView(item.view);
+            setActiveItem(activeItem === index ? null : index);
+          }
+        }}
+        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
+          isCollapsed ? 'justify-center' : ''
+        }`}
+        title={isCollapsed ? item.title : ''}
+      >
+        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
+        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
+      </button>
+    </div>
+  );
+
+  MenuItem.propTypes = {
+    item: PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      icon: PropTypes.elementType.isRequired,
+      view: PropTypes.string.isRequired,
+      onClick: PropTypes.func,
+    }).isRequired,
+    index: PropTypes.number.isRequired,
+  };
 
   const getStatusColor = (status) => {
     const colors = {
@@ -275,7 +561,7 @@ const CustomerTickets = () => {
     
       if (!selectedResolvedTicket?.id) {
         console.error('No ticket selected for feedback');
-        toast({
+         toast({
           variant: "destructive",
           title: "Error",
           description: "No ticket selected. Please try again."
@@ -757,36 +1043,45 @@ const CustomerTickets = () => {
     <div className={`min-h-screen flex justify-center ${
       isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
     }`}>
+      <BackgroundSVG className="z-0 "/>
+      <CyberCursorEffect />
+      <aside 
+        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
+          isCollapsed ? 'w-20' : 'w-64'
+        }`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <SidebarContent />
+      </aside>
       <Toaster />
-      <div className={`w-[1024px] shadow-xl rounded-lg my-8 ${
-        isDarkMode ? 'bg-gray-800' : 'bg-white'
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+        isCollapsed ? 'md:ml-20' : 'md:ml-64'
       }`}>
-        <div className={`p-6 border-b ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-100'
-        }`}>
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              className={`hover:bg-gray-700 ${
-                isDarkMode ? 'text-gray-300 hover:text-gray-100' : 'text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => navigate('/customerdashboard', { state: { userData } })}
-            >
-              <ArrowLeft size={16} className="mr-2" />
-              Back
-            </Button>
-            <div className="flex-1">
-              <h1 className={`text-2xl font-bold ${
+        <div className={`${isCollapsed ? 'w-[1024px]' : 'w-[896px]'} shadow-xl rounded-lg my-8 ${
+          isDarkMode ? 'bg-gray-800' : 'bg-white'} ${isCollapsed ? 'left-20' : 'left-64'} pt-8 mb-0`}>
+          <div className={`p-6 border-b ${
+            isDarkMode ? 'border-gray-700' : 'border-gray-100'
+          }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col flex-grow">
+              <h1 className={` flex text-2xl font-bold ${
                 isDarkMode ? 'text-gray-100' : 'text-gray-900'
               }`}>
                 TicketZone
               </h1>
-              <p className={`text-sm mt-1 ${
-                isDarkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}>
-                Manage and track your support tickets
-              </p>
             </div>
+            
+            <Button 
+              className={`rounded-xl px-6 py-5 transform transition-all duration-300 hover:scale-105 ${
+                isDarkMode
+                  ? 'from-teal-400 to-emerald-500'
+                  : 'from-teal-500 to-emerald-600'
+              } bg-gradient-to-br text-white shadow-lg hover:shadow-xl`}
+              onClick={() => setShowTicketDialog(true)}
+            >
+              Create Ticket
+            </Button>
           </div>
         </div>
 
@@ -922,8 +1217,102 @@ const CustomerTickets = () => {
               )}
             </TabsContent>
           </Tabs>
+          </div>
         </div>
       </div>
+      
+      <Dialog open={showTicketDialog} onOpenChange={setShowTicketDialog}>
+        <DialogContent className={`sm:max-w-[500px] rounded-2xl ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+          <DialogHeader>
+            <DialogTitle className={`text-2xl ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Create Support Ticket</DialogTitle>
+            <DialogDescription className={`text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Fill out the form below to submit a new support ticket. Our team will respond as soon as possible.
+            </DialogDescription>
+          </DialogHeader>
+          <Separator className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} />
+          <div className="grid gap-6 py-6">
+            <div className="grid gap-2">
+              <label htmlFor="issue-type" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Issue Type</label>
+              <Select
+                value={ticketData.type}
+                onValueChange={(value) => setTicketData(prev => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger className={`bg-white dark:bg-gray-700 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                  <SelectValue placeholder="Select issue type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="technical">Technical Issue</SelectItem>
+                  <SelectItem value="billing">Billing Issue</SelectItem>
+                  <SelectItem value="account">Account Issue</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <label className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Priority</label>
+              <Select
+                value={ticketData.priority}
+                onValueChange={(value) => setTicketData(prev => ({ ...prev, priority: value }))}
+              >
+                <SelectTrigger className={`bg-white dark:bg-gray-700 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="description" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Description</label>
+              <Textarea
+                id="description"
+                placeholder="Please describe your issue in detail"
+                value={ticketData.description}
+                onChange={(e) => setTicketData(prev => ({ ...prev, description: e.target.value }))}
+                className={`h-32 ${
+                  isDarkMode
+                    ? 'bg-gray-700 text-gray-200 placeholder-gray-400'
+                    : 'bg-white text-gray-800 placeholder-gray-500'
+                }`}
+              />
+            </div>
+          </div>
+          <Separator className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} />
+          <DialogFooter className="gap-3 sm:gap-0">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowTicketDialog(false)}
+              className={`rounded-lg ${
+                isDarkMode
+                  ? 'border-gray-600 text-gray-200 hover:bg-gray-700'
+                  : 'border-gray-200 text-gray-800 hover:bg-gray-100'
+              }`}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className={`rounded-lg transform transition-all duration-300 hover:scale-105 ${
+                isDarkMode
+                  ? 'from-teal-400 to-emerald-500'
+                  : 'from-teal-500 to-emerald-600'
+              } bg-gradient-to-br text-white shadow-md hover:shadow-xl`}
+              onClick={handleTicketSubmit}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Submitting...</span>
+                </div>
+              ) : (
+                <span>Submit Ticket</span>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <RejectionDialog />
       <InProgressDialog />

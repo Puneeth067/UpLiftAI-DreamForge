@@ -19,7 +19,6 @@ import { Toaster } from "@/components/ui/toaster"
 import {
   Moon,
   Bell,
-  ArrowLeft,
   AlertTriangle,
   Mail,
   MessageCircle,
@@ -41,55 +40,47 @@ import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 
 const BackgroundSVG = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
-    preserveAspectRatio="xMidYMid slice"
-    viewBox="0 0 1440 900"
-  >
-    <defs>
-      <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#F8F0FF" stopOpacity="0.4" />
-        <stop offset="100%" stopColor="#F0E6FF" stopOpacity="0.2" />
-      </radialGradient>
-     
-      <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.15" />
-        <stop offset="100%" stopColor="#D4BBFF" stopOpacity="0.1" />
-      </radialGradient>
-
-      <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#2A1352" stopOpacity="0.3" />
-        <stop offset="100%" stopColor="#1A0B38" stopOpacity="0.2" />
-      </radialGradient>
-     
-      <filter id="blurFilter">
-        <feGaussianBlur stdDeviation="60" />
-      </filter>
-
-      <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-purple-200 dark:text-purple-900" opacity="0.3" />
-      </pattern>
-    </defs>
+  xmlns="http://www.w3.org/2000/svg"
+  className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+  preserveAspectRatio="xMidYMid slice"
+  viewBox="0 0 1440 900"
+>
+  <defs>
+    <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stopColor="#F5F3FF" stopOpacity="0.4" />
+      <stop offset="100%" stopColor="#F0E7FF" stopOpacity="0.2" />
+    </radialGradient>
    
-    {/* Light Mode Patterns */}
-    <g className="opacity-100 dark:opacity-0">
-      <rect width="100%" height="100%" fill="url(#dots)" />
-      <circle cx="200" cy="150" r="400" fill="url(#lightGradient)" filter="url(#blurFilter)" />
-      <circle cx="1200" cy="300" r="500" fill="url(#lightGradient)" opacity="0.4" filter="url(#blurFilter)" />
-      <circle cx="800" cy="600" r="300" fill="url(#accentGradient)" opacity="0.3" filter="url(#blurFilter)" />
-      <path d="M0,300 Q720,400 1440,300 Q720,500 0,300" fill="url(#accentGradient)" opacity="0.15" />
-      <ellipse cx="600" cy="750" rx="600" ry="300" fill="url(#lightGradient)" opacity="0.2" filter="url(#blurFilter)" />
-    </g>
+    <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stopColor="#EDE4FF" stopOpacity="0.3" />
+      <stop offset="100%" stopColor="#E6DAFF" stopOpacity="0.1" />
+    </radialGradient>
+
+    <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stopColor="#2A1352" stopOpacity="0.3" />
+      <stop offset="100%" stopColor="#1A0B38" stopOpacity="0.2" />
+    </radialGradient>
    
-    {/* Dark Mode Patterns */}
-    <g className="opacity-0 dark:opacity-100">
-      <rect width="100%" height="100%" fill="url(#dots)" />
-      <circle cx="300" cy="200" r="600" fill="url(#darkGradient)" filter="url(#blurFilter)" />
-      <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#darkGradient)" opacity="0.25" />
-      <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#darkGradient)" opacity="0.2" filter="url(#blurFilter)" />
-      <circle cx="800" cy="750" r="400" fill="url(#darkGradient)" opacity="0.15" filter="url(#blurFilter)" />
-    </g>
-  </svg>
+    <filter id="blurFilter">
+      <feGaussianBlur stdDeviation="50" />
+    </filter>
+
+    <pattern id="softDots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.5" fill="currentColor" className="text-purple-100 dark:text-purple-900" opacity="0.1" />
+    </pattern>
+  </defs>
+   
+  
+   
+  {/* Dark Mode Patterns */}
+  <g className="opacity-0 dark:opacity-100">
+    <rect width="100%" height="100%" fill="url(#softDots)" />
+    <circle cx="300" cy="200" r="600" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+    <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#darkGradient)" opacity="0.25" />
+    <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#darkGradient)" opacity="0.2" filter="url(#blurFilter)" />
+    <circle cx="800" cy="750" r="400" fill="url(#darkGradient)" opacity="0.15" filter="url(#blurFilter)" />
+  </g>
+</svg>
 );
 
 const SettingsPage = () => {
@@ -140,32 +131,37 @@ const SettingsPage = () => {
     }
   });
 
+  const dashboardPath = userData.userType === 'agent' ? '/agentdashboard' : '/customerdashboard';
+  const ticketPath = userData.userType === 'agent' ? '/agenttickets' : '/customertickets';
+
   // Updated menu items for creator dashboard
   const menuItems = [
     {
       title: 'Home',
       icon: Home,
       view: 'home',
-      onClick: () => navigate('/agentdashboard', { state: { userData } })
+      onClick: () => navigate(dashboardPath, { state: { userData } })
     },
     {
       title: 'Messages',
       icon: MessageSquare,
       view: 'tickets',
-      onClick: () => navigate('/agenttickets', { state: { userData } })
+      onClick: () => navigate(ticketPath, { state: { userData } })
     },
-    {
-      title: 'Featured Work',
-      icon: Star,
-      view: 'project',
-      onClick: () => navigate('/agentprojects', { state: { userData } })
-    },
+    ...(userData.userType === 'agent' ? [
     {
       title: 'Portfolio',
       icon: Palette,
       view: 'portfolio',
       onClick: () => navigate('/portfolio', { state: { userData } })
     },
+    {
+      title: 'Featured Work',
+      icon: Star,
+      view: 'project',
+      onClick: () => navigate('/agentprojects', { state: { userData } })
+    }
+  ] : []),
     {
       title: 'Profile',
       icon: User,
@@ -467,11 +463,11 @@ const SettingsPage = () => {
           {/* Left Column - Appearance & Language */}
           <div className="lg:col-span-2 space-y-6">
             {/* Appearance Settings */}
-            <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
-              <CardHeader className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-6">
+            <Card className="overflow-hidden border-purple-200 dark:border-purple-700 shadow-lg">
+              <CardHeader className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-6">
                 <div className="flex items-center gap-3">
                   <Moon size={20} className="text-blue-600 dark:text-blue-500" />
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Appearance</h2>
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">Appearance</h2>
                 </div>
               </CardHeader>
               <CardContent className="p-6">
@@ -490,11 +486,11 @@ const SettingsPage = () => {
             </Card>
 
             {/* Notification Preferences */}
-            <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
+            <Card className="overflow-hidden border-purple-200 dark:border-purple-700 shadow-lg">
               <CardHeader className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-6">
                 <div className="flex items-center gap-3">
                   <Bell size={20} className="text-blue-600 dark:text-blue-500" />
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                     Notification Preferences
                   </h2>
                 </div>
@@ -561,11 +557,11 @@ const SettingsPage = () => {
 
           {/* Right Column - Danger Zone */}
           <div className="lg:col-span-1">
-            <Card className="border-red-200 dark:border-red-800">
+            <Card className="border-red-200 dark:border-red-800 shadow-lg">
               <CardHeader className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
                 <div className="flex items-center gap-3 text-red-600 dark:text-red-500">
                   <AlertTriangle size={20} />
-                  <h2 className="text-lg font-semibold">Danger Zone</h2>
+                  <h2 className="text-lg font-bold">Danger Zone</h2>
                 </div>
               </CardHeader>
               <CardContent className="p-6">

@@ -15,7 +15,6 @@ import { supabase } from '@/utils/supabase';
 import {
   Mail,
   Phone,
-  Gem,
   Sparkles ,
   Edit2,
   Save,
@@ -31,7 +30,8 @@ import {
   User,
   PanelLeftClose,
   PanelLeftOpen,
-  Settings
+  Settings,
+  BadgeCheck
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
@@ -160,32 +160,37 @@ const ProfilePage = () => {
     };
   }, [hoverTimeout]);
 
+  const dashboardPath = userData.userType === 'agent' ? '/agentdashboard' : '/customerdashboard';
+  const ticketPath = userData.userType === 'agent' ? '/agenttickets' : '/customertickets';
+
   // Updated menu items for creator dashboard
   const menuItems = [
     {
       title: 'Home',
       icon: Home,
       view: 'home',
-      onClick: () => navigate('/agentdashboard', { state: { userData } })
+      onClick: () => navigate(dashboardPath, { state: { userData } })
     },
     {
       title: 'Messages',
       icon: MessageSquare,
       view: 'tickets',
-      onClick: () => navigate('/agenttickets', { state: { userData } })
+      onClick: () => navigate(ticketPath, { state: { userData } })
     },
-    {
-      title: 'Featured Work',
-      icon: Star,
-      view: 'project',
-      onClick: () => navigate('/agentprojects', { state: { userData } })
-    },
-    {
-      title: 'Portfolio',
-      icon: Palette,
-      view: 'portfolio',
-      onClick: () => navigate('/portfolio', { state: { userData } })
-    },
+    ...(userData.userType === 'agent' ? [
+      {
+        title: 'Portfolio',
+        icon: Palette,
+        view: 'portfolio',
+        onClick: () => navigate('/portfolio', { state: { userData } })
+      },
+      {
+        title: 'Featured Work',
+        icon: Star,
+        view: 'project',
+        onClick: () => navigate('/agentprojects', { state: { userData } })
+      }
+    ] : []),
     {
       title: 'Profile',
       icon: User,
@@ -428,13 +433,13 @@ const ProfilePage = () => {
 
   const getUserTypeColor = (userType) => {
     const types = {
-      admin: isDarkMode 
+      agent: isDarkMode 
         ? 'bg-purple-900 text-purple-100 border-purple-800'
         : 'bg-purple-50 text-purple-700 border-purple-200',
-      agent: isDarkMode
-        ? 'bg-blue-900 text-blue-100 border-blue-800'
-        : 'bg-blue-50 text-blue-700 border-blue-200',
       customer: isDarkMode
+        ? 'bg-amber-900 text-amber-100 border-amber-800'
+        : 'bg-amber-50 text-amber-700 border-amber-200',
+      admin: isDarkMode
         ? 'bg-green-900 text-green-100 border-green-800'
         : 'bg-green-50 text-green-700 border-green-200',
       default: isDarkMode
@@ -494,7 +499,7 @@ const ProfilePage = () => {
           )}
           {isAgent && (
             <div className={`flex items-center gap-3 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} justify-center`}>
-              <Gem className="h-4 w-4" />
+              <Sparkles className="h-4 w-4" />
               {profile?.department || 'Not specified'}
             </div>
           )}
@@ -732,7 +737,7 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className={`flex items-center gap-4 p-6 rounded-xl ${getUserTypeColor(profile?.usertype)} transition-all hover:shadow-md`}>
                     <div className={`p-3 ${isDarkMode ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-sm`}>
-                      <Sparkles  className={`h-6 w-6 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`} />
+                      <BadgeCheck  className={`h-6 w-6 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`} />
                     </div>
                     <div>
                       <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>

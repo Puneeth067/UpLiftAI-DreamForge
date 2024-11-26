@@ -175,6 +175,35 @@ const AgentPortfolio = () => {
       setUserProfile(profileData);
       setProfileData(profileData);
 
+      const defaultTemplate = {
+        user_id: userData.id,
+        title: 'Software Developer',
+        bio: 'Passionate about building innovative solutions',
+        skills: ['React', 'JavaScript', 'TypeScript'],
+        projects: [
+          {
+            title: 'Portfolio Website',
+            description: 'Personal portfolio showcasing projects and skills',
+            image: '/api/placeholder/600/400'
+          }
+        ],
+        experience: [
+          {
+            role: 'Junior Developer',
+            company: 'Tech Innovations Inc.',
+            period: '2022 - Present',
+            description: 'Working on cutting-edge web applications'
+          }
+        ],
+        social_links: {
+          github: '',
+          twitter: '',
+          linkedin: '',
+          instagram: ''
+        }
+      };
+  
+
       const { data: portfolioData, error: portfolioError } = await supabase
         .from('portfolio')
         .select('*')
@@ -182,18 +211,19 @@ const AgentPortfolio = () => {
         .single();
 
       if (portfolioError) {
-        const { data: defaultData } = await supabase
-          .from('portfolio')
-          .select('*')
-          .eq('user_id', 'DEFAULT')
-          .single();
+        const { error: insertError } = await supabase
+        .from('portfolio')
+        .insert(defaultTemplate);
 
-        setPortfolioData({ ...defaultData, user_id: userData.id });
+      if (insertError) throw insertError;
+      
+      setPortfolioData(defaultTemplate);
       } else {
         setPortfolioData(portfolioData);
       }
     } catch (error) {
       console.error('Error:', error);
+      setPortfolioData(defaultTemplate);
     } finally {
       setLoading(false);
     }
@@ -204,10 +234,13 @@ const AgentPortfolio = () => {
       const { error } = await supabase
         .from('portfolio')
         .upsert({
+          user_id: userData.id, // Explicitly include user_id
           ...portfolioData,
           updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id' // Specify the conflict column
         });
-
+  
       if (error) throw error;
       setIsEditing(false);
       await fetchPortfolioData();
@@ -215,6 +248,7 @@ const AgentPortfolio = () => {
       console.error('Error:', error);
     }
   };
+
   // Add this function to handle file upload to Supabase storage
 const uploadProjectImage = async (file, userId) => {
   try {

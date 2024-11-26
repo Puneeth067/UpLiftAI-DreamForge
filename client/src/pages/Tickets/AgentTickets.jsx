@@ -33,6 +33,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import LoadingScreen from "@/components/ui/loading";
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
+import { Toaster } from "@/components/ui/toaster";
 
 const BackgroundSVG = () => (
   <svg
@@ -951,7 +952,9 @@ const InProgressTicketDetailsDialog = () => {
   }
 
   return (
-    <div className={`min-h-screen flex justify-center`}>
+    <div className={`min-h-screen flex justify-center ${
+      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+    }`}>
       <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
       <aside 
@@ -963,7 +966,7 @@ const InProgressTicketDetailsDialog = () => {
       >
         <SidebarContent />
       </aside>
-
+      <Toaster />
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
         isCollapsed ? 'md:ml-20' : 'md:ml-64'
       }`}>

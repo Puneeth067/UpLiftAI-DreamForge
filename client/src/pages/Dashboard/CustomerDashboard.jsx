@@ -1,24 +1,116 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, Bell, Settings, LogOut, Ticket, MessageSquare, User, ChevronRight, Wand2 } from 'lucide-react';
+import { 
+  Menu, Settings, LogOut, MessageSquare, Home, User,
+  PanelLeftOpen, PanelLeftClose, Wand2,
+} from 'lucide-react';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import LoadingScreen from "@/components/ui/loading";
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../utils/supabase.js';
-import LoadingScreen from '@/components/ui/loading';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
+import AgentNLP from '../NLP/AgentNLP';
+
+const BackgroundSVG = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+    preserveAspectRatio="xMidYMid slice"
+    viewBox="0 0 1440 900"
+  >
+    <defs>
+      <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#F8F0FF" stopOpacity="0.4" />
+        <stop offset="100%" stopColor="#F0E6FF" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="#D4BBFF" stopOpacity="0.1" />
+      </radialGradient>
+
+      <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#2A1352" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#1A0B38" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <filter id="blurFilter">
+        <feGaussianBlur stdDeviation="60" />
+      </filter>
+
+      <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-purple-200 dark:text-purple-900" opacity="0.3" />
+      </pattern>
+    </defs>
+   
+    {/* Light Mode Patterns */}
+    <g className="opacity-100 dark:opacity-0">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="200" cy="150" r="400" fill="url(#lightGradient)" filter="url(#blurFilter)" />
+      <circle cx="1200" cy="300" r="500" fill="url(#lightGradient)" opacity="0.4" filter="url(#blurFilter)" />
+      <circle cx="800" cy="600" r="300" fill="url(#accentGradient)" opacity="0.3" filter="url(#blurFilter)" />
+      <path d="M0,300 Q720,400 1440,300 Q720,500 0,300" fill="url(#accentGradient)" opacity="0.15" />
+      <ellipse cx="600" cy="750" rx="600" ry="300" fill="url(#lightGradient)" opacity="0.2" filter="url(#blurFilter)" />
+    </g>
+   
+    {/* Dark Mode Patterns */}
+    <g className="opacity-0 dark:opacity-100">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="300" cy="200" r="600" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+      <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#darkGradient)" opacity="0.25" />
+      <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#darkGradient)" opacity="0.2" filter="url(#blurFilter)" />
+      <circle cx="800" cy="750" r="400" fill="url(#darkGradient)" opacity="0.15" filter="url(#blurFilter)" />
+    </g>
+  </svg>
+);
 
 const CustomerDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [profileData, setProfileData] = useState(null);
+  const [userData, setProfileData] = useState(location.state?.userData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const userData = location.state?.userData;
   const { loadUserTheme } = useTheme();
+  const [activeItem, setActiveItem] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [setActiveView] = useState('home');
+  const [hoverTimeout, setHoverTimeout] = useState(null);
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    setIsCollapsed(false);
+  };
+
+  const handleMouseLeave = () => {
+    // Add a small delay before collapsing to make the interaction smoother
+    const timeout = setTimeout(() => {
+      setIsCollapsed(true);
+    }, 400); // 300ms delay
+    setHoverTimeout(timeout);
+  };
+
+  // Clear timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+    };
+  }, [hoverTimeout]);
 
   useEffect(() => {
     const userDataFromAuth = location.state?.userData;
@@ -27,7 +119,6 @@ const CustomerDashboard = () => {
       return;
     }
 
-    // Load user theme
     loadUserTheme(userDataFromAuth.id);
 
     // Fetch profile data from Supabase
@@ -57,43 +148,41 @@ const CustomerDashboard = () => {
     fetchProfileData();
   }, [location.state, navigate, loadUserTheme]);
 
-  const [activeItem, setActiveItem] = useState(null);
-
+  // Updated menu items for creator dashboard
   const menuItems = [
     {
-      title: 'Tickets',
-      icon: Ticket,
-      view: 'tickets',
-      onClick: () => navigate('/customertickets', { state: { userData } })
+      title: 'Home',
+      icon: Home,
+      view: 'home',
+      onClick: () => navigate('/customerdashboard', { state: { userData } })
     },
     {
-      title: 'Chat Support',
+      title: 'Messages',
       icon: MessageSquare,
-      view: 'chat',
-      onClick: () => navigate('/customerchatbotinterface', { state: { userData } })
+      view: 'tickets',
+      onClick: () => navigate('/customertickets', { state: { userData } })
     },
     {
       title: 'Profile',
       icon: User,
       view: 'profile',
       onClick: () => navigate('/profile', { state: { userData } })
-    }
+    },
+    {
+      title: 'Settings',
+      icon: Settings,
+      view: 'settings',
+      onClick: () => navigate('/settings', { state: { userData } })
+    }    
   ];
-  
-  const handleSettingsClick = () => {
-    navigate('/settings', { 
-      state: { 
-        userData,
-        userType: profileData?.usertype || 'user' 
-      } 
-    });
-  };
 
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      navigate('/', { replace: true });
+      navigate('/',{ 
+        state: { userData }
+      });
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -112,30 +201,40 @@ const CustomerDashboard = () => {
   }
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900 transition-colors duration-200">
-      <div className="p-4 border-b dark:border-gray-700">
-        <div className="flex items-center space-x-3">
-          <span className="text-xl font-semibold dark:text-gray-100">Dashboard</span>
+    <div 
+      className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
+        <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
+          {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
+          <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
+            {isCollapsed ? 
+              <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
+              <PanelLeftClose className="h-6 w-6 dark:text-white" />
+            }
+          </div>
         </div>
       </div>
-
+  
       <nav className="flex-1 overflow-y-auto p-4">
         {menuItems.map((item, index) => (
           <MenuItem key={index} item={item} index={index} />
         ))}
       </nav>
-
-      <div className="border-t dark:border-gray-700 p-4 mt-auto">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {profileData?.avatar_url ? (
+  
+      <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
+          <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {userData?.avatar_url ? (
               <img 
-                src={`/avatars/${profileData.avatar_url}`}
-                alt={profileData.fullname}
+                src={`${userData.avatar_url}`}
+                alt={userData.fullname}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/avatars/user.png';
+                  e.target.src = `/avatars/${userData.avatar_url}`;
                 }}
               />
             ) : (
@@ -146,18 +245,20 @@ const CustomerDashboard = () => {
               />
             )}
           </div>
-          <div className="min-w-0">
-            <p className="font-medium truncate dark:text-gray-100">{profileData.fullname}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{profileData.email}</p>
-            {profileData.department && (
-              <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{profileData.department}</p>
-            )}
-          </div>
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
+              <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
+              {userData.department && (
+                <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-
+  
   const MenuItem = ({ item, index }) => (
     <div className="mb-2">
       <button 
@@ -169,44 +270,49 @@ const CustomerDashboard = () => {
             setActiveItem(activeItem === index ? null : index);
           }
         }}
-        className="flex items-center w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors duration-200"
+        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
+          isCollapsed ? 'justify-center' : ''
+        }`}
+        title={isCollapsed ? item.title : ''}
       >
-        <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
-        <span className="text-sm font-medium">{item.title}</span>
-        {item.subItems && (
-          <ChevronRight className={`ml-auto h-4 w-4 transform transition-transform duration-200 ${activeItem === index ? 'rotate-90' : ''}`} />
-        )}
+        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
+        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
       </button>
     </div>
   );
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen dark:bg-gray-900">
-        <div className="text-lg text-red-600 dark:text-red-400">Error: {error}</div>
-      </div>
-    );
-  }
+  MenuItem.propTypes = {
+    item: PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      icon: PropTypes.elementType.isRequired,
+      view: PropTypes.string.isRequired,
+      onClick: PropTypes.func,
+    }).isRequired,
+    index: PropTypes.number.isRequired,
+  };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900 transition-colors duration-200 cursor-none">
+    <div className={`min-h-screen flex bg-gray-50 dark:bg-gray-900 transition-colors duration-200`}>
+      <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
-      <aside className="hidden md:block w-64 fixed left-0 top-0 h-full border-r dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900 z-30 transition-colors duration-200">
+      <aside 
+        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
+          isCollapsed ? 'w-20' : 'w-64'
+        }`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         <SidebarContent />
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 md:ml-64">
-        <header className="bg-white dark:bg-gray-900 border-b dark:border-gray-700 fixed top-0 right-0 left-0 md:left-64 z-20 h-16 transition-colors duration-200">
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300`}>
+        <header className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed right-0 top-0 ${isCollapsed ? 'left-20' : 'left-64'} z-20 h-16`}>
           <div className="flex items-center justify-between px-4 h-full">
             <div className="flex items-center space-x-3">
               <Sheet>
                 <SheetTrigger asChild>
-                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg md:hidden transition-colors duration-200">
-                    <Menu className="h-6 w-6 dark:text-gray-100" />
+                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg md:hidden">
+                    <Menu className="h-6 w-6 dark:text-white" />
                   </button>
                 </SheetTrigger>
                 <SheetContent side="left" className="p-0 w-64">
@@ -216,7 +322,7 @@ const CustomerDashboard = () => {
               
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                  <div className="p-3 absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                     <Wand2 className="h-8 w-8 relative text-purple-600 dark:text-purple-400" />
                   </div>
                   <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -226,71 +332,34 @@ const CustomerDashboard = () => {
               </div>
 
             <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg relative transition-colors duration-200">
-                <Bell className="h-6 w-6 dark:text-gray-100" />
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
-              </button>
-              <button 
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg hidden sm:block transition-colors duration-200"
-                onClick={handleSettingsClick}
-              >
-                <Settings className="h-6 w-6 dark:text-gray-100" />
-              </button>
-              <button 
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg hidden sm:block transition-colors duration-200"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-6 w-6 dark:text-gray-100" />
-              </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden sm:block">
+                    <LogOut className="h-6 w-6 dark:text-white" />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="sm:max-w-[425px]">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to log out? You`ll need to sign in again to access the DreamForge.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleLogout}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    Log out
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             </div>
           </div>
         </header>
-
-        <main className="flex-1 overflow-auto mt-16 p-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl p-8 shadow-lg border border-blue-100 dark:border-gray-600 transition-colors duration-200">
-              <h1 className="text-3xl font-bold text-blue-800 dark:text-blue-400 mb-4">
-                Welcome {profileData.fullname}! 👋
-              </h1>
-              
-              <div className="space-y-6">
-                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                  Your gateway to seamless customer support. We`re here to make your experience smooth and efficient.
-                </p>
-                
-                <div className="grid md:grid-cols-2 gap-6 mt-8">
-                  <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-blue-100 dark:border-gray-700 transition-colors duration-200">
-                    <div className="flex items-center mb-3">
-                      <Ticket className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
-                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Quick Support</h3>
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Create and track support tickets for faster issue resolution. We prioritize your concerns.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-blue-100 dark:border-gray-700 transition-colors duration-200">
-                    <div className="flex items-center mb-3">
-                      <MessageSquare className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
-                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Live Chat</h3>
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Connect with our support team in real-time through our intuitive chat interface.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 dark:bg-gray-800 p-4 rounded-lg mt-6 transition-colors duration-200">
-                  <p className="text-sm text-blue-800 dark:text-blue-400">
-                    👉 <span className="font-medium">Use the sidebar menu to navigate between different sections and access all our support features.</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
+        <AgentNLP userData={userData} isCollapsed={isCollapsed} />
       </div>
     </div>
   );
