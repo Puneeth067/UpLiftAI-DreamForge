@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { motion} from 'framer-motion';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,19 +23,11 @@ import {
   CheckCircle,
   Camera,
   Info,
-  Home,
-  MessageSquare,
-  Star,
-  Palette,
-  User,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Settings,
   BadgeCheck
 } from 'lucide-react';
-import PropTypes from 'prop-types';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 import AvatarDialog from './AvatarDialog';
+import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 
 
 const BackgroundSVG = () => (
@@ -69,16 +61,6 @@ const BackgroundSVG = () => (
         <circle cx="2" cy="2" r="1" fill="currentColor" className="text-purple-200 dark:text-purple-900" opacity="0.3" />
       </pattern>
     </defs>
-   
-    {/* Light Mode Patterns */}
-    <g className="opacity-100 dark:opacity-0">
-      <rect width="100%" height="100%" fill="url(#dots)" />
-      <circle cx="200" cy="150" r="400" fill="url(#lightGradient)" filter="url(#blurFilter)" />
-      <circle cx="1200" cy="300" r="500" fill="url(#lightGradient)" opacity="0.4" filter="url(#blurFilter)" />
-      <circle cx="800" cy="600" r="300" fill="url(#accentGradient)" opacity="0.3" filter="url(#blurFilter)" />
-      <path d="M0,300 Q720,400 1440,300 Q720,500 0,300" fill="url(#accentGradient)" opacity="0.15" />
-      <ellipse cx="600" cy="750" rx="600" ry="300" fill="url(#lightGradient)" opacity="0.2" filter="url(#blurFilter)" />
-    </g>
    
     {/* Dark Mode Patterns */}
     <g className="opacity-0 dark:opacity-100">
@@ -117,7 +99,6 @@ const formatPhoneNumber = (value) => {
 
 const ProfilePage = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const userId = location.state?.userData?.id;
   const { isDarkMode, loadUserTheme } = useTheme();
   const [userData, setProfileData] = useState(location.state?.userData);
@@ -136,8 +117,6 @@ const ProfilePage = () => {
     avatar_url: 'user.png'
   });
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [setActiveView] = useState('profile');
-  const [activeItem, setActiveItem] = useState(null);
   const [hoverTimeout, setHoverTimeout] = useState(null);
 
   const handleMouseEnter = () => {
@@ -160,141 +139,6 @@ const ProfilePage = () => {
     };
   }, [hoverTimeout]);
 
-  const dashboardPath = userData.userType === 'agent' ? '/agentdashboard' : '/customerdashboard';
-  const ticketPath = userData.userType === 'agent' ? '/agenttickets' : '/customertickets';
-
-  // Updated menu items for creator dashboard
-  const menuItems = [
-    {
-      title: 'Home',
-      icon: Home,
-      view: 'home',
-      onClick: () => navigate(dashboardPath, { state: { userData } })
-    },
-    {
-      title: 'Messages',
-      icon: MessageSquare,
-      view: 'tickets',
-      onClick: () => navigate(ticketPath, { state: { userData } })
-    },
-    ...(userData.userType === 'agent' ? [
-      {
-        title: 'Portfolio',
-        icon: Palette,
-        view: 'portfolio',
-        onClick: () => navigate('/portfolio', { state: { userData } })
-      },
-      {
-        title: 'Featured Work',
-        icon: Star,
-        view: 'project',
-        onClick: () => navigate('/agentprojects', { state: { userData } })
-      }
-    ] : []),
-    {
-      title: 'Profile',
-      icon: User,
-      view: 'profile',
-      onClick: () => navigate('/profile', { state: { userData } })
-    },
-    {
-      title: 'Settings',
-      icon: Settings,
-      view: 'settings',
-      onClick: () => navigate('/settings', { state: { userData } })
-    }    
-  ];
-
-  const SidebarContent = () => (
-    <div 
-      className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
-        <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
-          {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
-          <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
-            {isCollapsed ? 
-              <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
-              <PanelLeftClose className="h-6 w-6 dark:text-white" />
-            }
-          </div>
-        </div>
-      </div>
-  
-      <nav className="flex-1 overflow-y-auto p-4">
-        {menuItems.map((item, index) => (
-          <MenuItem key={index} item={item} index={index} />
-        ))}
-      </nav>
-  
-      <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-          <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {userData?.avatar_url ? (
-              <img 
-                src={`${userData.avatar_url}`}
-                alt={userData.fullname}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = `/avatars/${userData.avatar_url}`;
-                }}
-              />
-            ) : (
-              <img 
-                src="/avatars/user.png"
-                alt="Default User"
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-          {!isCollapsed && (
-            <div className="min-w-0">
-              <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
-              <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
-              {userData.department && (
-                <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-  
-  const MenuItem = ({ item, index }) => (
-    <div className="mb-2">
-      <button 
-        onClick={() => {
-          if (item.onClick) {
-            item.onClick();
-          } else {
-            setActiveView(item.view);
-            setActiveItem(activeItem === index ? null : index);
-          }
-        }}
-        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
-          isCollapsed ? 'justify-center' : ''
-        }`}
-        title={isCollapsed ? item.title : ''}
-      >
-        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-      </button>
-    </div>
-  );
-
-  MenuItem.propTypes = {
-    item: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      icon: PropTypes.elementType.isRequired,
-      view: PropTypes.string.isRequired,
-      onClick: PropTypes.func,
-    }).isRequired,
-    index: PropTypes.number.isRequired,
-  };
 
   useEffect(() => {
     // Load user theme
@@ -659,7 +503,10 @@ const ProfilePage = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <SidebarContent />
+        <SidebarContent 
+        userId={userId}
+        isDarkMode={isDarkMode}
+        />
       </aside>
       <Toaster />
       {/* {renderAvatarDialog()} */}

@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  Menu, Settings, LogOut, MessageSquare, Home, User,
-  PanelLeftOpen, PanelLeftClose, Wand2,
+  Menu, LogOut, Wand2
 } from 'lucide-react';
 import {
   Sheet,
@@ -26,6 +24,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../utils/supabase.js';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 import AgentNLP from '../NLP/AgentNLP';
+import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 
 const BackgroundSVG = () => (
   <svg
@@ -86,10 +85,8 @@ const CustomerDashboard = () => {
   const [userData, setProfileData] = useState(location.state?.userData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { loadUserTheme } = useTheme();
-  const [activeItem, setActiveItem] = useState(null);
+  const { isDarkMode, loadUserTheme } = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [setActiveView] = useState('home');
   const [hoverTimeout, setHoverTimeout] = useState(null);
 
   const handleMouseEnter = () => {
@@ -148,34 +145,6 @@ const CustomerDashboard = () => {
     fetchProfileData();
   }, [location.state, navigate, loadUserTheme]);
 
-  // Updated menu items for creator dashboard
-  const menuItems = [
-    {
-      title: 'Home',
-      icon: Home,
-      view: 'home',
-      onClick: () => navigate('/customerdashboard', { state: { userData } })
-    },
-    {
-      title: 'Messages',
-      icon: MessageSquare,
-      view: 'tickets',
-      onClick: () => navigate('/customertickets', { state: { userData } })
-    },
-    {
-      title: 'Profile',
-      icon: User,
-      view: 'profile',
-      onClick: () => navigate('/profile', { state: { userData } })
-    },
-    {
-      title: 'Settings',
-      icon: Settings,
-      view: 'settings',
-      onClick: () => navigate('/settings', { state: { userData } })
-    }    
-  ];
-
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -200,97 +169,6 @@ const CustomerDashboard = () => {
     );
   }
 
-  const SidebarContent = () => (
-    <div 
-      className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
-        <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
-          {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
-          <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
-            {isCollapsed ? 
-              <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
-              <PanelLeftClose className="h-6 w-6 dark:text-white" />
-            }
-          </div>
-        </div>
-      </div>
-  
-      <nav className="flex-1 overflow-y-auto p-4">
-        {menuItems.map((item, index) => (
-          <MenuItem key={index} item={item} index={index} />
-        ))}
-      </nav>
-  
-      <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-          <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {userData?.avatar_url ? (
-              <img 
-                src={`${userData.avatar_url}`}
-                alt={userData.fullname}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = `/avatars/${userData.avatar_url}`;
-                }}
-              />
-            ) : (
-              <img 
-                src="/avatars/user.png"
-                alt="Default User"
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-          {!isCollapsed && (
-            <div className="min-w-0">
-              <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
-              <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
-              {userData.department && (
-                <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-  
-  const MenuItem = ({ item, index }) => (
-    <div className="mb-2">
-      <button 
-        onClick={() => {
-          if (item.onClick) {
-            item.onClick();
-          } else {
-            setActiveView(item.view);
-            setActiveItem(activeItem === index ? null : index);
-          }
-        }}
-        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
-          isCollapsed ? 'justify-center' : ''
-        }`}
-        title={isCollapsed ? item.title : ''}
-      >
-        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-      </button>
-    </div>
-  );
-
-  MenuItem.propTypes = {
-    item: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      icon: PropTypes.elementType.isRequired,
-      view: PropTypes.string.isRequired,
-      onClick: PropTypes.func,
-    }).isRequired,
-    index: PropTypes.number.isRequired,
-  };
-
   return (
     <div className={`min-h-screen flex bg-gray-50 dark:bg-gray-900 transition-colors duration-200`}>
       <BackgroundSVG className="z-0 "/>
@@ -302,7 +180,10 @@ const CustomerDashboard = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <SidebarContent />
+        <SidebarContent 
+        userId={userData.id}
+        isDarkMode={isDarkMode}
+        />
       </aside>
 
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300`}>

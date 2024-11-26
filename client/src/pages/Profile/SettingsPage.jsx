@@ -15,7 +15,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Toaster } from "@/components/ui/toaster"
 import {
   Moon,
   Bell,
@@ -23,19 +22,11 @@ import {
   Mail,
   MessageCircle,
   AlertOctagon,
-  MessageSquare,
-  Home,
-  Star,
-  Palette,
-  User,
-  Settings,
-  PanelLeftOpen,
-  PanelLeftClose
 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import PropTypes from 'prop-types';
+import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 
 const BackgroundSVG = () => (
@@ -91,12 +82,9 @@ const SettingsPage = () => {
   const [loading, setLoading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState('');
   const { isDarkMode, toggleTheme } = useTheme();
-  
   const [userData, setUserData] = useState(location.state?.userData);
   const userType = location.state?.userData.userType || 'user';
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [setActiveView] = useState('home');
-  const [activeItem, setActiveItem] = useState(null);
   const [hoverTimeout, setHoverTimeout] = useState(null);
 
   const handleMouseEnter = () => {
@@ -130,142 +118,6 @@ const SettingsPage = () => {
       marketingComms: false
     }
   });
-
-  const dashboardPath = userData.userType === 'agent' ? '/agentdashboard' : '/customerdashboard';
-  const ticketPath = userData.userType === 'agent' ? '/agenttickets' : '/customertickets';
-
-  // Updated menu items for creator dashboard
-  const menuItems = [
-    {
-      title: 'Home',
-      icon: Home,
-      view: 'home',
-      onClick: () => navigate(dashboardPath, { state: { userData } })
-    },
-    {
-      title: 'Messages',
-      icon: MessageSquare,
-      view: 'tickets',
-      onClick: () => navigate(ticketPath, { state: { userData } })
-    },
-    ...(userData.userType === 'agent' ? [
-    {
-      title: 'Portfolio',
-      icon: Palette,
-      view: 'portfolio',
-      onClick: () => navigate('/portfolio', { state: { userData } })
-    },
-    {
-      title: 'Featured Work',
-      icon: Star,
-      view: 'project',
-      onClick: () => navigate('/agentprojects', { state: { userData } })
-    }
-  ] : []),
-    {
-      title: 'Profile',
-      icon: User,
-      view: 'profile',
-      onClick: () => navigate('/profile', { state: { userData } })
-    },
-    {
-      title: 'Settings',
-      icon: Settings,
-      view: 'settings',
-      onClick: () => navigate('/settings', { state: { userData } })
-    }    
-  ];
-
-  const SidebarContent = () => (
-    <div 
-      className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
-        <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
-          {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
-          <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
-            {isCollapsed ? 
-              <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
-              <PanelLeftClose className="h-6 w-6 dark:text-white" />
-            }
-          </div>
-        </div>
-      </div>
-  
-      <nav className="flex-1 overflow-y-auto p-4">
-        {menuItems.map((item, index) => (
-          <MenuItem key={index} item={item} index={index} />
-        ))}
-      </nav>
-  
-      <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-          <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {userData?.avatar_url ? (
-              <img 
-                src={`${userData.avatar_url}`}
-                alt={userData.fullname}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = `/avatars/${userData.avatar_url}`;
-                }}
-              />
-            ) : (
-              <img 
-                src="/avatars/user.png"
-                alt="Default User"
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-          {!isCollapsed && (
-            <div className="min-w-0">
-              <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
-              <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
-              {userData.department && (
-                <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-  
-  const MenuItem = ({ item, index }) => (
-    <div className="mb-2">
-      <button 
-        onClick={() => {
-          if (item.onClick) {
-            item.onClick();
-          } else {
-            setActiveView(item.view);
-            setActiveItem(activeItem === index ? null : index);
-          }
-        }}
-        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
-          isCollapsed ? 'justify-center' : ''
-        }`}
-        title={isCollapsed ? item.title : ''}
-      >
-        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-      </button>
-    </div>
-  );
-
-  MenuItem.propTypes = {
-    item: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      icon: PropTypes.elementType.isRequired,
-      view: PropTypes.string.isRequired,
-      onClick: PropTypes.func,
-    }).isRequired,
-    index: PropTypes.number.isRequired,
-  };
 
   // Get current user and settings on mount
   useEffect(() => {
@@ -443,9 +295,11 @@ const SettingsPage = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <SidebarContent />
+        <SidebarContent 
+        userId={userData.id}
+        isDarkMode={isDarkMode}
+        />
       </aside>
-      <Toaster />
       {/* Header Section */}
       <div className={`sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b`}>
         <div className="container mx-auto px-4 h-16">

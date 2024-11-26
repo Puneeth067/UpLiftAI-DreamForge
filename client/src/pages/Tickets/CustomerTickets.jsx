@@ -9,9 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import { 
   CircleSlash, 
-  MessageSquare, 
   Search, 
   Timer,
   Clock,
@@ -19,11 +19,10 @@ import {
   MessageCircle,
   CheckCircle2,
   CheckCircle,
-  User,
-  Home,
-  Settings,
-  PanelLeftOpen,
-  PanelLeftClose
+  Paintbrush,
+  Briefcase,
+  Award,
+  Rocket
 } from "lucide-react";
 import { 
   Dialog, 
@@ -100,7 +99,6 @@ const CustomerTickets = () => {
   const navigate = useNavigate();
   const userData = location.state?.userData;
   const { isDarkMode, loadUserTheme } = useTheme();
-
   const [activeTickets, setActiveTickets] = useState([]);
   const [inProgressTickets, setInProgressTickets] = useState([]);
   const [resolvedTickets, setResolvedTickets] = useState([]);
@@ -113,9 +111,7 @@ const CustomerTickets = () => {
   const [selectedRejectedTicket, setSelectedRejectedTicket] = useState(null);
   const [selectedInProgressTicket, setSelectedInProgressTicket] = useState(null);
   const [agentProfiles, setAgentProfiles] = useState({});
-  const [activeItem, setActiveItem] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [setActiveView] = useState('home');
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -170,7 +166,7 @@ const CustomerTickets = () => {
         status: 'active'
       });
   
-      const { data: ticket, error } = await supabase
+      const { error } = await supabase
         .from('tickets')
         .insert([
           {
@@ -207,7 +203,7 @@ const CustomerTickets = () => {
       console.error('Full error object:', error);
       
       // More user-friendly error message
-      let errorMessage = 'Failed to create ticket. ';
+      let errorMessage = 'Failed to create proposal. ';
       if (error.message) {
         errorMessage += error.message;
       } else if (error.details) {
@@ -280,125 +276,6 @@ const CustomerTickets = () => {
     fetchTickets();
   }, [userData?.id, loadUserTheme, fetchTickets]);
 
-  // Updated menu items for creator dashboard
-  const menuItems = [
-    {
-      title: 'Home',
-      icon: Home,
-      view: 'home',
-      onClick: () => navigate('/customerdashboard', { state: { userData } })
-    },
-    {
-      title: 'Messages',
-      icon: MessageSquare,
-      view: 'tickets',
-      onClick: () => navigate('/customertickets', { state: { userData } })
-    },
-    {
-      title: 'Profile',
-      icon: User,
-      view: 'profile',
-      onClick: () => navigate('/profile', { state: { userData } })
-    },
-    {
-      title: 'Settings',
-      icon: Settings,
-      view: 'settings',
-      onClick: () => navigate('/settings', { state: { userData } })
-    }    
-  ];
-
-  const SidebarContent = () => (
-    <div 
-      className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
-        <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
-          {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
-          <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
-            {isCollapsed ? 
-              <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
-              <PanelLeftClose className="h-6 w-6 dark:text-white" />
-            }
-          </div>
-        </div>
-      </div>
-  
-      <nav className="flex-1 overflow-y-auto p-4">
-        {menuItems.map((item, index) => (
-          <MenuItem key={index} item={item} index={index} />
-        ))}
-      </nav>
-  
-      <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-          <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {userData?.avatar_url ? (
-              <img 
-                src={`${userData.avatar_url}`}
-                alt={userData.fullname}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = `/avatars/${userData.avatar_url}`;
-                }}
-              />
-            ) : (
-              <img 
-                src="/avatars/user.png"
-                alt="Default User"
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-          {!isCollapsed && (
-            <div className="min-w-0">
-              <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
-              <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
-              {userData.department && (
-                <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-  
-  const MenuItem = ({ item, index }) => (
-    <div className="mb-2">
-      <button 
-        onClick={() => {
-          if (item.onClick) {
-            item.onClick();
-          } else {
-            setActiveView(item.view);
-            setActiveItem(activeItem === index ? null : index);
-          }
-        }}
-        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
-          isCollapsed ? 'justify-center' : ''
-        }`}
-        title={isCollapsed ? item.title : ''}
-      >
-        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-      </button>
-    </div>
-  );
-
-  MenuItem.propTypes = {
-    item: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      icon: PropTypes.elementType.isRequired,
-      view: PropTypes.string.isRequired,
-      onClick: PropTypes.func,
-    }).isRequired,
-    index: PropTypes.number.isRequired,
-  };
-
   const getStatusColor = (status) => {
     const colors = {
       active: isDarkMode 
@@ -451,8 +328,8 @@ const CustomerTickets = () => {
         isDarkMode ? 'bg-gray-800 hover:bg-gray-800/80' : 'bg-white hover:bg-gray-50'
       }`}
       style={{
-        borderLeftColor: ticket.priority === 'high' ? '#ef4444' : 
-                        ticket.priority === 'medium' ? '#eab308' : '#22c55e'
+        borderLeftColor: ticket.priority === 'high' ? '#ec4899' : 
+                        ticket.priority === 'medium' ? '#8b5cf6' : '#6366f1'
       }}
       onClick={() => {
         console.log('Clicked on ticket:', ticket);
@@ -472,18 +349,28 @@ const CustomerTickets = () => {
       <CardContent className="pt-6">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-3 flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className={`font-semibold text-lg group-hover:text-blue-500 transition-colors ${
-                isDarkMode ? 'text-gray-100' : 'text-gray-900'
-              }`}>
-                {ticket.issue_type}
-              </h3>
-            </div>
+          <div className="flex items-center gap-2">
+            {ticket.issue_type === 'easy' && (
+              <Award className="h-5 w-5 text-purple-500" />
+            )}
+            {ticket.issue_type === 'medium' && (
+              <Briefcase className="h-5 w-5 text-purple-500" />
+            )}
+            {ticket.issue_type === 'high' && (
+              <Rocket className="h-5 w-5 text-purple-500" />
+            )}
+            <h3 className={`font-semibold text-lg group-hover:text-purple-500 transition-colors ${
+              isDarkMode ? 'text-gray-100' : 'text-gray-900'
+            }`}>
+              {ticket.issue_type}
+            </h3>
+          </div>
+
             <div className={`flex items-center gap-3 text-sm ${
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}>
               <div className="flex items-center gap-1">
-                <MessageSquare size={14} />
+                <Paintbrush size={14} />
                 <span>#{ticket.id}</span>
               </div>
               <div className="flex items-center gap-1">
@@ -497,11 +384,16 @@ const CustomerTickets = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className={`${getStatusColor(ticket.status)} capitalize`}>
-              {ticket.status.replace('_', ' ')}
+          <Badge variant="outline" className={`${getStatusColor(ticket.status)} capitalize`}>
+              {ticket.status === 'active' ? 'New Proposal' :
+               ticket.status === 'in_progress' ? 'Under Review' :
+               ticket.status === 'resolved' ? 'Accepted' :
+               'Declined'}
             </Badge>
             <Badge variant="outline" className={`${getPriorityColor(ticket.priority)} capitalize`}>
-              {ticket.priority}
+              {ticket.priority === 'high' ? 'Rush' :
+               ticket.priority === 'medium' ? 'Standard' :
+               'Flexible'}
             </Badge>
           </div>
         </div>
@@ -515,11 +407,6 @@ const CustomerTickets = () => {
         <CircleSlash className={`mx-auto h-12 w-12 ${
           isDarkMode ? 'text-gray-600' : 'text-gray-400'
         } mb-4`} />
-        <h3 className={`text-lg font-medium mb-1 ${
-          isDarkMode ? 'text-gray-100' : 'text-gray-900'
-        }`}>
-          No tickets found
-        </h3>
         <p className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>
           {message}
         </p>
@@ -1052,12 +939,13 @@ const CustomerTickets = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <SidebarContent />
+        <SidebarContent 
+        userId={userData.id}
+        isDarkMode={isDarkMode}
+        />
       </aside>
       <Toaster />
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-        isCollapsed ? 'md:ml-20' : 'md:ml-64'
-      }`}>
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300`}>
         <div className={`${isCollapsed ? 'w-[1024px]' : 'w-[896px]'} shadow-xl rounded-lg my-8 ${
           isDarkMode ? 'bg-gray-800' : 'bg-white'} ${isCollapsed ? 'left-20' : 'left-64'} pt-8 mb-0`}>
           <div className={`p-6 border-b ${
@@ -1068,7 +956,7 @@ const CustomerTickets = () => {
               <h1 className={` flex text-2xl font-bold ${
                 isDarkMode ? 'text-gray-100' : 'text-gray-900'
               }`}>
-                TicketZone
+                Project Proposal
               </h1>
             </div>
             
@@ -1080,7 +968,7 @@ const CustomerTickets = () => {
               } bg-gradient-to-br text-white shadow-lg hover:shadow-xl`}
               onClick={() => setShowTicketDialog(true)}
             >
-              Create Ticket
+              Create Proposal
             </Button>
           </div>
         </div>
@@ -1096,7 +984,7 @@ const CustomerTickets = () => {
               className={`pl-10 ${
                 isDarkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : ''
               }`}
-              placeholder="Search tickets by issue type..."
+              placeholder="Search proposals by issue type..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -1107,19 +995,19 @@ const CustomerTickets = () => {
           <Tabs defaultValue="active" className="space-y-6">
             <TabsList className={isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50/80'}>
               <TabsTrigger value="active" className="gap-2">
-                Tickets Booked
+                Proposal Submitted
                 {activeTickets.length > 0 && (
                   <Badge variant="secondary">{activeTickets.length}</Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger value="in_progress" className="gap-2">
-                In Progress
+                Under Review
                 {inProgressTickets.length > 0 && (
                   <Badge variant="secondary">{inProgressTickets.length}</Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger value="resolved" className="gap-2">
-                Resolved
+                Accepted
                 {resolvedTickets.length > 0 && (
                   <Badge variant="secondary">{resolvedTickets.length}</Badge>
                 )}
@@ -1139,7 +1027,7 @@ const CustomerTickets = () => {
                     isDarkMode ? 'border-gray-400' : 'border-gray-900'
                   }`}></div>
                   <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'}>
-                    Loading tickets...
+                    Loading proposals...
                   </p>
                 </div>
               ) : filteredActiveTickets.length > 0 ? (
@@ -1147,8 +1035,8 @@ const CustomerTickets = () => {
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No active tickets match your search"
-                    : "You don't have any active tickets"
+                    ? "No active proposals match your search"
+                    : "You don't have any active proposals"
                 )
               )}
             </TabsContent>
@@ -1160,7 +1048,7 @@ const CustomerTickets = () => {
                     isDarkMode ? 'border-gray-400' : 'border-gray-900'
                   }`}></div>
                   <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'}>
-                    Loading tickets...
+                    Loading proposals...
                   </p>
                 </div>
               ) : filteredInProgressTickets.length > 0 ? (
@@ -1168,8 +1056,8 @@ const CustomerTickets = () => {
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No in-progress tickets match your search"
-                    : "You don't have any in-progress tickets"
+                    ? "No in-creation proposals match your search"
+                    : "You don't have any in-progress proposals"
                 )
               )}
             </TabsContent>
@@ -1181,7 +1069,7 @@ const CustomerTickets = () => {
                     isDarkMode ? 'border-gray-400' : 'border-gray-900'
                   }`}></div>
                   <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'}>
-                    Loading tickets...
+                    Loading proposals...
                   </p>
                 </div>
               ) : filteredResolvedTickets.length > 0 ? (
@@ -1189,8 +1077,8 @@ const CustomerTickets = () => {
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No resolved tickets match your search"
-                    : "You don't have any resolved tickets"
+                    ? "No resolved proposals match your search"
+                    : "You don't have any resolved proposals"
                 )
               )}
             </TabsContent>
@@ -1203,7 +1091,7 @@ const CustomerTickets = () => {
                   }`}></div>
                   <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'
                   }>
-                    Loading tickets...
+                    Loading proposals...
                   </p>
                 </div>
               ) : filteredRejectedTickets.length > 0 ? (
@@ -1211,8 +1099,8 @@ const CustomerTickets = () => {
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No rejected tickets match your search"
-                    : "You don't have any rejected tickets"
+                    ? "No rejected proposals match your search"
+                    : "You don't have any rejected proposals"
                 )
               )}
             </TabsContent>
@@ -1222,97 +1110,126 @@ const CustomerTickets = () => {
       </div>
       
       <Dialog open={showTicketDialog} onOpenChange={setShowTicketDialog}>
-        <DialogContent className={`sm:max-w-[500px] rounded-2xl ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-          <DialogHeader>
-            <DialogTitle className={`text-2xl ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Create Support Ticket</DialogTitle>
-            <DialogDescription className={`text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Fill out the form below to submit a new support ticket. Our team will respond as soon as possible.
-            </DialogDescription>
-          </DialogHeader>
-          <Separator className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} />
-          <div className="grid gap-6 py-6">
-            <div className="grid gap-2">
-              <label htmlFor="issue-type" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Issue Type</label>
-              <Select
-                value={ticketData.type}
-                onValueChange={(value) => setTicketData(prev => ({ ...prev, type: value }))}
-              >
-                <SelectTrigger className={`bg-white dark:bg-gray-700 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                  <SelectValue placeholder="Select issue type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="technical">Technical Issue</SelectItem>
-                  <SelectItem value="billing">Billing Issue</SelectItem>
-                  <SelectItem value="account">Account Issue</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <label className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Priority</label>
-              <Select
-                value={ticketData.priority}
-                onValueChange={(value) => setTicketData(prev => ({ ...prev, priority: value }))}
-              >
-                <SelectTrigger className={`bg-white dark:bg-gray-700 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="description" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Description</label>
-              <Textarea
-                id="description"
-                placeholder="Please describe your issue in detail"
-                value={ticketData.description}
-                onChange={(e) => setTicketData(prev => ({ ...prev, description: e.target.value }))}
-                className={`h-32 ${
-                  isDarkMode
-                    ? 'bg-gray-700 text-gray-200 placeholder-gray-400'
-                    : 'bg-white text-gray-800 placeholder-gray-500'
-                }`}
-              />
-            </div>
-          </div>
-          <Separator className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} />
-          <DialogFooter className="gap-3 sm:gap-0">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowTicketDialog(false)}
-              className={`rounded-lg ${
-                isDarkMode
-                  ? 'border-gray-600 text-gray-200 hover:bg-gray-700'
-                  : 'border-gray-200 text-gray-800 hover:bg-gray-100'
-              }`}
-            >
-              Cancel
-            </Button>
-            <Button 
-              className={`rounded-lg transform transition-all duration-300 hover:scale-105 ${
-                isDarkMode
-                  ? 'from-teal-400 to-emerald-500'
-                  : 'from-teal-500 to-emerald-600'
-              } bg-gradient-to-br text-white shadow-md hover:shadow-xl`}
-              onClick={handleTicketSubmit}
-              disabled={uploading}
-            >
-              {uploading ? (
+  <DialogContent className={`sm:max-w-[500px] rounded-2xl max-h-[90vh] flex flex-col overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+    <DialogHeader className={`sticky top-0 z-10 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} py-4 px-6`}>
+      <DialogTitle className={`text-2xl ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Submit Project Proposal</DialogTitle>
+      <DialogDescription className={`text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+        Fill out the form below to submit a new project proposal. Our team will review and match you with potential creators.
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+      <div className="grid gap-4">
+        <div className="grid gap-2">
+          <label htmlFor="issue-type" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+            Proposal Type
+          </label>
+          <Select
+            value={ticketData.type}
+            onValueChange={(value) => setTicketData(prev => ({ ...prev, type: value }))}
+          >
+            <SelectTrigger className={`${isDarkMode ? 'bg-gray-700 text-gray-200' : 'bg-white text-gray-800'} rounded-lg`}>
+              <SelectValue placeholder="Select required speciality" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="technical">Technical Issue</SelectItem>
+              <SelectItem value="billing">Billing Issue</SelectItem>
+              <SelectItem value="account">Account Issue</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid gap-2">
+          <label className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+            Urgency
+          </label>
+          <Select
+            value={ticketData.priority}
+            onValueChange={(value) => setTicketData(prev => ({ ...prev, priority: value }))}
+          >
+            <SelectTrigger className={`${isDarkMode ? 'bg-gray-700 text-gray-200' : 'bg-white text-gray-800'} rounded-lg`}>
+              <SelectValue placeholder="Select urgency" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Submitting...</span>
+                  <Award size={16} className="text-green-500" />
+                  <span>Small Project</span>
                 </div>
-              ) : (
-                <span>Submit Ticket</span>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              </SelectItem>
+              <SelectItem value="medium">
+                <div className="flex items-center gap-2">
+                  <Briefcase size={16} className="text-yellow-500" />
+                  <span>Medium Project</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="high">
+                <div className="flex items-center gap-2">
+                  <Rocket size={16} className="text-red-500" />
+                  <span>Complex Project</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid gap-2">
+          <label htmlFor="description" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+            Description
+          </label>
+          <Textarea
+            id="description"
+            placeholder="Please describe your proposal in detail"
+            value={ticketData.description}
+            onChange={(e) => setTicketData(prev => ({ ...prev, description: e.target.value }))}
+            className={`h-32 rounded-lg ${
+              isDarkMode
+                ? 'bg-gray-700 text-gray-200 placeholder-gray-400'
+                : 'bg-white text-gray-800 placeholder-gray-500'
+            }`}
+          />
+        </div>
+      </div>
+    </div>
+
+    <div className={`sticky bottom-0 left-0 right-0 z-10 py-4 px-6 flex justify-end gap-4 ${
+      isDarkMode 
+        ? 'bg-gray-800 border-t border-gray-700' 
+        : 'bg-white border-t border-gray-200'
+    }`}>
+      <Button 
+        variant="outline" 
+        onClick={() => setShowTicketDialog(false)}
+        className={`rounded-lg ${
+          isDarkMode
+            ? 'border-gray-600 text-gray-200 hover:bg-gray-700'
+            : 'border-gray-200 text-gray-800 hover:bg-gray-100'
+        }`}
+      >
+        Cancel
+      </Button>
+      <Button 
+        className={`rounded-lg transform transition-all duration-300 hover:scale-105 ${
+          isDarkMode
+            ? 'from-teal-400 to-emerald-500'
+            : 'from-teal-500 to-emerald-600'
+        } bg-gradient-to-br text-white shadow-md hover:shadow-xl`}
+        onClick={handleTicketSubmit}
+        disabled={uploading}
+      >
+        {uploading ? (
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <span>Submitting...</span>
+          </div>
+        ) : (
+          <span>Submit Proposal</span>
+        )}
+      </Button>
+    </div>
+  </DialogContent>
+</Dialog>
 
       <RejectionDialog />
       <InProgressDialog />

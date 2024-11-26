@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import PropTypes from 'prop-types';
 import {
   Card,
   CardContent
@@ -9,16 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+
+import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import { 
   CircleSlash, 
-  MessageSquare, 
   Search, 
   Clock,
   User,
   X,
   CheckCircle2,
   XCircle,
-  PanelLeftOpen, PanelLeftClose,Home,Palette,Star, Sparkles, Paintbrush, Settings
+  Paintbrush,
+  Briefcase,
+  Award,
+  Rocket
 } from "lucide-react";
 import { supabase } from "@/utils/supabase";
 import { useTheme } from '../../contexts/ThemeContext';
@@ -90,7 +93,6 @@ const BackgroundSVG = () => (
 
 const AgentTickets = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { isDarkMode, loadUserTheme } = useTheme();
 
   const [openTickets, setOpenTickets] = useState([]);
@@ -99,9 +101,7 @@ const AgentTickets = () => {
   const [rejectedTickets, setRejectedTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [activeItem, setActiveItem] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [setActiveView] = useState('tickets')
   
   const [selectedResolvedTicket, setSelectedResolvedTicket] = useState(null);
   const [isResolvedDialogOpen, setIsResolvedDialogOpen] = useState(false);
@@ -143,45 +143,6 @@ const [hoverTimeout, setHoverTimeout] = useState(null);
     };
   }, [hoverTimeout]);
 
-// Updated menu items for creator dashboard
-const menuItems = [
-  {
-    title: 'Home',
-    icon: Home,
-    view: 'home',
-    onClick: () => navigate('/agentdashboard', { state: { userData } })
-  },
-  {
-    title: 'Messages',
-    icon: MessageSquare,
-    view: 'tickets',
-    onClick: () => navigate('/agenttickets', { state: { userData } })
-  },
-  {
-    title: 'Featured Work',
-    icon: Star,
-    view: 'project',
-    onClick: () => navigate('/agentprojects', { state: { userData } })
-  },
-  {
-    title: 'Portfolio',
-    icon: Palette,
-    view: 'portfolio',
-    onClick: () => navigate('/portfolio', { state: { userData } })
-  },
-  {
-    title: 'Profile',
-    icon: User,
-    view: 'profile',
-    onClick: () => navigate('/profile', { state: { userData } })
-  },
-  {
-    title: 'Settings',
-    icon: Settings,
-    view: 'settings',
-    onClick: () => navigate('/settings', { state: { userData } })
-  }    
-];
 
 // Fetch user details for in-progress ticket
 const fetchInProgressTicketUserDetails = async (userId) => {
@@ -747,8 +708,16 @@ const InProgressTicketDetailsDialog = () => {
       <CardContent className="pt-6">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-3 flex-1">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-500" />
+          <div className="flex items-center gap-2">
+              {request.issue_type === 'easy' && (
+                <Award className="h-5 w-5 text-purple-500" />
+              )}
+              {request.issue_type === 'medium' && (
+                <Briefcase className="h-5 w-5 text-purple-500" />
+              )}
+              {request.issue_type === 'high' && (
+                <Rocket className="h-5 w-5 text-purple-500" />
+              )}
               <h3 className={`font-semibold text-lg group-hover:text-purple-500 transition-colors ${
                 isDarkMode ? 'text-gray-100' : 'text-gray-900'
               }`}>
@@ -774,9 +743,9 @@ const InProgressTicketDetailsDialog = () => {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className={`${getStatusColor(request.status)} capitalize`}>
-              {request.status === 'active' ? 'New Request' :
-               request.status === 'in_progress' ? 'In Creation' :
-               request.status === 'resolved' ? 'Completed' :
+              {request.status === 'active' ? 'New Proposal' :
+               request.status === 'in_progress' ? 'Under Review' :
+               request.status === 'resolved' ? 'Accepted' :
                'Declined'}
             </Badge>
             <Badge variant="outline" className={`${getPriorityColor(request.priority)} capitalize`}>
@@ -802,97 +771,6 @@ const InProgressTicketDetailsDialog = () => {
       </CardContent>
     </Card>
   );
-
-  const SidebarContent = () => (
-    <div 
-      className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
-        <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
-          {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
-          <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
-            {isCollapsed ? 
-              <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
-              <PanelLeftClose className="h-6 w-6 dark:text-white" />
-            }
-          </div>
-        </div>
-      </div>
-  
-      <nav className="flex-1 overflow-y-auto p-4">
-        {menuItems.map((item, index) => (
-          <MenuItem key={index} item={item} index={index} />
-        ))}
-      </nav>
-  
-      <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-          <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {userData?.avatar_url ? (
-              <img 
-                src={`${userData.avatar_url}`}
-                alt={userData.fullname}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = `/avatars/${userData.avatar_url}`;
-                }}
-              />
-            ) : (
-              <img 
-                src="/avatars/user.png"
-                alt="Default User"
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-          {!isCollapsed && (
-            <div className="min-w-0">
-              <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
-              <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
-              {userData.department && (
-                <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-  
-  const MenuItem = ({ item, index }) => (
-    <div className="mb-2">
-      <button 
-        onClick={() => {
-          if (item.onClick) {
-            item.onClick();
-          } else {
-            setActiveView(item.view);
-            setActiveItem(activeItem === index ? null : index);
-          }
-        }}
-        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
-          isCollapsed ? 'justify-center' : ''
-        }`}
-        title={isCollapsed ? item.title : ''}
-      >
-        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-      </button>
-    </div>
-  );
-
-  MenuItem.propTypes = {
-    item: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      icon: PropTypes.elementType.isRequired,
-      view: PropTypes.string.isRequired,
-      onClick: PropTypes.func,
-    }).isRequired,
-    index: PropTypes.number.isRequired,
-  };
 
   const filteredOpenTickets = openTickets.filter((ticket) =>
     ticket.issue_type.toLowerCase().includes(searchTerm.toLowerCase())
@@ -964,7 +842,10 @@ const InProgressTicketDetailsDialog = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <SidebarContent />
+        <SidebarContent 
+        userId={userData.id}
+        isDarkMode={isDarkMode}
+        />
       </aside>
       <Toaster />
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
@@ -1013,13 +894,13 @@ const InProgressTicketDetailsDialog = () => {
             <Tabs defaultValue="active" className="space-y-6">
               <TabsList className={isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50/80'}>
                 <TabsTrigger value="active" className="gap-2">
-                  New Requests
+                  New Proposals
                   {openTickets.length > 0 && (
                     <Badge variant="secondary">{openTickets.length}</Badge>
                   )}
                 </TabsTrigger>
                 <TabsTrigger value="in_progress" className="gap-2">
-                  In Creation
+                  Under Review
                   {inProgressTickets.length > 0 && (
                     <Badge variant="secondary">{inProgressTickets.length}</Badge>
                   )}
@@ -1031,7 +912,7 @@ const InProgressTicketDetailsDialog = () => {
                   )}
                 </TabsTrigger>
                 <TabsTrigger value="rejected" className="gap-2">
-                  Declined
+                  Rejected
                   {rejectedTickets.length > 0 && (
                     <Badge variant="secondary">{rejectedTickets.length}</Badge>
                   )}
@@ -1045,7 +926,7 @@ const InProgressTicketDetailsDialog = () => {
                     isDarkMode ? 'border-gray-400' : 'border-gray-900'
                   }`}></div>
                   <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'}>
-                    Loading tickets...
+                    Loading Proposals...
                   </p>
                 </div>
               ) : filteredOpenTickets.length > 0 ? (
@@ -1053,8 +934,8 @@ const InProgressTicketDetailsDialog = () => {
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No requests match your search"
-                    : "No requests available"
+                    ? "No proposals match your search"
+                    : "No proposals available"
                 )
               )}
             </TabsContent>
@@ -1066,7 +947,7 @@ const InProgressTicketDetailsDialog = () => {
                     isDarkMode ? 'border-gray-400' : 'border-gray-900'
                   }`}></div>
                   <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'}>
-                    Loading tickets...
+                    Loading Proposals...
                   </p>
                 </div>
               ) : filteredInProgressTickets.length > 0 ? (
@@ -1074,8 +955,8 @@ const InProgressTicketDetailsDialog = () => {
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No in-progress creation match your search"
-                    : "No creations in progress"
+                    ? "No in-progress proposals match your search"
+                    : "No proposals in progress"
                 )
               )}
             </TabsContent>
@@ -1087,7 +968,7 @@ const InProgressTicketDetailsDialog = () => {
                     isDarkMode ? 'border-gray-400' : 'border-gray-900'
                   }`}></div>
                   <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-900'}>
-                    Loading tickets...
+                    Loading proposals...
                   </p>
                 </div>
               ) : filteredResolvedTickets.length > 0 ? (
@@ -1095,8 +976,8 @@ const InProgressTicketDetailsDialog = () => {
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No accepted creations match your search"
-                    : "No accepted creations available"
+                    ? "No accepted proposals match your search"
+                    : "No accepted proposals available"
                 )
               )}
             </TabsContent>
@@ -1108,7 +989,7 @@ const InProgressTicketDetailsDialog = () => {
                     isDarkMode ? 'border-gray-400' : 'border-gray-900'
                   }`}></div>
                   <p className={isDarkMode ? 'mt-4 text-gray-400' : 'mt-4 text-gray-500'}>
-                    Loading tickets...
+                    Loading proposals...
                   </p>
                 </div>
               ) : filteredRejectedTickets.length > 0 ? (
@@ -1116,8 +997,8 @@ const InProgressTicketDetailsDialog = () => {
               ) : (
                 renderEmptyState(
                   searchTerm
-                    ? "No declined creations match your search"
-                    : "No declined creations available"
+                    ? "No declined proposals match your search"
+                    : "No declined proposals available"
                 )
               )}
             </TabsContent>

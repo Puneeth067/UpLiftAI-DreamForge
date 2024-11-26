@@ -1,280 +1,200 @@
-// components/layout/Sidebar.jsx
-import React, { useState } from 'react';
-import {
-  LayoutDashboard,
-  TicketCheck,
-  MessageSquare,
-  BarChart,
-  Settings,
-  Users,
-  HelpCircle,
-  ChevronLeft,
-  Menu,
-  FileQuestion,
-  Clock,
-  Bell,
-  HeadphonesIcon,
-  UserCircle,
-  PhoneCall,
-  FileText,
-  PieChart
+import { useState, useEffect } from 'react';
+import { toast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster"
+import PropTypes from 'prop-types';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { 
+  Home, MessageSquare, Palette, Star, User, Settings, 
+  PanelLeftOpen, PanelLeftClose 
 } from 'lucide-react';
+import SidebarLoading from './SidebarLoading';
+import { supabase } from '@/utils/supabase';
 
-// User-specific menu configuration
-const userMenuConfig = [
-  {
-    title: 'Support',
-    items: [
-      {
-        name: 'My Tickets',
-        icon: TicketCheck,
-        path: '/tickets',
-        badge: 3
-      },
-      {
-        name: 'New Ticket',
-        icon: FileQuestion,
-        path: '/new-ticket'
-      },
-      {
-        name: 'Live Chat',
-        icon: MessageSquare,
-        path: '/chat'
-      },
-      {
-        name: 'Knowledge Base',
-        icon: FileText,
-        path: '/kb'
-      }
-    ]
-  },
-  {
-    title: 'Account',
-    items: [
-      {
-        name: 'My Profile',
-        icon: UserCircle,
-        path: '/profile'
-      },
-      {
-        name: 'Notifications',
-        icon: Bell,
-        path: '/notifications',
-        badge: 2
-      },
-      {
-        name: 'History',
-        icon: Clock,
-        path: '/history'
-      },
-      {
-        name: 'Settings',
-        icon: Settings,
-        path: '/settings'
-      }
-    ]
-  }
-];
-
-// Agent-specific menu configuration
-const agentMenuConfig = [
-  {
-    title: 'Workspace',
-    items: [
-      {
-        name: 'Dashboard',
-        icon: LayoutDashboard,
-        path: '/dashboard',
-        badge: 5
-      },
-      {
-        name: 'Active Tickets',
-        icon: TicketCheck,
-        path: '/tickets',
-        badge: 12
-      },
-      {
-        name: 'Live Support',
-        icon: HeadphonesIcon,
-        path: '/support'
-      },
-      {
-        name: 'Chat Queue',
-        icon: MessageSquare,
-        path: '/chat',
-        badge: 3
-      }
-    ]
-  },
-  {
-    title: 'Analysis',
-    items: [
-      {
-        name: 'Performance',
-        icon: BarChart,
-        path: '/performance'
-      },
-      {
-        name: 'Statistics',
-        icon: PieChart,
-        path: '/stats'
-      },
-      {
-        name: 'Call Logs',
-        icon: PhoneCall,
-        path: '/calls'
-      }
-    ]
-  },
-  {
-    title: 'Settings',
-    items: [
-      {
-        name: 'Profile',
-        icon: Users,
-        path: '/profile'
-      },
-      {
-        name: 'Preferences',
-        icon: Settings,
-        path: '/settings'
-      },
-      {
-        name: 'Help',
-        icon: HelpCircle,
-        path: '/help'
-      }
-    ]
-  }
-];
-
-const SidebarItem = ({ name, icon: Icon, path, isActive, onClick, badge }) => (
-  <button
-    onClick={() => onClick(path)}
-    className={`flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 w-full
-      ${isActive
-        ? 'bg-gray-100 text-gray-900'
-        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-      }`}
-  >
-    <div className="flex items-center">
-      <Icon className={`h-5 w-5 mr-3 ${isActive ? 'text-blue-500' : 'text-gray-400'}`} />
-      <span className="truncate">{name}</span>
-    </div>
-    {badge && (
-      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-        {badge}
-      </span>
-    )}
-  </button>
-);
-
-const UserProfile = ({ userType, userName }) => (
-  <div className="p-4 border-t border-gray-200">
-    <div className="flex items-center space-x-3">
-      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium">
-        {userName?.charAt(0) || 'U'}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">{userName || 'User Name'}</p>
-        <p className="text-xs text-gray-500 truncate capitalize">{userType}</p>
-      </div>
-    </div>
-  </div>
-);
-
-const Sidebar = ({ 
-  userType = 'user',
-  userName = '',
-  onNavigate = (path) => console.log('Navigate to:', path)
+const SidebarContent = ({ 
+  userId,
+  isDarkMode
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [currentPath, setCurrentPath] = useState('/dashboard');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [userData, setUserData] = useState(location.state?.userData);
+  const [loading, setLoading] = useState(true);
+  const [hoverTimeout, setHoverTimeout] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
-  const menuConfig = userType === 'agent' ? agentMenuConfig : userMenuConfig;
+  useEffect(() => {
+    fetchProfile();
+  }, [userId]);
 
-  const handleNavigation = (path) => {
-    setCurrentPath(path);
-    onNavigate(path);
+  const fetchProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      setUserData(data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load profile data",
+        variant: "destructive",
+        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+      });
+      setLoading(false);
+    }
   };
 
-  return (
-    <div className="relative">
-      {/* Mobile menu button */}
-      <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white shadow-md"
-        onClick={() => setIsCollapsed(!isCollapsed)}
+  const handleMouseEnter = () => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    setIsCollapsed(false);
+  };
+
+  const handleMouseLeave = () => {
+    const timeout = setTimeout(() => {
+      setIsCollapsed(true);
+    }, 400);
+    setHoverTimeout(timeout);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+    };
+  }, [hoverTimeout]);
+
+  const menuItems = [
+    {
+      title: 'Home',
+      icon: Home,
+      onClick: () => navigate(
+        userData?.usertype === 'agent' ? '/agentdashboard' : '/customerdashboard', 
+        { state: { userData } }
+      )
+    },
+    {
+      title: 'Messages',
+      icon: MessageSquare,
+      onClick: () => navigate(
+        userData?.usertype === 'agent' ? '/agenttickets' : '/customertickets', 
+        { state: { userData } }
+      )
+    },
+    ...(userData?.usertype === 'agent' ? [
+      {
+        title: 'Portfolio',
+        icon: Palette,
+        onClick: () => navigate('/portfolio', { state: { userData } })
+      },
+      {
+        title: 'Featured Work',
+        icon: Star,
+        onClick: () => navigate('/agentprojects', { state: { userData } })
+      }
+    ] : []),
+    {
+      title: 'Profile',
+      icon: User,
+      onClick: () => navigate('/profile', { state: { userData } })
+    },
+    {
+      title: 'Settings',
+      icon: Settings,
+      onClick: () => navigate('/settings', { state: { userData } })
+    }    
+  ];
+  
+  const MenuItem = ({ item }) => (
+    <div className="mb-2">
+      <button 
+        onClick={item.onClick}
+        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
+          isCollapsed ? 'justify-center' : ''
+        }`}
+        title={isCollapsed ? item.title : ''}
       >
-        <Menu className="h-6 w-6 text-gray-600" />
+        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
+        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
       </button>
-
-      {/* Sidebar */}
-      <div
-        className={`fixed top-0 left-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-40
-          ${isCollapsed ? '-translate-x-full' : 'translate-x-0'}
-          lg:translate-x-0 lg:static
-          ${isCollapsed ? 'w-0' : 'w-64'}`}
-      >
-        <div className="flex flex-col h-full">
-          {/* Logo and collapse button */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-md flex items-center justify-center text-white font-bold">
-                {userType === 'agent' ? 'A' : 'S'}
-              </div>
-              <span className="font-semibold text-gray-900">
-                {userType === 'agent' ? 'Agent Portal' : 'Support Center'}
-              </span>
-            </div>
-            <button
-              className="hidden lg:block p-1 rounded-md hover:bg-gray-100"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-            >
-              <ChevronLeft 
-                className={`h-5 w-5 text-gray-500 transition-transform duration-300 
-                  ${isCollapsed ? 'rotate-180' : ''}`} 
-              />
-            </button>
-          </div>
-
-          {/* Menu sections */}
-          <div className="flex-1 overflow-y-auto py-4">
-            {menuConfig.map((section) => (
-              <div key={section.title} className="px-3 space-y-1 mb-6">
-                <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                  {section.title}
-                </h3>
-                <div className="space-y-1">
-                  {section.items.map((item) => (
-                    <SidebarItem
-                      key={item.name}
-                      name={item.name}
-                      icon={item.icon}
-                      path={item.path}
-                      isActive={currentPath === item.path}
-                      onClick={handleNavigation}
-                      badge={item.badge}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* User profile section */}
-          <UserProfile userType={userType} userName={userName} />
-        </div>
-      </div>
-
-      {/* Overlay for mobile */}
-      {!isCollapsed && (
-        <div
-          className="fixed inset-0 bg-gray-600 bg-opacity-50 transition-opacity lg:hidden z-30"
-          onClick={() => setIsCollapsed(true)}
-        />
-      )}
     </div>
   );
+
+  MenuItem.propTypes = {
+    item: PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      icon: PropTypes.elementType.isRequired,
+      onClick: PropTypes.func.isRequired,
+    }).isRequired,
+  };
+
+  return(
+  <div 
+    className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
+    onMouseEnter={handleMouseEnter}
+    onMouseLeave={handleMouseLeave}
+  >
+    <Toaster />
+    <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
+      <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
+        {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
+        <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
+          {isCollapsed ? 
+            <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
+            <PanelLeftClose className="h-6 w-6 dark:text-white" />
+          }
+        </div>
+      </div>
+    </div>
+
+    <nav className="flex-1 overflow-y-auto p-4">
+      {menuItems.map((item, index) => (
+        <MenuItem key={index} item={item} index={index} />
+      ))}
+    </nav>
+
+    <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
+      <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
+        <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          {userData?.avatar_url ? (
+            <img 
+              src={`${userData.avatar_url}`}
+              alt={userData.fullname}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = `/avatars/${userData.avatar_url}`;
+              }}
+            />
+          ) : (
+            <img 
+              src="/avatars/user.png"
+              alt="Default User"
+              className="w-full h-full object-cover"
+            />
+          )}
+        </div>
+        {!isCollapsed && (
+          <div className="min-w-0">
+            <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
+            <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
+            {userData.department && (
+              <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+    {loading && <SidebarLoading isDarkMode={isDarkMode} />}
+  </div>
+)
 };
 
-export default Sidebar;
+SidebarContent.propTypes = {
+  userId: PropTypes.string.isRequired,
+  isDarkMode: PropTypes.bool.isRequired
+};
+
+export default SidebarContent;

@@ -303,7 +303,7 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-50 to-rose-50 dark:from-indigo-900/70 dark:to-rose-900/70 cursor-none">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-50 to-rose-50 dark:from-indigo-900/70 dark:to-rose-900/70 pb-12 cursor-none">
       <HomeBackground className="z-0"/>
       <CyberCursorEffect />
       <motion.nav 

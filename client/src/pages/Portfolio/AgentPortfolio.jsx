@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,12 +18,14 @@ import{
 } from "@/components/ui/avatar";
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
-import { Github, Twitter, Instagram, Linkedin, Globe, Mail, Edit, Save, Plus, X, Building, Calendar, Home,MessageSquare, Star, Palette, User, PanelLeftClose, PanelLeftOpen, Settings} from "lucide-react";
+import { Github, Twitter, Instagram, Linkedin, Globe, Mail, Edit, Save, Plus, X, Building, Calendar} from "lucide-react";
 import { supabase } from '@/utils/supabase';
 import PropTypes from 'prop-types';
 import { useTheme } from '../../contexts/ThemeContext';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 import { v4 as uuidv4 } from 'uuid';
+import SidebarContent from '@/components/layout/Sidebar/Sidebar';
+
 
 const BackgroundSVG = () => (
   <svg
@@ -81,17 +83,14 @@ const BackgroundSVG = () => (
 const MotionCard = motion(Card);
 
 const AgentPortfolio = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const { loadUserTheme } = useTheme();
+  const { isDarkMode, loadUserTheme } = useTheme();
   const [userData, setProfileData] = useState(location.state?.userData);
   const [isEditing, setIsEditing] = useState(false);
   const [portfolioData, setPortfolioData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [setActiveView] = useState('portfolio');
-  const [activeItem, setActiveItem] = useState(null);
   const [hoverTimeout, setHoverTimeout] = useState(null);
 
   const handleMouseEnter = () => {
@@ -118,46 +117,6 @@ const AgentPortfolio = () => {
   useEffect(() => {
     fetchPortfolioData();
   }, [userData.id]);
-
-  // Updated menu items for creator dashboard
-  const menuItems = [
-    {
-      title: 'Home',
-      icon: Home,
-      view: 'home',
-      onClick: () => navigate('/agentdashboard', { state: { userData } })
-    },
-    {
-      title: 'Messages',
-      icon: MessageSquare,
-      view: 'tickets',
-      onClick: () => navigate('/agenttickets', { state: { userData } })
-    },
-    {
-      title: 'Featured Work',
-      icon: Star,
-      view: 'project',
-      onClick: () => navigate('/agentprojects', { state: { userData } })
-    },
-    {
-      title: 'Portfolio',
-      icon: Palette,
-      view: 'portfolio',
-      onClick: () => navigate('/portfolio', { state: { userData } })
-    },
-    {
-      title: 'Profile',
-      icon: User,
-      view: 'profile',
-      onClick: () => navigate('/profile', { state: { userData } })
-    },
-    {
-      title: 'Settings',
-      icon: Settings,
-      view: 'settings',
-      onClick: () => navigate('/settings', { state: { userData } })
-    }    
-  ];
 
   const fetchPortfolioData = async () => {
     try {
@@ -397,97 +356,6 @@ const deleteProjectImage = async (imageUrl) => {
   }
 };
 
-const SidebarContent = () => (
-  <div 
-    className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
-    onMouseEnter={handleMouseEnter}
-    onMouseLeave={handleMouseLeave}
-  >
-    <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
-      <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
-        {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
-        <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
-          {isCollapsed ? 
-            <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
-            <PanelLeftClose className="h-6 w-6 dark:text-white" />
-          }
-        </div>
-      </div>
-    </div>
-
-    <nav className="flex-1 overflow-y-auto p-4">
-      {menuItems.map((item, index) => (
-        <MenuItem key={index} item={item} index={index} />
-      ))}
-    </nav>
-
-    <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
-      <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-        <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
-          {userData?.avatar_url ? (
-            <img 
-              src={`${userData.avatar_url}`}
-              alt={userData.fullname}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = `/avatars/${userData.avatar_url}`;
-              }}
-            />
-          ) : (
-            <img 
-              src="/avatars/user.png"
-              alt="Default User"
-              className="w-full h-full object-cover"
-            />
-          )}
-        </div>
-        {!isCollapsed && (
-          <div className="min-w-0">
-            <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
-            <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
-            {userData.department && (
-              <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  </div>
-);
-
-const MenuItem = ({ item, index }) => (
-  <div className="mb-2">
-    <button 
-      onClick={() => {
-        if (item.onClick) {
-          item.onClick();
-        } else {
-          setActiveView(item.view);
-          setActiveItem(activeItem === index ? null : index);
-        }
-      }}
-      className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
-        isCollapsed ? 'justify-center' : ''
-      }`}
-      title={isCollapsed ? item.title : ''}
-    >
-      <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-      {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-    </button>
-  </div>
-);
-
-  MenuItem.propTypes = {
-    item: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      icon: PropTypes.elementType.isRequired,
-      view: PropTypes.string.isRequired,
-      onClick: PropTypes.func,
-    }).isRequired,
-    index: PropTypes.number.isRequired,
-  };
-
   const handleEmailClick = () => {
     if (userProfile?.email) {
       window.open(`mailto:${userProfile.email}`, '_blank');
@@ -523,7 +391,10 @@ const MenuItem = ({ item, index }) => (
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <SidebarContent />
+        <SidebarContent 
+        userId={userData.id}
+        isDarkMode={isDarkMode}
+        />
       </aside>
       {/* Header with Edit Toggle */}
       <div className={`sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b`}>
@@ -571,17 +442,9 @@ const MenuItem = ({ item, index }) => (
             
             <div className="flex-1 space-y-4 text-center md:text-left">
               <div>
-                <h1 className="text-4xl font-bold">{userProfile?.fullname}</h1>
-                {isEditing ? (
-                  <Input
-                    value={portfolioData.title}
-                    onChange={(e) => setPortfolioData({ ...portfolioData, title: e.target.value })}
-                    className="mt-2 text-xl"
-                    placeholder="Your title"
-                  />
-                ) : (
-                  <h2 className="text-2xl text-muted-foreground mt-2">{portfolioData.title}</h2>
-                )}
+                <h1 className="text-4xl font-bold">{userProfile?.fullname}</h1>                
+                <h2 className="text-2xl text-muted-foreground mt-2">{userProfile.department}</h2>
+                
               </div>
 
               {isEditing ? (
