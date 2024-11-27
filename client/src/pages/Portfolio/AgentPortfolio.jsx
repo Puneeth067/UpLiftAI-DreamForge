@@ -25,6 +25,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 import { v4 as uuidv4 } from 'uuid';
 import SidebarContent from '@/components/layout/Sidebar/Sidebar';
+import PortfolioExportPDF from './PortfolioExportPDF';
 
 
 const BackgroundSVG = () => (
@@ -397,26 +398,33 @@ const deleteProjectImage = async (imageUrl) => {
         />
       </aside>
       {/* Header with Edit Toggle */}
-      <div className={`sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b`}>
+
+
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
           <h1 className="text-xl font-semibold">Portfolio</h1>
-          <Button
-            onClick={isEditing ? handleSave : () => setIsEditing(true)}
-            variant={isEditing ? "default" : "outline"}
-            className="flex items-center gap-2"
-          >
-            {isEditing ? (
-              <>
-                <Save className="w-4 h-4" />
-                Save Changes
-              </>
-            ) : (
-              <>
-                <Edit className="w-4 h-4" />
-                Edit Portfolio
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <PortfolioExportPDF 
+              userid={userData.id}
+            />
+            <Button
+              onClick={isEditing ? handleSave : () => setIsEditing(true)}
+              variant={isEditing ? "default" : "outline"}
+              className="flex items-center gap-2"
+            >
+              {isEditing ? (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Changes
+                </>
+              ) : (
+                <>
+                  <Edit className="w-4 h-4" />
+                  Edit Portfolio
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 

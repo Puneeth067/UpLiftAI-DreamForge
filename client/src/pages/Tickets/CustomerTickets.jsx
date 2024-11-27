@@ -33,7 +33,6 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { supabase } from "@/utils/supabase";
-import { Separator } from "@/components/ui/separator";
 import { useTheme } from '../../contexts/ThemeContext';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import PropTypes from 'prop-types';
@@ -1110,126 +1109,126 @@ const CustomerTickets = () => {
       </div>
       
       <Dialog open={showTicketDialog} onOpenChange={setShowTicketDialog}>
-  <DialogContent className={`sm:max-w-[500px] rounded-2xl max-h-[90vh] flex flex-col overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-    <DialogHeader className={`sticky top-0 z-10 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} py-4 px-6`}>
-      <DialogTitle className={`text-2xl ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Submit Project Proposal</DialogTitle>
-      <DialogDescription className={`text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-        Fill out the form below to submit a new project proposal. Our team will review and match you with potential creators.
-      </DialogDescription>
-    </DialogHeader>
+        <DialogContent className={`sm:max-w-[500px] rounded-2xl max-h-[90vh] flex flex-col overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+          <DialogHeader className={`sticky top-0 z-10 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} py-4 px-6`}>
+            <DialogTitle className={`text-2xl ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Submit Project Proposal</DialogTitle>
+            <DialogDescription className={`text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Fill out the form below to submit a new project proposal. Our team will review and match you with potential creators.
+            </DialogDescription>
+          </DialogHeader>
 
-    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-      <div className="grid gap-4">
-        <div className="grid gap-2">
-          <label htmlFor="issue-type" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-            Proposal Type
-          </label>
-          <Select
-            value={ticketData.type}
-            onValueChange={(value) => setTicketData(prev => ({ ...prev, type: value }))}
-          >
-            <SelectTrigger className={`${isDarkMode ? 'bg-gray-700 text-gray-200' : 'bg-white text-gray-800'} rounded-lg`}>
-              <SelectValue placeholder="Select required speciality" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="technical">Technical Issue</SelectItem>
-              <SelectItem value="billing">Billing Issue</SelectItem>
-              <SelectItem value="account">Account Issue</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <label htmlFor="issue-type" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                  Proposal Type
+                </label>
+                <Select
+                  value={ticketData.type}
+                  onValueChange={(value) => setTicketData(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger className={`${isDarkMode ? 'bg-gray-700 text-gray-200' : 'bg-white text-gray-800'} rounded-lg`}>
+                    <SelectValue placeholder="Select required speciality" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="technical">Technical Issue</SelectItem>
+                    <SelectItem value="billing">Billing Issue</SelectItem>
+                    <SelectItem value="account">Account Issue</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-        <div className="grid gap-2">
-          <label className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-            Urgency
-          </label>
-          <Select
-            value={ticketData.priority}
-            onValueChange={(value) => setTicketData(prev => ({ ...prev, priority: value }))}
-          >
-            <SelectTrigger className={`${isDarkMode ? 'bg-gray-700 text-gray-200' : 'bg-white text-gray-800'} rounded-lg`}>
-              <SelectValue placeholder="Select urgency" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">
-                <div className="flex items-center gap-2">
-                  <Award size={16} className="text-green-500" />
-                  <span>Small Project</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="medium">
-                <div className="flex items-center gap-2">
-                  <Briefcase size={16} className="text-yellow-500" />
-                  <span>Medium Project</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="high">
-                <div className="flex items-center gap-2">
-                  <Rocket size={16} className="text-red-500" />
-                  <span>Complex Project</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+              <div className="grid gap-2">
+                <label className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                  Urgency
+                </label>
+                <Select
+                  value={ticketData.priority}
+                  onValueChange={(value) => setTicketData(prev => ({ ...prev, priority: value }))}
+                >
+                  <SelectTrigger className={`${isDarkMode ? 'bg-gray-700 text-gray-200' : 'bg-white text-gray-800'} rounded-lg`}>
+                    <SelectValue placeholder="Select urgency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">
+                      <div className="flex items-center gap-2">
+                        <Award size={16} className="text-green-500" />
+                        <span>Small Project</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="medium">
+                      <div className="flex items-center gap-2">
+                        <Briefcase size={16} className="text-yellow-500" />
+                        <span>Medium Project</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="high">
+                      <div className="flex items-center gap-2">
+                        <Rocket size={16} className="text-red-500" />
+                        <span>Complex Project</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-        <div className="grid gap-2">
-          <label htmlFor="description" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-            Description
-          </label>
-          <Textarea
-            id="description"
-            placeholder="Please describe your proposal in detail"
-            value={ticketData.description}
-            onChange={(e) => setTicketData(prev => ({ ...prev, description: e.target.value }))}
-            className={`h-32 rounded-lg ${
-              isDarkMode
-                ? 'bg-gray-700 text-gray-200 placeholder-gray-400'
-                : 'bg-white text-gray-800 placeholder-gray-500'
-            }`}
-          />
-        </div>
-      </div>
-    </div>
-
-    <div className={`sticky bottom-0 left-0 right-0 z-10 py-4 px-6 flex justify-end gap-4 ${
-      isDarkMode 
-        ? 'bg-gray-800 border-t border-gray-700' 
-        : 'bg-white border-t border-gray-200'
-    }`}>
-      <Button 
-        variant="outline" 
-        onClick={() => setShowTicketDialog(false)}
-        className={`rounded-lg ${
-          isDarkMode
-            ? 'border-gray-600 text-gray-200 hover:bg-gray-700'
-            : 'border-gray-200 text-gray-800 hover:bg-gray-100'
-        }`}
-      >
-        Cancel
-      </Button>
-      <Button 
-        className={`rounded-lg transform transition-all duration-300 hover:scale-105 ${
-          isDarkMode
-            ? 'from-teal-400 to-emerald-500'
-            : 'from-teal-500 to-emerald-600'
-        } bg-gradient-to-br text-white shadow-md hover:shadow-xl`}
-        onClick={handleTicketSubmit}
-        disabled={uploading}
-      >
-        {uploading ? (
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            <span>Submitting...</span>
+              <div className="grid gap-2">
+                <label htmlFor="description" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                  Description
+                </label>
+                <Textarea
+                  id="description"
+                  placeholder="Please describe your proposal in detail"
+                  value={ticketData.description}
+                  onChange={(e) => setTicketData(prev => ({ ...prev, description: e.target.value }))}
+                  className={`h-32 rounded-lg ${
+                    isDarkMode
+                      ? 'bg-gray-700 text-gray-200 placeholder-gray-400'
+                      : 'bg-white text-gray-800 placeholder-gray-500'
+                  }`}
+                />
+              </div>
+            </div>
           </div>
-        ) : (
-          <span>Submit Proposal</span>
-        )}
-      </Button>
-    </div>
-  </DialogContent>
-</Dialog>
+
+          <div className={`sticky bottom-0 left-0 right-0 z-10 py-4 px-6 flex justify-end gap-4 ${
+            isDarkMode 
+              ? 'bg-gray-800 border-t border-gray-700' 
+              : 'bg-white border-t border-gray-200'
+          }`}>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowTicketDialog(false)}
+              className={`rounded-lg ${
+                isDarkMode
+                  ? 'border-gray-600 text-gray-200 hover:bg-gray-700'
+                  : 'border-gray-200 text-gray-800 hover:bg-gray-100'
+              }`}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className={`rounded-lg transform transition-all duration-300 hover:scale-105 ${
+                isDarkMode
+                  ? 'from-teal-400 to-emerald-500'
+                  : 'from-teal-500 to-emerald-600'
+              } bg-gradient-to-br text-white shadow-md hover:shadow-xl`}
+              onClick={handleTicketSubmit}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Submitting...</span>
+                </div>
+              ) : (
+                <span>Submit Proposal</span>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <RejectionDialog />
       <InProgressDialog />
