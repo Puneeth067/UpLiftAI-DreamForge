@@ -60,11 +60,92 @@ const AuthBackgroundSVG = () => (
 );
 
 const DEPARTMENTS = [
-  'Visual Artist',
-  'Musician',
-  'Writer',
-  'Digital Creator',
-  'Mixed Media Artist'
+  // Visual Arts & Design
+  'Graphic Design',
+  'Illustration',
+  'UI/UX Design',
+  'Motion Graphics',
+  'Industrial Design',
+  
+  // Digital Arts
+  'Digital Art',
+  '3D Modeling',
+  'Animation',
+  'Game Design',
+  'Web Design',
+  
+  // Music & Audio
+  'Music Production',
+  'Sound Design',
+  'Audio Engineering',
+  'Composition',
+  
+  // Writing
+  'Creative Writing',
+  'Technical Writing',
+  'Copywriting',
+  'Content Strategy',
+  'Technical Documentation',
+  
+  // Film & Media
+  'Filmmaking',
+  'Video Production',
+  'Cinematography',
+  'Podcasting',
+  
+  // Technical Professions
+  'Software Engineering',
+  'Web Development',
+  'Mobile App Development',
+  'Cloud Computing',
+  'Cybersecurity',
+  'Data Science',
+  'Machine Learning',
+  'Network Engineering',
+  'Systems Architecture',
+  'Artificial Intelligence',
+  
+  // Engineering
+  'Mechanical Engineering',
+  'Electrical Engineering',
+  'Civil Engineering',
+  'Aerospace Engineering',
+  'Robotics Engineering',
+  
+  // Scientific Fields
+  'Biotechnology',
+  'Environmental Science',
+  'Quantum Computing',
+  'Aerospace Research',
+  'Bioinformatics',
+  
+  // IT & Technology
+  'IT Support',
+  'Network Administration',
+  'Cloud Solutions',
+  'DevOps',
+  'Information Security',
+  
+  // Professional Creative Fields
+  'Digital Marketing',
+  'Brand Strategy',
+  'Creative Direction',
+  'Product Management',
+  'Innovation Consulting',
+  
+  // Emerging Technologies
+  'AR/VR Development',
+  'Blockchain Technology',
+  'IoT Design',
+  'Quantum Technology',
+  'Generative AI',
+  
+  // Performance & Creative
+  'Performance Art',
+  'Digital Performance',
+  'Interactive Media',
+  'Creative Technology',
+  'Immersive Experience Design'
 ];
 
 const DEFAULT_FORM_DATA = {
@@ -622,7 +703,7 @@ const AuthPages = () => {
                           value={formData.department}
                           onChange={handleInputChange}
                           disabled={isLoading}
-                          className={`mt-1 w-full p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 ${
+                          className={`mt-1 w-full p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 max-h-[300px] ${
                             isLoading ? 'opacity-50 cursor-not-allowed' : ''
                           }`}
                         >

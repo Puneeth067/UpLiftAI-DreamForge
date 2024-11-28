@@ -74,11 +74,92 @@ const BackgroundSVG = () => (
 );
 
 const DEPARTMENTS = [
-  'Visual Artist',
-  'Musician',
-  'Writer',
-  'Digital Creator',
-  'Mixed Media Artist'
+  // Visual Arts & Design
+  'Graphic Design',
+  'Illustration',
+  'UI/UX Design',
+  'Motion Graphics',
+  'Industrial Design',
+  
+  // Digital Arts
+  'Digital Art',
+  '3D Modeling',
+  'Animation',
+  'Game Design',
+  'Web Design',
+  
+  // Music & Audio
+  'Music Production',
+  'Sound Design',
+  'Audio Engineering',
+  'Composition',
+  
+  // Writing
+  'Creative Writing',
+  'Technical Writing',
+  'Copywriting',
+  'Content Strategy',
+  'Technical Documentation',
+  
+  // Film & Media
+  'Filmmaking',
+  'Video Production',
+  'Cinematography',
+  'Podcasting',
+  
+  // Technical Professions
+  'Software Engineering',
+  'Web Development',
+  'Mobile App Development',
+  'Cloud Computing',
+  'Cybersecurity',
+  'Data Science',
+  'Machine Learning',
+  'Network Engineering',
+  'Systems Architecture',
+  'Artificial Intelligence',
+  
+  // Engineering
+  'Mechanical Engineering',
+  'Electrical Engineering',
+  'Civil Engineering',
+  'Aerospace Engineering',
+  'Robotics Engineering',
+  
+  // Scientific Fields
+  'Biotechnology',
+  'Environmental Science',
+  'Quantum Computing',
+  'Aerospace Research',
+  'Bioinformatics',
+  
+  // IT & Technology
+  'IT Support',
+  'Network Administration',
+  'Cloud Solutions',
+  'DevOps',
+  'Information Security',
+  
+  // Professional Creative Fields
+  'Digital Marketing',
+  'Brand Strategy',
+  'Creative Direction',
+  'Product Management',
+  'Innovation Consulting',
+  
+  // Emerging Technologies
+  'AR/VR Development',
+  'Blockchain Technology',
+  'IoT Design',
+  'Quantum Technology',
+  'Generative AI',
+  
+  // Performance & Creative
+  'Performance Art',
+  'Digital Performance',
+  'Interactive Media',
+  'Creative Technology',
+  'Immersive Experience Design'
 ];
 
 const formatPhoneNumber = (value) => {
@@ -408,7 +489,10 @@ const ProfilePage = () => {
                 }`}>
                   <SelectValue placeholder="Select a department" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent 
+                  className="max-h-[300px] overflow-y-auto"
+                  position="popper"
+                >
                   {DEPARTMENTS.map((dept) => (
                     <SelectItem key={dept} value={dept}>
                       {dept}
