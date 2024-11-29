@@ -405,7 +405,7 @@ const CreatorDiscoverPage = () => {
   const paginatedCreators = getCurrentPageItems(filteredCreators);
 
   return (
-    <div className={`min-h-screen flex flex-col pl-20 pr-16 mx-auto min-w-[1240px] max-w-screen-xl w-full ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'} cursor-none`}>
+    <div className={`min-h-screen flex flex-col pl-20 pr-16 mx-auto min-w-[1240px] max-w-[1024] w-full ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'} cursor-none`}>
       <BackgroundSVG />
       <CyberCursorEffect />
         <Toaster />

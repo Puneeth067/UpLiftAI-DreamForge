@@ -26,6 +26,7 @@ import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 import { v4 as uuidv4 } from 'uuid';
 import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import PortfolioExportPDF from './PortfolioExportPDF';
+import CollabRequestDialog from './CollabRequestDialog';
 
 
 const BackgroundSVG = () => (
@@ -480,9 +481,18 @@ const deleteProjectImage = async (imageUrl) => {
                     Edit Portfolio
                   </>
                 )}
-              </Button>
+              </Button>              
             </div>
           )}
+          
+          {viewMode === 'patron' && patron && (
+            <div className="flex items-center gap-2">
+                <CollabRequestDialog 
+                  patron={patron} 
+                  creator={userData} 
+                />
+            </div>
+            )}
         </div>
       </div>
 
