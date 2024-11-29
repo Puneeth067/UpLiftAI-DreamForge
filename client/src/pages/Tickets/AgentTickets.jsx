@@ -830,7 +830,7 @@ const InProgressTicketDetailsDialog = () => {
   }
 
   return (
-    <div className={`min-h-screen flex justify-center ${
+    <div className={`min-h-screen flex justify-center ml-20${
       isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
     }`}>
       <BackgroundSVG className="z-0 "/>
@@ -848,26 +848,18 @@ const InProgressTicketDetailsDialog = () => {
         />
       </aside>
       <Toaster />
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-        isCollapsed ? 'md:ml-20' : 'md:ml-64'
-      }`}>
-        <div className={`${isCollapsed ? 'w-[1024px]' : 'w-[896px]'} shadow-xl rounded-lg my-8 ${
-          isDarkMode ? 'bg-gray-800' : 'bg-white'} ${isCollapsed ? 'left-20' : 'left-64'} pt-8 mb-0`}>
+      <div className={`flex-1 flex flex-col min-w-[1024] transition-all duration-300`}>
+        <div className={`max-w-[1248] min-w-[1024px] shadow-xl rounded-lg my-8 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} pt-8 mb-0`}>
           <div className={`p-6 border-b ${
             isDarkMode ? 'border-gray-700' : 'border-gray-100'
           }`}>
             <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <h1 className={`text-2xl font-bold ${
+              <div className="flex flex-col flex-grow">
+                <h1 className={`flex text-2xl font-bold ${
                   isDarkMode ? 'text-gray-100' : 'text-gray-900'
                 }`}>
                   Creative Project Requests
-                </h1>
-                <p className={`text-sm mt-1 ${
-                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>
-                  Manage your patron requests and bring dreams to life
-                </p>
+                </h1>                
               </div>
             </div>
           </div>

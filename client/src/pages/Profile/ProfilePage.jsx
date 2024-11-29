@@ -74,92 +74,69 @@ const BackgroundSVG = () => (
 );
 
 const DEPARTMENTS = [
-  // Visual Arts & Design
-  'Graphic Design',
-  'Illustration',
-  'UI/UX Design',
-  'Motion Graphics',
-  'Industrial Design',
-  
-  // Digital Arts
-  'Digital Art',
   '3D Modeling',
-  'Animation',
-  'Game Design',
-  'Web Design',
-  
-  // Music & Audio
-  'Music Production',
-  'Sound Design',
+  'Aerial Engineering',
+  'Aerospace Engineering',
+  'Aerospace Research',
+  'AR/VR Development',
+  'Artificial Intelligence',
   'Audio Engineering',
-  'Composition',
-  
-  // Writing
-  'Creative Writing',
-  'Technical Writing',
-  'Copywriting',
-  'Content Strategy',
-  'Technical Documentation',
-  
-  // Film & Media
-  'Filmmaking',
-  'Video Production',
+  'Bioinformatics',
+  'Biotechnology',
+  'Blockchain Technology',
+  'Brand Strategy',
   'Cinematography',
-  'Podcasting',
-  
-  // Technical Professions
-  'Software Engineering',
-  'Web Development',
-  'Mobile App Development',
+  'Civil Engineering',
   'Cloud Computing',
+  'Cloud Solutions',
+  'Composition',
+  'Content Strategy',
+  'Copywriting',
+  'Creative Direction',
+  'Creative Technology',
+  'Creative Writing',
   'Cybersecurity',
   'Data Science',
-  'Machine Learning',
-  'Network Engineering',
-  'Systems Architecture',
-  'Artificial Intelligence',
-  
-  // Engineering
-  'Mechanical Engineering',
-  'Electrical Engineering',
-  'Civil Engineering',
-  'Aerospace Engineering',
-  'Robotics Engineering',
-  
-  // Scientific Fields
-  'Biotechnology',
-  'Environmental Science',
-  'Quantum Computing',
-  'Aerospace Research',
-  'Bioinformatics',
-  
-  // IT & Technology
-  'IT Support',
-  'Network Administration',
-  'Cloud Solutions',
   'DevOps',
-  'Information Security',
-  
-  // Professional Creative Fields
+  'Digital Art',
   'Digital Marketing',
-  'Brand Strategy',
-  'Creative Direction',
-  'Product Management',
-  'Innovation Consulting',
-  
-  // Emerging Technologies
-  'AR/VR Development',
-  'Blockchain Technology',
-  'IoT Design',
-  'Quantum Technology',
-  'Generative AI',
-  
-  // Performance & Creative
-  'Performance Art',
   'Digital Performance',
+  'Electrical Engineering',
+  'Environmental Science',
+  'Film Production',
+  'Filmmaking',
+  'Game Design',
+  'Generative AI',
+  'Graphic Design',
+  'Illustration',
+  'Immersive Experience Design',
+  'Industrial Design',
+  'Information Security',
+  'Innovation Consulting',
   'Interactive Media',
-  'Creative Technology',
-  'Immersive Experience Design'
+  'IoT Design',
+  'IT Support',
+  'Machine Learning',
+  'Mechanical Engineering',
+  'Mobile App Development',
+  'Motion Graphics',
+  'Music Production',
+  'Network Administration',
+  'Network Engineering',
+  'Performance Art',
+  'Podcasting',
+  'Product Management',
+  'Quantum Computing',
+  'Quantum Technology',
+  'Robotics Engineering',
+  'Software Engineering',
+  'Sound Design',
+  'Systems Architecture',
+  'Technical Documentation',
+  'Technical Writing',
+  'UI/UX Design',
+  'Web Design',
+  'Web Development'
 ];
 
 const formatPhoneNumber = (value) => {
@@ -388,7 +365,7 @@ const ProfilePage = () => {
               alt={profile?.fullname} 
             />
             <AvatarFallback>
-              <img src={`/avatars/${profile?.avatar_url}`} alt="Default Avatar" />
+              <img src={`https://byoenyaekxtufmzsfqxq.supabase.co/storage/v1/object/public/user-avatars/avatars/${profile?.avatar_url}`} alt="user.png" />
             </AvatarFallback>
           </Avatar>
           {editing && (

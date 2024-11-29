@@ -326,7 +326,7 @@ const AvatarDialog = ({
                 }`}
               >
                 <img
-                  src={`/avatars/${avatar}`}
+                  src={`https://byoenyaekxtufmzsfqxq.supabase.co/storage/v1/object/public/user-avatars/avatars/${avatar}`}
                   alt={avatar}
                   className="w-full h-auto rounded-lg"
                 />

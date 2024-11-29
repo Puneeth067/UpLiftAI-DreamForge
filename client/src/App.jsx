@@ -22,9 +22,8 @@ const AgentTickets = lazy(() => import('./pages/Tickets/AgentTickets'));
 const SettingsPage = lazy(() => import('./pages/Profile/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/Profile/ProfilePage'));
 const AgentPortfolio = lazy(() => import('./pages/Portfolio/AgentPortfolio'));
-// const TicketsPage = lazy(() => import('./pages/Tickets/TicketsPage'));
-// const TicketDetailsPage = lazy(() => import('./pages/Tickets/TicketDetailsPage'));
 const NotFoundPage = lazy(() => import('./pages/Error/NotFoundPage'));
+const CreatorDiscoverPage = lazy(() => import('./pages/Portfolio/CreatorDiscoverPage'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -45,7 +44,8 @@ const ROUTES = {
       DASHBOARD: '/customerdashboard',
       CHATBOT: '/customerchatbotinterface',
       REALTIMECHAT: '/customerrealtimechat',
-      TICKET: '/customertickets'
+      TICKET: '/customertickets',
+      PORTFOLIOVIEW: '/portfolioview'
     },
     AGENT: {
       DASHBOARD: '/agentdashboard',
@@ -109,6 +109,8 @@ function App() {
                   // </PrivateRoute>
                 }
               />
+
+              <Route path={ROUTES.PROTECTED.CUSTOMER.PORTFOLIOVIEW} element={<CreatorDiscoverPage />} />
 
               {/* Protected Agent routes */}
               <Route

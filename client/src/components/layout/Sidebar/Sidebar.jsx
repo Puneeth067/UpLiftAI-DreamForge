@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import PropTypes from 'prop-types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  Home, MessageSquare, Palette, Star, User, Settings, 
+  Home, MessageSquare, Palette, User, Settings, 
   PanelLeftOpen, PanelLeftClose 
 } from 'lucide-react';
 import SidebarLoading from './SidebarLoading';
@@ -16,7 +16,12 @@ const SidebarContent = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [userData, setUserData] = useState(location.state?.userData);
+  const [userData, setUserData] = useState(() => {
+    if (location.state?.patron) {
+      return location.state?.patron;
+    }
+    return location.state?.userData;
+  });
   const [loading, setLoading] = useState(true);
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -88,11 +93,13 @@ const SidebarContent = ({
         title: 'Portfolio',
         icon: Palette,
         onClick: () => navigate('/portfolio', { state: { userData } })
-      },
+      }
+    ] : []),
+    ...(userData?.usertype === 'customer' ? [
       {
-        title: 'Featured Work',
-        icon: Star,
-        onClick: () => navigate('/agentprojects', { state: { userData } })
+        title: 'Discover Creators',
+        icon: Palette,
+        onClick: () => navigate('/portfolioview', { state: { userData } })
       }
     ] : []),
     {

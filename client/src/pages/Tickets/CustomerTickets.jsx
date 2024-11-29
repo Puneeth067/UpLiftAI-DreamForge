@@ -926,7 +926,7 @@ const CustomerTickets = () => {
   }
 
   return (
-    <div className={`min-h-screen flex justify-center ${
+    <div className={`min-h-screen flex ${
       isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
     }`}>
       <BackgroundSVG className="z-0 "/>
@@ -945,8 +945,8 @@ const CustomerTickets = () => {
       </aside>
       <Toaster />
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300`}>
-        <div className={`${isCollapsed ? 'w-[1024px]' : 'w-[896px]'} shadow-xl rounded-lg my-8 ${
-          isDarkMode ? 'bg-gray-800' : 'bg-white'} ${isCollapsed ? 'left-20' : 'left-64'} pt-8 mb-0`}>
+        <div className={`max-w-[1248px]' min-w-[1024px] shadow-xl rounded-lg my-8 ${
+          isDarkMode ? 'bg-gray-800' : 'bg-white'} pt-8 mb-0`}>
           <div className={`p-6 border-b ${
             isDarkMode ? 'border-gray-700' : 'border-gray-100'
           }`}>

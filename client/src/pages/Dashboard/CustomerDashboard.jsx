@@ -147,13 +147,30 @@ const CustomerDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      navigate('/',{ 
+      // First, attempt to refresh the session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+      if (sessionError) {
+        throw sessionError;
+      }
+  
+      // If session exists, proceed with logout
+      if (session) {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+      }
+  
+      // Navigate away regardless of session status
+      navigate('/', { 
         state: { userData }
       });
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Logout error:', error);
+      
+      // Fallback navigation in case of persistent session issues
+      navigate('/', { 
+        state: { userData }
+      });
     }
   };
 
@@ -197,7 +214,10 @@ const CustomerDashboard = () => {
                   </button>
                 </SheetTrigger>
                 <SheetContent side="left" className="p-0 w-64">
-                  <SidebarContent />
+                <SidebarContent 
+                  userId={userData.id}
+                  isDarkMode={isDarkMode}  // Add this line
+                />
                 </SheetContent>
               </Sheet>
               

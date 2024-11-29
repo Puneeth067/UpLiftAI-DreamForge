@@ -83,16 +83,69 @@ const BackgroundSVG = () => (
 
 const MotionCard = motion(Card);
 
+const defaultTemplate = {
+  user_id: null,
+  title: 'Software Developer',
+  bio: 'Passionate about building innovative solutions',
+  skills: ['React', 'JavaScript', 'TypeScript'],
+  projects: [
+    {
+      title: 'Portfolio Website',
+      description: 'Personal portfolio showcasing projects and skills',
+      image: '/api/placeholder/600/400'
+    }
+  ],
+  experience: [
+    {
+      role: 'Junior Developer',
+      company: 'Tech Innovations Inc.',
+      period: '2022 - Present',
+      description: 'Working on cutting-edge web applications'
+    }
+  ],
+  social_links: {
+    github: '',
+    twitter: '',
+    linkedin: '',
+    instagram: ''
+  }
+};
+
 const AgentPortfolio = () => {
+
   const location = useLocation();
   const { isDarkMode, loadUserTheme } = useTheme();
-  const [userData, setProfileData] = useState(location.state?.userData);
+  const [userData, setProfileData] = useState(() => {
+    if (location.state?.creator) {
+      return location.state?.creator;
+    }
+    return location.state?.userData;
+  });
+   // Determine the view context
+  const viewMode = location.state?.viewMode || 'creator';
+  const [patron] = useState(() => {
+    if (location.state?.patron) {
+      return location.state?.patron;
+    }
+    return null;
+  });
+  // State to control editing and export
+  const [canEditPortfolio, setCanEditPortfolio] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [portfolioData, setPortfolioData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [hoverTimeout, setHoverTimeout] = useState(null);
+
+  
+  useEffect(() => {
+    // Disable editing if viewed by a patron
+    if (viewMode === 'patron') {
+      setIsEditing(false);
+      setCanEditPortfolio(false);
+    }
+  }, [viewMode]);
 
   const handleMouseEnter = () => {
     if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -122,6 +175,7 @@ const AgentPortfolio = () => {
   const fetchPortfolioData = async () => {
     try {
       setLoading(true);
+      console.log(userData.id);
       
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -130,8 +184,11 @@ const AgentPortfolio = () => {
         .single();
 
       if (profileError) throw profileError;
-
-      loadUserTheme(profileData.id);
+      if(patron){
+        loadUserTheme(patron.data.id);
+      }else{
+        loadUserTheme(profileData.id);
+      }
       setUserProfile(profileData);
       setProfileData(profileData);
 
@@ -221,7 +278,7 @@ const uploadProjectImage = async (file, userId) => {
     const filePath = `${userId}/projects/${fileName}`;
 
     // Upload the file to Supabase storage
-    const { data, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('project-images')
       .upload(filePath, file);
 
@@ -385,46 +442,47 @@ const deleteProjectImage = async (imageUrl) => {
     <div className="min-h-screen bg-gradient-to-b from-background to-background/80 text-foreground">
       <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
+      {/* Sidebar modification */}
       <aside 
-        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
+        className={`hidden md:block fixed left-0 top-0 h-full z-30 transition-all duration-600 ease-in-out ${
           isCollapsed ? 'w-20' : 'w-64'
         }`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <SidebarContent 
-        userId={userData.id}
-        isDarkMode={isDarkMode}
+          userId={viewMode === 'patron' ? patron.data.id : userData.id}
+          isDarkMode={isDarkMode}
         />
       </aside>
-      {/* Header with Edit Toggle */}
 
+      {/* Header with Edit Toggle */}
 
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-          <h1 className="text-xl font-semibold">Portfolio</h1>
-          <div className="flex items-center gap-2">
-            <PortfolioExportPDF 
-              userid={userData.id}
-            />
-            <Button
-              onClick={isEditing ? handleSave : () => setIsEditing(true)}
-              variant={isEditing ? "default" : "outline"}
-              className="flex items-center gap-2"
-            >
-              {isEditing ? (
-                <>
-                  <Save className="w-4 h-4" />
-                  Save Changes
-                </>
-              ) : (
-                <>
-                  <Edit className="w-4 h-4" />
-                  Edit Portfolio
-                </>
-              )}
-            </Button>
-          </div>
+        <h1 className="text-xl font-semibold">Portfolio</h1>
+          {canEditPortfolio && (
+            <div className="flex items-center gap-2">
+              <PortfolioExportPDF userid={userData.id} />
+              <Button
+                onClick={isEditing ? handleSave : () => setIsEditing(true)}
+                variant={isEditing ? "default" : "outline"}
+                className="flex items-center gap-2"
+              >
+                {isEditing ? (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Save Changes
+                  </>
+                ) : (
+                  <>
+                    <Edit className="w-4 h-4" />
+                    Edit Portfolio
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
