@@ -830,7 +830,7 @@ const InProgressTicketDetailsDialog = () => {
   }
 
   return (
-    <div className={`min-h-screen flex justify-center ml-20${
+    <div className={`min-h-screen flex justify-center ml-20 ${
       isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
     }`}>
       <BackgroundSVG className="z-0 "/>
@@ -849,7 +849,7 @@ const InProgressTicketDetailsDialog = () => {
       </aside>
       <Toaster />
       <div className={`flex-1 flex flex-col min-w-[1024] transition-all duration-300`}>
-        <div className={`max-w-[1248] min-w-[1024px] shadow-xl rounded-lg my-8 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} pt-8 mb-0`}>
+        <div className={`min-w-[1024px] shadow-xl rounded-lg my-8 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} pt-8 mb-0`}>
           <div className={`p-6 border-b ${
             isDarkMode ? 'border-gray-700' : 'border-gray-100'
           }`}>
