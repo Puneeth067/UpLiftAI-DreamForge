@@ -10,7 +10,10 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Mail, Lock, User, Palette, Sparkles, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, Link, Wand2 } from 'lucide-react';
+import { Mail, Lock, User, Palette, Sparkles, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, Link, Wand2, HelpCircle } from 'lucide-react';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { supabase } from '../../utils/supabase.js';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 
@@ -591,6 +594,42 @@ const AuthPages = () => {
           </Alert>
         )}
 
+         {/* Add a Help Dialog for account types */}
+         {authMode === 'register' && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="absolute top-4 right-4">
+                <HelpCircle className="h-5 w-5 text-muted-foreground" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Choose Your Account Type</DialogTitle>
+                <DialogDescription>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold flex items-center gap-2">
+                        <Palette className="h-5 w-5 text-primary" /> Patron
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Looking to commission creative work or hire talent for your projects.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-primary" /> Creator
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Professional creators offering specialized creative services.
+                      </p>
+                    </div>
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        )}
+
         {showVerificationAlert && (
           <Alert className="mb-4 dark:bg-gray-800 dark:border-gray-700">
             <AlertCircle className="h-4 w-4" />
@@ -674,21 +713,29 @@ const AuthPages = () => {
                     {userType === 'agent' && (
                       <>
                       <div>
-                        <label className="text-sm text-gray-700 dark:text-gray-300 font-bold">Speciality</label>
-                        <select
-                          name="department"
-                          value={formData.department}
-                          onChange={handleInputChange}
-                          disabled={isLoading}
-                          className={`mt-1 w-full p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 max-h-[300px] ${
-                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          <option value="">Choose Speciality</option>
-                          {DEPARTMENTS.map((dept) => (
-                            <option key={dept} value={dept}>{dept}</option>
-                          ))}
-                        </select>
+                        <Label className="text-sm text-gray-700 dark:text-gray-300 font-bold">Speciality</Label>
+                          <div className="relative">
+                            <div className={`w-full p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg border focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-gray-400 dark:placeholder-gray-500`}>
+                                <Select 
+                                value={formData.department}
+                                onValueChange={(value) => handleInputChange({ 
+                                  target: { name: 'department', value } 
+                                })}
+                                disabled={isLoading}                            
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Choose Speciality" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {DEPARTMENTS.map((dept) => (
+                                    <SelectItem key={dept} value={dept}>
+                                      {dept}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>                          
                       </div>
                       {renderInput('Portfolio URL', 'portfolio', 'url', 'https://your-portfolio.com', <Link />)}
                     </>  
