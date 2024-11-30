@@ -1123,6 +1123,7 @@ const CustomerTickets = () => {
                 <label htmlFor="issue-type" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                   Proposal Type
                 </label>
+                <div className="max-h-[300px] overflow-y-auto">
                 <Select
                   value={ticketData.type}
                   onValueChange={(value) => setTicketData(prev => ({ ...prev, type: value }))}
@@ -1130,13 +1131,73 @@ const CustomerTickets = () => {
                   <SelectTrigger className={`${isDarkMode ? 'bg-gray-700 text-gray-200' : 'bg-white text-gray-800'} rounded-lg`}>
                     <SelectValue placeholder="Select required speciality" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="technical">Technical Issue</SelectItem>
-                    <SelectItem value="billing">Billing Issue</SelectItem>
-                    <SelectItem value="account">Account Issue</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                    <SelectContent className="max-h-[280px] overflow-y-auto">
+                      <SelectItem value="3D Modeling">3D Modeling</SelectItem>
+                      <SelectItem value="Aerial Engineering">Aerial Engineering</SelectItem>
+                      <SelectItem value="Aerospace Engineering">Aerospace Engineering</SelectItem>
+                      <SelectItem value="Aerospace Research">Aerospace Research</SelectItem>
+                      <SelectItem value="AR/VR Development">AR/VR Development</SelectItem>
+                      <SelectItem value="Artificial Intelligence">Artificial Intelligence</SelectItem>
+                      <SelectItem value="Audio Engineering">Audio Engineering</SelectItem>
+                      <SelectItem value="Bioinformatics">Bioinformatics</SelectItem>
+                      <SelectItem value="Biotechnology">Biotechnology</SelectItem>
+                      <SelectItem value="Blockchain Technology">Blockchain Technology</SelectItem>
+                      <SelectItem value="Brand Strategy">Brand Strategy</SelectItem>
+                      <SelectItem value="Cinematography">Cinematography</SelectItem>
+                      <SelectItem value="Civil Engineering">Civil Engineering</SelectItem>
+                      <SelectItem value="Cloud Computing">Cloud Computing</SelectItem>
+                      <SelectItem value="Cloud Solutions">Cloud Solutions</SelectItem>
+                      <SelectItem value="Composition">Composition</SelectItem>
+                      <SelectItem value="Content Strategy">Content Strategy</SelectItem>
+                      <SelectItem value="Copywriting">Copywriting</SelectItem>
+                      <SelectItem value="Creative Direction">Creative Direction</SelectItem>
+                      <SelectItem value="Creative Technology">Creative Technology</SelectItem>
+                      <SelectItem value="Creative Writing">Creative Writing</SelectItem>
+                      <SelectItem value="Cybersecurity">Cybersecurity</SelectItem>
+                      <SelectItem value="Data Science">Data Science</SelectItem>
+                      <SelectItem value="DevOps">DevOps</SelectItem>
+                      <SelectItem value="Digital Art">Digital Art</SelectItem>
+                      <SelectItem value="Digital Marketing">Digital Marketing</SelectItem>
+                      <SelectItem value="Digital Performance">Digital Performance</SelectItem>
+                      <SelectItem value="Electrical Engineering">Electrical Engineering</SelectItem>
+                      <SelectItem value="Environmental Science">Environmental Science</SelectItem>
+                      <SelectItem value="Film Production">Film Production</SelectItem>
+                      <SelectItem value="Filmmaking">Filmmaking</SelectItem>
+                      <SelectItem value="Game Design">Game Design</SelectItem>
+                      <SelectItem value="Generative AI">Generative AI</SelectItem>
+                      <SelectItem value="Graphic Design">Graphic Design</SelectItem>
+                      <SelectItem value="Illustration">Illustration</SelectItem>
+                      <SelectItem value="Immersive Experience Design">Immersive Experience Design</SelectItem>
+                      <SelectItem value="Industrial Design">Industrial Design</SelectItem>
+                      <SelectItem value="Information Security">Information Security</SelectItem>
+                      <SelectItem value="Innovation Consulting">Innovation Consulting</SelectItem>
+                      <SelectItem value="Interactive Media">Interactive Media</SelectItem>
+                      <SelectItem value="IoT Design">IoT Design</SelectItem>
+                      <SelectItem value="IT Support">IT Support</SelectItem>
+                      <SelectItem value="Machine Learning">Machine Learning</SelectItem>
+                      <SelectItem value="Mechanical Engineering">Mechanical Engineering</SelectItem>
+                      <SelectItem value="Mobile App Development">Mobile App Development</SelectItem>
+                      <SelectItem value="Motion Graphics">Motion Graphics</SelectItem>
+                      <SelectItem value="Music Production">Music Production</SelectItem>
+                      <SelectItem value="Network Administration">Network Administration</SelectItem>
+                      <SelectItem value="Network Engineering">Network Engineering</SelectItem>
+                      <SelectItem value="Performance Art">Performance Art</SelectItem>
+                      <SelectItem value="Podcasting">Podcasting</SelectItem>
+                      <SelectItem value="Product Management">Product Management</SelectItem>
+                      <SelectItem value="Quantum Computing">Quantum Computing</SelectItem>
+                      <SelectItem value="Quantum Technology">Quantum Technology</SelectItem>
+                      <SelectItem value="Robotics Engineering">Robotics Engineering</SelectItem>
+                      <SelectItem value="Software Engineering">Software Engineering</SelectItem>
+                      <SelectItem value="Sound Design">Sound Design</SelectItem>
+                      <SelectItem value="Systems Architecture">Systems Architecture</SelectItem>
+                      <SelectItem value="Technical Documentation">Technical Documentation</SelectItem>
+                      <SelectItem value="Technical Writing">Technical Writing</SelectItem>
+                      <SelectItem value="UI/UX Design">UI/UX Design</SelectItem>
+                      <SelectItem value="Web Design">Web Design</SelectItem>
+                      <SelectItem value="Web Development">Web Development</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>                
               </div>
 
               <div className="grid gap-2">

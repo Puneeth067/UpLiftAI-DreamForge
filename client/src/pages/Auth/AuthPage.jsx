@@ -726,7 +726,7 @@ const AuthPages = () => {
                                 <SelectTrigger>
                                   <SelectValue placeholder="Choose Speciality" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent maxHeight="160px">
                                   {DEPARTMENTS.map((dept) => (
                                     <SelectItem key={dept} value={dept}>
                                       {dept}
