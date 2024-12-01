@@ -743,7 +743,7 @@ const updateTicketStatus = async (status, reason = "") => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Textarea
-              placeholder="Enter resolution note..."
+              placeholder="Enter Acceptance note..."
               value={resolutionNote}
               onChange={(e) => setResolutionNote(e.target.value)}
               className={`min-h-[120px] ${isDarkMode 
