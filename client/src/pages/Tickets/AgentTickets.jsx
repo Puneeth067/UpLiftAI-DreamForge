@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import TicketDetailsDialog from './TicketDetailsDialog';
-
 import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import { 
   CircleSlash, 
@@ -36,6 +35,7 @@ import {
 import LoadingScreen from "@/components/ui/loading";
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 import { Toaster } from "@/components/ui/toaster";
+import { toast } from "@/hooks/use-toast";
 
 const BackgroundSVG = () => (
   <svg
@@ -300,6 +300,16 @@ const handleTicketClick = async (ticket) => {
   };
 
   useEffect(() => {
+
+    toast({
+      title: "Explore Your Proposals",
+      description: "Click on any proposal card to view details and take actions!",
+      variant: 'default',
+          className: isDarkMode 
+            ? 'bg-purple-900 border-purple-700 text-purple-100' 
+            : 'bg-purple-100 border-purple-300 text-purple-700'
+    });
+
     if (!userData?.id) return;
 
     loadUserTheme(userData.id);

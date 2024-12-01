@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
+import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
+import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import { 
   Send, 
   ArrowLeft, 
@@ -33,6 +35,59 @@ import { Toaster } from "@/components/ui/toaster";
 import { supabase } from '../../utils/supabase';
 import { chat } from '../../utils/supabase-chat';
 
+const BackgroundSVG = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+    preserveAspectRatio="xMidYMid slice"
+    viewBox="0 0 1440 900"
+  >
+    <defs>
+      <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#F8F0FF" stopOpacity="0.4" />
+        <stop offset="100%" stopColor="#F0E6FF" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="#D4BBFF" stopOpacity="0.1" />
+      </radialGradient>
+
+      <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#2A1352" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#1A0B38" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <filter id="blurFilter">
+        <feGaussianBlur stdDeviation="60" />
+      </filter>
+
+      <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-purple-200 dark:text-purple-900" opacity="0.3" />
+      </pattern>
+    </defs>
+   
+    {/* Light Mode Patterns */}
+    <g className="opacity-100 dark:opacity-0">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="200" cy="150" r="400" fill="url(#lightGradient)" filter="url(#blurFilter)" />
+      <circle cx="1200" cy="300" r="500" fill="url(#lightGradient)" opacity="0.4" filter="url(#blurFilter)" />
+      <circle cx="800" cy="600" r="300" fill="url(#accentGradient)" opacity="0.3" filter="url(#blurFilter)" />
+      <path d="M0,300 Q720,400 1440,300 Q720,500 0,300" fill="url(#accentGradient)" opacity="0.15" />
+      <ellipse cx="600" cy="750" rx="600" ry="300" fill="url(#lightGradient)" opacity="0.2" filter="url(#blurFilter)" />
+    </g>
+   
+    {/* Dark Mode Patterns */}
+    <g className="opacity-0 dark:opacity-100">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="300" cy="200" r="600" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+      <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#darkGradient)" opacity="0.25" />
+      <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#darkGradient)" opacity="0.2" filter="url(#blurFilter)" />
+      <circle cx="800" cy="750" r="400" fill="url(#darkGradient)" opacity="0.15" filter="url(#blurFilter)" />
+    </g>
+  </svg>
+);
+
 function AgentChatInterface() {
   const location = useLocation();
   const { ticketId, userId, agentId, ticketData } = location.state || {};
@@ -48,6 +103,28 @@ function AgentChatInterface() {
   const typingTimeoutRef = useRef(null);
   const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
   const [ setRejectionReason] = useState("");
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [hoverTimeout, setHoverTimeout] = useState(null);
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    setIsCollapsed(false);
+  };
+
+  const handleMouseLeave = () => {
+    // Add a small delay before collapsing to make the interaction smoother
+    const timeout = setTimeout(() => {
+      setIsCollapsed(true);
+    }, 400); // 300ms delay
+    setHoverTimeout(timeout);
+  };
+
+  // Clear timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+    };
+  }, [hoverTimeout]);
 
   useEffect(() => {
     if (!ticketId || !agentId || !userId) return;
@@ -373,7 +450,21 @@ const updateTicketStatus = async (status, reason = "") => {
   }
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen cursor-none ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <BackgroundSVG className="z-0 "/>
+      <CyberCursorEffect />
+      <aside 
+        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
+          isCollapsed ? 'w-20' : 'w-64'
+        }`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <SidebarContent 
+        userId={agentId}
+        isDarkMode={isDarkMode}
+        />
+      </aside>
       <Toaster />
       <div className="max-w-5xl mx-auto p-6">
         <div className="grid grid-cols-[1fr_350px] gap-6">
@@ -397,8 +488,8 @@ const updateTicketStatus = async (status, reason = "") => {
                   onClick={() => setIsResolutionDialogOpen(true)}
                   className={`${ticketDetails?.status === 'resolved' ? 'opacity-50' : ''} 
                   ${isDarkMode 
-                    ? 'hover:bg-green-700 bg-green-600 border-green-700 text-green-300' 
-                    : 'hover:bg-green-500 bg-green-400 border-green-300 text--700'}`}
+                    ? 'hover:bg-lime-600 bg-lime-400 border-lime-700 text-white-300' 
+                    : 'hover:bg-lime-500 bg-lime-400 border-lime-300 text-black-700'}`}
                   disabled={ticketDetails?.status === 'resolved'}
                 >
                   <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -562,7 +653,7 @@ const updateTicketStatus = async (status, reason = "") => {
                 <div className="space-y-8 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-transparent">
                   <div>
                     <h3 className={`font-semibold mb-4 text-lg ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-                      Proposal Information
+                      Proposal Details
                     </h3>
                     <div className="space-y-4">
                       <div 

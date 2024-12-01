@@ -307,7 +307,10 @@ const CustomerTickets = () => {
     toast({
       title: "Explore Your Proposals",
       description: "Click on any proposal card to view details and take actions!",
-      variant: "info"
+      variant: 'default',
+          className: isDarkMode 
+            ? 'bg-purple-900 border-purple-700 text-purple-100' 
+            : 'bg-purple-100 border-purple-300 text-purple-700'
     });
     
     if (!userData?.id) return;
@@ -900,11 +903,11 @@ const InProgressDialog = () => (
         </Button>
         <Button 
           onClick={() => {
-            navigate('/customerrealtimechat', { 
+            navigate('/customerchatinterface', { 
               state: { 
-                ticketId: selectedInProgressTicket.id,
+                ticketId: selectedInProgressTicket.id,                
+                userId: userData.id,
                 agentId: selectedInProgressTicket.agent_id,
-                userData: userData,
                 ticketData: selectedInProgressTicket
               } 
             });

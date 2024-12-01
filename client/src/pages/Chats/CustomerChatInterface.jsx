@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
+import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
+import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import { 
   Send, 
   ArrowLeft, 
@@ -11,9 +13,9 @@ import {
   Loader2,
   Mail,
   Calendar,
-  PhoneCall,
   Star,
-  Wand2
+  Wand2,
+  GraduationCap
 } from 'lucide-react';
 import { chatService } from '@/services/api/chatService';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -22,6 +24,59 @@ import { toast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { supabase } from '../../utils/supabase';
 import { chat } from '../../utils/supabase-chat';
+
+const BackgroundSVG = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+    preserveAspectRatio="xMidYMid slice"
+    viewBox="0 0 1440 900"
+  >
+    <defs>
+      <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#F8F0FF" stopOpacity="0.4" />
+        <stop offset="100%" stopColor="#F0E6FF" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="#D4BBFF" stopOpacity="0.1" />
+      </radialGradient>
+
+      <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#2A1352" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#1A0B38" stopOpacity="0.2" />
+      </radialGradient>
+     
+      <filter id="blurFilter">
+        <feGaussianBlur stdDeviation="60" />
+      </filter>
+
+      <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-purple-200 dark:text-purple-900" opacity="0.3" />
+      </pattern>
+    </defs>
+   
+    {/* Light Mode Patterns */}
+    <g className="opacity-100 dark:opacity-0">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="200" cy="150" r="400" fill="url(#lightGradient)" filter="url(#blurFilter)" />
+      <circle cx="1200" cy="300" r="500" fill="url(#lightGradient)" opacity="0.4" filter="url(#blurFilter)" />
+      <circle cx="800" cy="600" r="300" fill="url(#accentGradient)" opacity="0.3" filter="url(#blurFilter)" />
+      <path d="M0,300 Q720,400 1440,300 Q720,500 0,300" fill="url(#accentGradient)" opacity="0.15" />
+      <ellipse cx="600" cy="750" rx="600" ry="300" fill="url(#lightGradient)" opacity="0.2" filter="url(#blurFilter)" />
+    </g>
+   
+    {/* Dark Mode Patterns */}
+    <g className="opacity-0 dark:opacity-100">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="300" cy="200" r="600" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+      <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#darkGradient)" opacity="0.25" />
+      <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#darkGradient)" opacity="0.2" filter="url(#blurFilter)" />
+      <circle cx="800" cy="750" r="400" fill="url(#darkGradient)" opacity="0.15" filter="url(#blurFilter)" />
+    </g>
+  </svg>
+);
 
 function CustomerChatInterface() {
   const location = useLocation();
@@ -34,6 +89,28 @@ function CustomerChatInterface() {
   const [isLoading, setIsLoading] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [hoverTimeout, setHoverTimeout] = useState(null);
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    setIsCollapsed(false);
+  };
+
+  const handleMouseLeave = () => {
+    // Add a small delay before collapsing to make the interaction smoother
+    const timeout = setTimeout(() => {
+      setIsCollapsed(true);
+    }, 400); // 300ms delay
+    setHoverTimeout(timeout);
+  };
+
+  // Clear timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+    };
+  }, [hoverTimeout]);
 
   useEffect(() => {
     if (!ticketId || !agentId || !userId) return;
@@ -49,11 +126,11 @@ function CustomerChatInterface() {
         const { data: userData } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', userId)
+          .eq('id', agentId)
           .single();
 
         setUserDetails(userData);
-        loadUserTheme(userData.id);
+        loadUserTheme(userId);
 
 
         // Only load ticket details if not already provided
@@ -87,8 +164,8 @@ function CustomerChatInterface() {
     // Subscribe to new messages
     const messageSubscription = chatService.subscribeToMessages(ticketId, (newMessage) => {
       setMessages((prev) => [...prev, newMessage]);
-      if (newMessage.receiver_id === agentId) {
-        chatService.markMessagesAsRead(ticketId, agentId);
+      if (newMessage.receiver_id === userId) {
+        chatService.markMessagesAsRead(ticketId, userId);
       }
     });
 
@@ -96,7 +173,7 @@ function CustomerChatInterface() {
     const typingSubscription = chat
       .channel(`typing:${ticketId}`)
       .on('broadcast', { event: 'typing' }, ({ payload }) => {
-        if (payload.userId !== agentId) {
+        if (payload.userId !== userId) {
           setIsTyping(true);
           clearTimeout(typingTimeoutRef.current);
           typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 3000);
@@ -128,7 +205,7 @@ function CustomerChatInterface() {
     channel.send({
       type: 'broadcast',
       event: 'typing',
-      payload: { userId: agentId }
+      payload: { userId: userId }
     });
   };
 
@@ -139,8 +216,8 @@ function CustomerChatInterface() {
     try {
       await chatService.sendMessage({
         ticketId,
-        senderId: agentId,
-        receiverId: userId,
+        senderId: userId,
+        receiverId: agentId,
         content: newMessage.trim(),
         messageType: 'text'
       });
@@ -167,7 +244,21 @@ function CustomerChatInterface() {
   }
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen cursor-none ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <BackgroundSVG className="z-0 "/>
+      <CyberCursorEffect />
+      <aside 
+        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
+          isCollapsed ? 'w-20' : 'w-64'
+        }`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <SidebarContent 
+        userId={userId}
+        isDarkMode={isDarkMode}
+        />
+      </aside>
       <Toaster />
       <div className="max-w-5xl mx-auto p-6">
         <div className="grid grid-cols-[1fr_350px] gap-6">
@@ -180,7 +271,7 @@ function CustomerChatInterface() {
                   onClick={() => window.history.back()}
                   className={`${isDarkMode 
                     ? 'text-purple-300 hover:bg-gray-700 hover:text-purple-200' 
-                    : 'hover:bg-gray-100 text-purple-600 hover:text-purple-700'} transition-colors`}
+                    : 'hover:bg-gray-100 text-fuchsia-800 hover:text-purple-700'} transition-colors`}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
@@ -243,11 +334,11 @@ function CustomerChatInterface() {
                             className={`text-xs opacity-70 
                               ${message.sender_id === userId
                                 ? isDarkMode 
-                                  ? 'text-gray-400' 
-                                  : 'text-gray-500'
-                                : isDarkMode 
                                   ? 'text-purple-100' 
                                   : 'text-white/70'
+                                : isDarkMode 
+                                  ? 'text-gray-400' 
+                                  : 'text-gray-500'
                               }`}
                           >
                             {new Date(message.created_at).toLocaleTimeString([], { 
@@ -343,7 +434,7 @@ function CustomerChatInterface() {
                 <div className="space-y-8 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-transparent">
                   <div>
                     <h3 className={`font-semibold mb-4 text-lg ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-                      Proposal Information
+                      Proposal Details
                     </h3>
                     <div className="space-y-4">
                       <div 
@@ -404,8 +495,8 @@ function CustomerChatInterface() {
                           <span className="text-sm">{userDetails?.email}</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <PhoneCall className="h-5 w-5 text-purple-500 flex-shrink-0" />
-                          <span className="text-sm">{userDetails?.phonenumber}</span>
+                          <GraduationCap  className="h-5 w-5 text-purple-500 flex-shrink-0" />
+                          <span className="text-sm">{userDetails?.department}</span>
                         </div>
                       </div>
                     </div>
