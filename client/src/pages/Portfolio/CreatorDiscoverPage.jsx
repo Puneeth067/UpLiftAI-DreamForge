@@ -574,8 +574,8 @@ const CreatorDiscoverPage = () => {
       {/* Fixed Footer Pagination */}
       <div className={`relative bottom-2 w-full z-50  ${
         isDarkMode 
-          ? 'bg-black-600/75 backdrop-blur-sm' 
-          : 'bg-white/90 backdrop-blur-sm'
+          ? 'bg-black-600/75' 
+          : 'bg-cream/90'
       }`}>
         <div className="container mx-auto px-4 max-w-screen-xl">
           {filteredCreators.length > 0 && (

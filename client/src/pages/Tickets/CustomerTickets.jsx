@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import SidebarContent from '@/components/layout/Sidebar/Sidebar';
+import ActiveTicketDialog from './ActiveTicketDialog';
 import { 
   CircleSlash, 
   Search, 
@@ -113,6 +114,8 @@ const CustomerTickets = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState(false);
+  const [selectedActiveTicket, setSelectedActiveTicket] = useState(null);
+  const [showActiveTicketDialog, setShowActiveTicketDialog] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [ticketData, setTicketData] = useState({
     type: '',
@@ -215,6 +218,20 @@ const CustomerTickets = () => {
     } finally {
       setUploading(false);
     }
+  };
+
+  // New method to handle ticket deletion from active tickets
+  const handleActiveTicketDeleted = (deletedTicketId) => {
+    setActiveTickets(prev => prev.filter(ticket => ticket.id !== deletedTicketId));
+  };
+
+  // New method to handle ticket update for active tickets
+  const handleActiveTicketUpdated = (updatedTicket) => {
+    setActiveTickets(prev => 
+      prev.map(ticket => 
+        ticket.id === updatedTicket.id ? updatedTicket : ticket
+      )
+    );
   };
 
   // Modified fetchTickets function to be reusable
@@ -331,8 +348,10 @@ const CustomerTickets = () => {
                         ticket.priority === 'medium' ? '#8b5cf6' : '#6366f1'
       }}
       onClick={() => {
-        console.log('Clicked on ticket:', ticket);
-        if (ticket.status === 'resolved') {
+        if (ticket.status === 'active') {
+          setSelectedActiveTicket(ticket);
+          setShowActiveTicketDialog(true);        
+        } else if (ticket.status === 'resolved') {
           console.log('Setting selectedResolvedTicket to:', ticket);
           setSelectedResolvedTicket(ticket);
         } else if (ticket.status === 'in_progress') {
@@ -400,6 +419,50 @@ const CustomerTickets = () => {
     </Card>
   );
 
+  const updateTicketStatus = async () => {
+    if (!selectedRejectedTicket) return;
+
+    try {
+      // Prepare update object to change status back to active
+      const updateData = { 
+        status: "active", 
+        last_update: new Date().toISOString()
+      };
+
+      // Perform the update
+      const { error } = await supabase
+        .from("tickets")
+        .update(updateData)
+        .eq("id", selectedRejectedTicket.id)
+        .select();
+
+      if (error) {
+        console.error("Error updating proposal status:", error);
+        return;
+      }
+
+      // Refresh tickets
+      const { data: tickets, fetchError } = await supabase
+        .from("tickets")
+        .select("*");
+
+      if (fetchError) {
+        console.error("Error refetching tickets:", fetchError);
+        return;
+      }
+
+      // Update ticket lists
+      setActiveTickets(tickets.filter((ticket) => ticket.status === "active"));
+      setRejectedTickets(tickets.filter((ticket) => ticket.status === "rejected"));
+
+      // Reset states
+      setSelectedRejectedTicket(null);
+
+    } catch (error) {
+      console.error("Unexpected error:", error);
+    }
+  };
+
   const renderEmptyState = (message) => (
     <Card className={isDarkMode ? 'bg-gray-800/50' : 'bg-gray-50/50'}>
       <CardContent className="py-12 text-center">
@@ -430,7 +493,7 @@ const CustomerTickets = () => {
     };
   
     const handleFeedbackSubmit = async () => {
-      console.log('Feedback Submission Started', {
+      console.log('Proposal Suggestion Submission Started', {
         ticketId: selectedResolvedTicket?.id,
         feedbackLength: feedback.trim().length,
         userData: userData // Log user data to ensure correct context
@@ -440,17 +503,17 @@ const CustomerTickets = () => {
         toast({
           variant: "destructive",
           title: "Submission blocked",
-          description: "Please enter your feedback before submitting."
+          description: "Please enter your suggestions before submitting."
         });
         return;
       }
     
       if (!selectedResolvedTicket?.id) {
-        console.error('No ticket selected for feedback');
+        console.error('No proposal selected for suggestions');
          toast({
           variant: "destructive",
           title: "Error",
-          description: "No ticket selected. Please try again."
+          description: "No proposal selected. Please try again."
         });
         return;
       }
@@ -492,7 +555,7 @@ const CustomerTickets = () => {
     
         toast({
           title: "Success",
-          description: "Feedback submitted successfully!",
+          description: "Suggestion submitted successfully!",
           variant: "default"
         });
     
@@ -504,11 +567,11 @@ const CustomerTickets = () => {
         // Optional: Refresh tickets
         await fetchTickets();
       } catch (error) {
-        console.error('Comprehensive Feedback Submission Error:', error);
+        console.error('Comprehensive Suggestion Submission Error:', error);
         
         toast({
           variant: "destructive",
-          title: "Feedback Submission Failed",
+          title: "Proposal Suggestion Submission Failed",
           description: error.message || "An unexpected error occurred"
         });
       } finally {
@@ -523,10 +586,10 @@ const CustomerTickets = () => {
         >
           <DialogHeader>
             <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
-              Share Your Feedback
+              Provide Suggestions on Your Project Proposal
             </DialogTitle>
             <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
-              Help us improve our support by sharing your experience
+              Help the creators to make the dream creation for your proposal by sharing your suggestions
             </DialogDescription>
           </DialogHeader>
           
@@ -535,11 +598,11 @@ const CustomerTickets = () => {
               htmlFor="feedback" 
               className={`font-medium ${isDarkMode ? 'text-gray-200' : ''}`}
             >
-              Your Feedback
+              Your Suggestion
             </label>
             <Textarea
               id="feedback"
-              placeholder="Please share your feedback about the support you received..."
+              placeholder="Please share your suggestion about the proposal you agreed upon..."
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               className={`min-h-[128px] ${
@@ -583,7 +646,7 @@ const CustomerTickets = () => {
                   Submitting...
                 </>
               ) : (
-                'Submit Feedback'
+                'Send'
               )}
             </Button>
           </DialogFooter>
@@ -647,7 +710,7 @@ const CustomerTickets = () => {
                 Thank You for Your Feedback
               </DialogTitle>
               <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
-                You have already submitted feedback for this ticket
+                You have already submitted feedback for this project proposal
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -670,8 +733,6 @@ const CustomerTickets = () => {
     >
       <DialogContent 
         className={isDarkMode ? 'bg-gray-800 border-gray-700' : ''}
-        // Remove aria-hidden and data-aria-hidden attributes
-        // Add onInteractOutside to handle clicks outside the dialog
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
@@ -680,11 +741,11 @@ const CustomerTickets = () => {
           <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="text-green-500" />
-              Ticket Resolution Details
+              Project Proposal Details
             </div>
           </DialogTitle>
           <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
-            Ticket #{selectedResolvedTicket?.id} - {selectedResolvedTicket?.issue_type}
+            Proposal #{selectedResolvedTicket?.id} - {selectedResolvedTicket?.issue_type} Project
           </DialogDescription>
         </DialogHeader>
         
@@ -694,15 +755,15 @@ const CustomerTickets = () => {
             : 'bg-gray-100 text-gray-800'
         }`}>
           <div>
-            <h3 className="font-semibold mb-2">Resolution Note</h3>
+            <h3 className="font-semibold mb-2">Proposal Collab </h3>
             <p className="text-sm">
-              {selectedResolvedTicket?.resolution_note || 'No resolution note available.'}
+              {selectedResolvedTicket?.resolution_note || 'No evaluation notes available.'}
             </p>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="font-semibold mb-2">Resolved By</h3>
+              <h3 className="font-semibold mb-2">Accepted By</h3>
               <p className="text-sm">
                 {selectedResolvedTicket?.resolved_by 
                   ? agentProfiles[selectedResolvedTicket.resolved_by] || 'Loading...'
@@ -711,7 +772,7 @@ const CustomerTickets = () => {
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Resolution Time</h3>
+              <h3 className="font-semibold mb-2">Proposal Success</h3>
               <p className="text-sm">
                 {selectedResolvedTicket?.resolved_at 
                   ? new Date(selectedResolvedTicket.resolved_at).toLocaleString()
@@ -743,7 +804,7 @@ const CustomerTickets = () => {
                 : 'bg-green-500 text-white hover:bg-green-600'
             }`}
           >
-            Provide Feedback
+            Give Final Guidance
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -751,8 +812,8 @@ const CustomerTickets = () => {
   );
 };
 
-  const InProgressDialog = () => (
-    <Dialog 
+const InProgressDialog = () => (
+  <Dialog 
     open={!!selectedInProgressTicket} 
     onOpenChange={() => setSelectedInProgressTicket(null)}
   >
@@ -761,31 +822,44 @@ const CustomerTickets = () => {
         <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
           <div className="flex items-center gap-2">
             <MessageCircle className="text-yellow-500" />
-            Agent Waiting for Your Response
+            Proposal Details
           </div>
         </DialogTitle>
         <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
-          Ticket #{selectedInProgressTicket?.id} - {selectedInProgressTicket?.issue_type}
+          Proposal #{selectedInProgressTicket?.id} - {selectedInProgressTicket?.issue_type}
         </DialogDescription>
       </DialogHeader>
       
-      <div className={`space-y-4 p-4 rounded-lg ${
+      <div className={`max-h-[400px] overflow-y-auto space-y-4 p-4 rounded-lg ${
         isDarkMode 
           ? 'bg-gray-700/50 text-gray-200' 
           : 'bg-gray-100 text-gray-800'
       }`}>
         <div>
-          <h3 className="font-semibold mb-2">Important Notice</h3>
+          <h3 className="font-semibold mb-2">Project Overview</h3>
           <p className="text-sm">
-            Your support agent is waiting for you to start the conversation. 
-            Please initiate the chat within the next 5 minutes to prevent ticket cancellation.
+            Your proposal has been accepted. Let`s discuss the project details 
+            to ensure a smooth collaboration and clear understanding of the work.
           </p>
         </div>
         
         <div>
-          <h3 className="font-semibold mb-2">Ticket Details</h3>
+          <h3 className="font-semibold mb-2">Proposal Description</h3>
           <p className="text-sm">
-            <strong>Description:</strong> {selectedInProgressTicket?.description || 'No description available.'}
+            <strong>Details:</strong> {selectedInProgressTicket?.description || 'No description available.'}
+          </p>
+        </div>
+
+        <div>
+          <h3 className="font-semibold mb-2">Next Steps</h3>
+          <p className="text-sm">
+            Start a conversation to:
+            <ul className="list-disc pl-5 mt-2 space-y-1">
+              <li>Clarify project requirements</li>
+              <li>Discuss specific deliverables</li>
+              <li>Share additional context</li>
+              <li>Align on project timeline</li>
+            </ul>
           </p>
         </div>
       </div>
@@ -799,34 +873,33 @@ const CustomerTickets = () => {
             : ''
           }
         >
-          Cancel
+          Close
         </Button>
         <Button 
           onClick={() => {
-            // Navigate to ticket chat interface with complete ticket data
             navigate('/customerrealtimechat', { 
               state: { 
                 ticketId: selectedInProgressTicket.id,
                 agentId: selectedInProgressTicket.agent_id,
                 userData: userData,
-                ticketData: selectedInProgressTicket // Pass the complete ticket data
+                ticketData: selectedInProgressTicket
               } 
             });
           }}
           className={`${
             isDarkMode 
-              ? 'bg-yellow-600 text-white hover:bg-yellow-500' 
-              : 'bg-yellow-500 text-white hover:bg-yellow-600'
+              ? 'bg-green-600 text-white hover:bg-green-500' 
+              : 'bg-green-500 text-white hover:bg-green-600'
           }`}
         >
-          Start Conversation
+          Discuss Project Details
         </Button>
       </div>
     </DialogContent>
   </Dialog>
-  );
+);
 
-  const RejectionDialog = () => (
+const RejectionDialog = () => (
   <Dialog 
         open={!!selectedRejectedTicket} 
         onOpenChange={() => setSelectedRejectedTicket(null)}
@@ -836,11 +909,11 @@ const CustomerTickets = () => {
             <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
               <div className="flex items-center gap-2">
                 <XCircle className="text-red-500" />
-                Ticket Rejection Details
+                Proposal Declined
               </div>
             </DialogTitle>
             <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
-              Ticket #{selectedRejectedTicket?.id} - {selectedRejectedTicket?.issue_type}
+              Proposal #{selectedRejectedTicket?.id} - {selectedRejectedTicket?.project_type}
             </DialogDescription>
           </DialogHeader>
           
@@ -850,21 +923,21 @@ const CustomerTickets = () => {
               : 'bg-gray-100 text-gray-800'
           }`}>
             <div>
-              <h3 className="font-semibold mb-2">Description</h3>
+              <h3 className="font-semibold mb-2">Proposal Details</h3>
               <p className="text-sm">
-                {selectedRejectedTicket?.description || 'No description available.'}
+                {selectedRejectedTicket?.description || 'No detailed description available.'}
               </p>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-2">Rejection Reason</h3>
+              <h3 className="font-semibold mb-2">Reason for Decline</h3>
               <p className="text-sm">
-                {selectedRejectedTicket?.rejection_reason || 'No specific reason provided.'}
+                {selectedRejectedTicket?.rejection_reason || 'The creators did not provide a specific reason for the proposal rejection.'}
               </p>
             </div>
           </div>
           
-          <div className="flex justify-end">
+          <div className="flex justify-end space-x-2">
             <Button 
               variant="outline" 
               onClick={() => setSelectedRejectedTicket(null)}
@@ -874,6 +947,16 @@ const CustomerTickets = () => {
               }
             >
               Close
+            </Button>
+            <Button 
+              variant="secondary"
+              onClick={updateTicketStatus}
+              className={isDarkMode
+                ? 'bg-purple-700 text-purple-100 hover:bg-purple-600'
+                : 'bg-purple-500 text-white hover:bg-purple-600'
+              }
+            >
+              Reactivate Proposal
             </Button>
           </div>
         </DialogContent>
@@ -962,8 +1045,8 @@ const CustomerTickets = () => {
             <Button 
               className={`rounded-xl px-6 py-5 transform transition-all duration-300 hover:scale-105 ${
                 isDarkMode
-                  ? 'from-teal-400 to-emerald-500'
-                  : 'from-teal-500 to-emerald-600'
+                  ? 'from-purple-400 to-violet-500'
+                  : 'from-purple-500 to-violet-600'
               } bg-gradient-to-br text-white shadow-lg hover:shadow-xl`}
               onClick={() => setShowTicketDialog(true)}
             >
@@ -1272,8 +1355,8 @@ const CustomerTickets = () => {
             <Button 
               className={`rounded-lg transform transition-all duration-300 hover:scale-105 ${
                 isDarkMode
-                  ? 'from-teal-400 to-emerald-500'
-                  : 'from-teal-500 to-emerald-600'
+                  ? 'from-purple-400 to-violet-500'
+                  : 'from-purple-500 to-violet-600'
               } bg-gradient-to-br text-white shadow-md hover:shadow-xl`}
               onClick={handleTicketSubmit}
               disabled={uploading}
@@ -1290,6 +1373,18 @@ const CustomerTickets = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ActiveTicketDialog 
+        isOpen={showActiveTicketDialog}
+        onClose={() => {
+          setShowActiveTicketDialog(false);
+          setSelectedActiveTicket(null);
+        }}
+        ticket={selectedActiveTicket}
+        isDarkMode={isDarkMode}
+        onTicketDeleted={handleActiveTicketDeleted}
+        onTicketUpdated={handleActiveTicketUpdated}
+      />
 
       <RejectionDialog />
       <InProgressDialog />

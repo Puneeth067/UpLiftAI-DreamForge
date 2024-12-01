@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import PropTypes from 'prop-types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  Home, MessageSquare, Palette, User, Settings, 
+  Home, Proportions, Palette, User, Settings, 
   PanelLeftOpen, PanelLeftClose 
 } from 'lucide-react';
 import SidebarLoading from './SidebarLoading';
@@ -25,6 +25,7 @@ const SidebarContent = ({
   const [loading, setLoading] = useState(true);
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isPinned, setIsPinned] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -54,15 +55,33 @@ const SidebarContent = ({
   };
 
   const handleMouseEnter = () => {
-    if (hoverTimeout) clearTimeout(hoverTimeout);
-    setIsCollapsed(false);
+    // Only expand sidebar if not pinned
+    if (!isPinned) {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+      setIsCollapsed(false);
+    }
+  };
+  
+  const handleMouseLeave = () => {
+    // Only auto-collapse if not pinned
+    if (!isPinned) {
+      const timeout = setTimeout(() => {
+        setIsCollapsed(true);
+      }, 400);
+      setHoverTimeout(timeout);
+    }
   };
 
-  const handleMouseLeave = () => {
-    const timeout = setTimeout(() => {
+  const togglePinning = () => {
+    // Toggle pinned state and reset collapse state
+    setIsPinned(!isPinned);
+    
+    // If unpinning and mouse is not over sidebar, collapse
+    if (isPinned) {
       setIsCollapsed(true);
-    }, 400);
-    setHoverTimeout(timeout);
+    } else {
+      setIsCollapsed(false);
+    }
   };
 
   useEffect(() => {
@@ -81,8 +100,8 @@ const SidebarContent = ({
       )
     },
     {
-      title: 'Messages',
-      icon: MessageSquare,
+      title: 'Proposal',
+      icon: Proportions,
       onClick: () => navigate(
         userData?.usertype === 'agent' ? '/agenttickets' : '/customertickets', 
         { state: { userData } }
@@ -147,10 +166,13 @@ const SidebarContent = ({
     <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
       <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
         {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
-        <div className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg">
-          {isCollapsed ? 
-            <PanelLeftOpen className="h-6 w-6 dark:text-white" /> : 
-            <PanelLeftClose className="h-6 w-6 dark:text-white" />
+        <div 
+          className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg cursor-pointer"
+          onClick={togglePinning}
+        >
+          {isPinned ? 
+            <PanelLeftClose className="h-6 w-6 dark:text-white" /> : 
+            <PanelLeftOpen className="h-6 w-6 dark:text-white" />
           }
         </div>
       </div>

@@ -367,7 +367,7 @@ const InProgressTicketDetailsDialog = () => {
         .select();
 
       if (error) {
-        console.error("Error updating ticket status:", error);
+        console.error("Error updating proposal status:", error);
         return;
       }
 
