@@ -123,5 +123,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Project Maintainer: [Your Name]
+Project Maintainer: Team Uplift
 Project Link: [https://github.com/puneeth067/UPLIFTAI-SUPPORT](https://github.com/puneeth067/UPLIFTAI-SUPPORT)
