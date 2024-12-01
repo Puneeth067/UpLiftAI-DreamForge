@@ -715,7 +715,7 @@ const AuthPages = () => {
                       <div>
                         <Label className="text-sm text-gray-700 dark:text-gray-300 font-bold">Speciality</Label>
                           <div className="relative">
-                            <div className={`w-full p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg border focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-gray-400 dark:placeholder-gray-500`}>
+                            <div className={`w-full p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-gray-400 dark:placeholder-gray-500`}>
                                 <Select 
                                 value={formData.department}
                                 onValueChange={(value) => handleInputChange({ 
