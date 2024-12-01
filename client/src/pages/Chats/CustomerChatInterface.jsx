@@ -13,27 +13,17 @@ import {
   Calendar,
   PhoneCall,
   Star,
-  Wand2,
-  XCircle,
-  X
+  Wand2
 } from 'lucide-react';
 import { chatService } from '@/services/api/chatService';
 import { useTheme } from '../../contexts/ThemeContext';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { supabase } from '../../utils/supabase';
 import { chat } from '../../utils/supabase-chat';
 
-function AgentChatInterface() {
+function CustomerChatInterface() {
   const location = useLocation();
   const { ticketId, userId, agentId, ticketData } = location.state || {};
   const { isDarkMode, loadUserTheme } = useTheme();
@@ -41,13 +31,9 @@ function AgentChatInterface() {
   const [newMessage, setNewMessage] = useState('');
   const [userDetails, setUserDetails] = useState(null);
   const [ticketDetails, setTicketDetails] = useState(ticketData || null);
-  const [isResolutionDialogOpen, setIsResolutionDialogOpen] = useState(false);
-  const [resolutionNote, setResolutionNote] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
-  const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
-  const [ setRejectionReason] = useState("");
 
   useEffect(() => {
     if (!ticketId || !agentId || !userId) return;
@@ -67,7 +53,7 @@ function AgentChatInterface() {
           .single();
 
         setUserDetails(userData);
-        loadUserTheme(agentId);
+        loadUserTheme(userData.id);
 
 
         // Only load ticket details if not already provided
@@ -169,198 +155,6 @@ function AgentChatInterface() {
     }
   };
 
-  // Updated updateTicketStatus method
-const updateTicketStatus = async (status, reason = "") => {
-  if (!ticketDetails) return;
-
-  try {
-    // Prepare update object
-    const updateData = { 
-      status: status, 
-      last_update: new Date().toISOString()
-    };
-
-    // Add rejection-specific fields if rejecting
-    if (status === "rejected") {
-      updateData.rejection_reason = reason.trim();
-      updateData.agent_id = agentId;
-    }
-
-    // Perform the update
-    const { error } = await supabase
-      .from("tickets")
-      .update(updateData)
-      .eq("id", ticketDetails.id)
-      .select();
-
-    if (error) {
-      console.error("Error updating proposal status:", error);
-      return;
-    }
-
-    // Reset states
-    setIsRejectionDialogOpen(false);
-    setRejectionReason("");
-
-  } catch (error) {
-    console.error("Unexpected error:", error);
-  }
-};
-
-  const handleResolveTicket = async () => {
-    if (!resolutionNote.trim()) return;
-  
-    try {
-      // First update ticket status
-      const { error: ticketError } = await supabase
-        .from('tickets')
-        .update({ 
-          status: 'resolved',
-          resolution_note: resolutionNote,
-          resolved_at: new Date().toISOString(),
-          resolved_by: agentId
-        })
-        .eq('id', ticketId);
-  
-      if (ticketError) throw ticketError;
-  
-      // Send resolution message as a regular text message instead of system
-      await chatService.sendMessage({
-        ticketId,
-        senderId: agentId,
-        receiverId: userId,
-        content: `Ticket Resolution: ${resolutionNote}`,
-        messageType: 'text' // Changed from 'system' to 'text'
-      });
-
-      // Delete all messages associated with this ticket
-      const { error: deleteMessagesError } = await chat
-        .from('messages')
-        .delete()
-        .eq('ticket_id', ticketId);
-  
-      if (deleteMessagesError) throw deleteMessagesError;
-  
-      toast({
-        title: "Ticket Resolved",
-        description: "The ticket has been marked as resolved."
-      });
-  
-      // Update local ticket details state
-      setTicketDetails(prev => ({
-        ...prev,
-        status: 'resolved',
-        resolution_note: resolutionNote,
-        resolved_at: new Date().toISOString(),
-        resolved_by: agentId
-      }));
-  
-      setIsResolutionDialogOpen(false);
-      
-      // Optional: You might want to stay on the page to see the resolution message
-      // Instead of immediately going back, you could add a slight delay
-      setTimeout(() => window.history.back(), 1500);
-  
-    } catch (error) {
-      console.error('Error resolving ticket:', error);
-      toast({
-        variant: "destructive",
-        title: "Failed to resolve ticket",
-        description: error.message || "Please try again."
-      });
-    }
-  };
-
-  const handleReject = () => {
-    setIsRejectionDialogOpen(true);
-  };
-
-  const RejectionReasonDialog = () => {
-    const [rejectionDetails, setRejectionDetails] = useState({
-      reason: ''
-    });
-   
-    const handleSubmitRejection = () => {
-      if (rejectionDetails.reason.trim()) {
-        updateTicketStatus("rejected", rejectionDetails.reason);
-      }
-    };
-   
-    return (
-      <Dialog
-        open={isRejectionDialogOpen}
-        onOpenChange={(open) => {
-          setIsRejectionDialogOpen(open);
-          if (!open) {
-            // Reset rejection details when dialog closes
-            setRejectionDetails({ reason: '' });
-          }
-        }}
-      >
-        <DialogContent className={`sm:max-w-[500px] border-purple-300 ${
-          isDarkMode 
-            ? 'bg-purple-900/80 border-purple-800' 
-            : 'bg-purple-50/90 border-purple-200'
-        }`}>
-          <DialogHeader>
-            <DialogTitle className={`text-purple-800 dark:text-purple-200 ${
-              isDarkMode ? 'text-purple-200' : 'text-purple-900'
-            }`}>
-              Redirect Creative Journey
-            </DialogTitle>
-            <DialogDescription className={`${
-              isDarkMode 
-                ? 'text-purple-300' 
-                : 'text-purple-700'
-            }`}>
-              Share insights on why this creative concept requires redirection
-            </DialogDescription>
-          </DialogHeader>
-   
-          <Textarea
-            placeholder="Craft a thoughtful narrative explaining the creative realignment..."
-            value={rejectionDetails.reason}
-            onChange={(e) => {
-              // Use functional update to ensure correct state update
-              setRejectionDetails(prev => ({
-                ...prev,
-                reason: e.target.value
-              }))
-            }}
-            className={`min-h-[100px] ${
-              isDarkMode
-                ? 'bg-purple-800/50 text-purple-200 border-purple-700' 
-                : 'bg-purple-100/50 text-purple-900 border-purple-200'
-            }`}
-          />
-   
-          <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setIsRejectionDialogOpen(false)}
-              className={`mr-2 ${
-                isDarkMode 
-                  ? 'text-purple-300 hover:bg-purple-800 border border-purple-700' 
-                  : 'text-purple-700 hover:bg-purple-100 border border-purple-200'
-              }`}
-            >
-              <X className="mr-2 h-4 w-4 text-purple-500" /> Reconsider
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleSubmitRejection}
-              disabled={!rejectionDetails.reason.trim()}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              <XCircle className="mr-2 h-4 w-4" /> Redirect Concept
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  };
-
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -391,19 +185,6 @@ const updateTicketStatus = async (status, reason = "") => {
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => setIsResolutionDialogOpen(true)}
-                  className={`${ticketDetails?.status === 'resolved' ? 'opacity-50' : ''} 
-                  ${isDarkMode 
-                    ? 'hover:bg-green-700 bg-green-600 border-green-700 text-green-300' 
-                    : 'hover:bg-green-500 bg-green-400 border-green-300 text--700'}`}
-                  disabled={ticketDetails?.status === 'resolved'}
-                >
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Confirm Proposal
-                </Button>
               </div>
             </div>
           </Card>
@@ -419,8 +200,8 @@ const updateTicketStatus = async (status, reason = "") => {
                     <div
                       key={message.id}
                       className={`flex ${message.sender_id === userId 
-                        ? 'justify-start' 
-                        : 'justify-end'} mb-4`}
+                        ? 'justify-end' 
+                        : 'justify-start'} mb-4`}
                     >
                       <div
                         className={`
@@ -435,12 +216,12 @@ const updateTicketStatus = async (status, reason = "") => {
                           m-2
                           ${message.sender_id === userId
                             ? `${isDarkMode 
-                              ? 'bg-gray-700 text-gray-100' 
-                              : 'bg-gray-100 text-gray-900'}
-                          rounded-tl-sm`
-                            : `${isDarkMode 
                               ? 'bg-purple-800 text-white' 
                               : 'bg-purple-500 text-white'}
+                          rounded-tl-sm`
+                            : `${isDarkMode 
+                              ? 'bg-gray-700 text-gray-100' 
+                              : 'bg-gray-100 text-gray-900'}
                           rounded-tr-sm`
                         }
                           transition-all duration-300 ease-in-out
@@ -599,7 +380,7 @@ const updateTicketStatus = async (status, reason = "") => {
 
                   <div>
                     <h3 className={`font-semibold mb-4 text-lg ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-                      Patron Info
+                      Creator Info
                     </h3>
                     <div 
                       className={`
@@ -628,63 +409,15 @@ const updateTicketStatus = async (status, reason = "") => {
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div>
-                  <Button 
-                    variant="destructive" 
-                    onClick={handleReject}
-                    className="mr-2 bg-red-400 hover:bg-red-500 text-white"
-                  >
-                    <XCircle className="mr-2 h-4 w-4" /> Decline Vision
-                  </Button>
-                  </div>
+                  </div>                  
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
-
-      <Dialog open={isResolutionDialogOpen} onOpenChange={setIsResolutionDialogOpen}>
-        <DialogContent className={`${isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white'} sm:max-w-md`}>
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">Confirm Proposal Creation</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <Textarea
-              placeholder="Enter resolution note..."
-              value={resolutionNote}
-              onChange={(e) => setResolutionNote(e.target.value)}
-              className={`min-h-[120px] ${isDarkMode 
-                ? 'bg-gray-700 text-gray-100 focus:ring-purple-600' 
-                : 'focus:ring-purple-500'} 
-                rounded-lg resize-none focus:ring-2`}
-            />
-          </div>
-          <DialogFooter className="gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsResolutionDialogOpen(false)}
-              className={isDarkMode 
-                ? 'hover:bg-gray-700 border-purple-700 text-purple-300' 
-                : 'hover:bg-gray-100 border-purple-500 text-purple-600'}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleResolveTicket} 
-              disabled={!resolutionNote.trim()}
-              className="bg-purple-500 hover:bg-purple-600"
-            >
-              Accept Proposal
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <RejectionReasonDialog />
     </div>
   );
 }
 
-export default AgentChatInterface;
+export default CustomerChatInterface;

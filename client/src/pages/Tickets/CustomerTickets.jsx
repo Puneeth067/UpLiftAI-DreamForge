@@ -270,10 +270,26 @@ const CustomerTickets = () => {
       }
 
       // Sort tickets into their respective categories
-      const active = tickets.filter((ticket) => ticket.status === "active");
-      const inProgress = tickets.filter((ticket) => ticket.status === "in_progress");
-      const resolved = tickets.filter((ticket) => ticket.status === "resolved");
-      const rejected = tickets.filter((ticket) => ticket.status === "rejected");
+      const active = tickets.filter(
+        (ticket) => 
+          ticket.status === "active" &&
+          ticket.user_id === userData.id
+        );
+      const inProgress = tickets.filter(
+        (ticket) => 
+          ticket.status === "in_progress" && 
+          ticket.user_id === userData.id
+      );
+      const resolved = tickets.filter(
+        (ticket) => 
+          ticket.status === "resolved" && 
+          ticket.user_id === userData.id
+      );
+      const rejected = tickets.filter(
+        (ticket) => 
+          ticket.status === "rejected" && 
+          ticket.user_id === userData.id
+      );
 
       setActiveTickets(active);
       setInProgressTickets(inProgress);
@@ -287,6 +303,13 @@ const CustomerTickets = () => {
   }, [userData?.id]);
 
   useEffect(() => {
+
+    toast({
+      title: "Explore Your Proposals",
+      description: "Click on any proposal card to view details and take actions!",
+      variant: "info"
+    });
+    
     if (!userData?.id) return;
     loadUserTheme(userData.id);
     fetchTickets();
@@ -1095,7 +1118,7 @@ const RejectionDialog = () => (
                 )}
               </TabsTrigger>
               <TabsTrigger value="rejected" className="gap-2">
-                Rejected
+                Declined
                 {rejectedTickets.length > 0 && (
                   <Badge variant="secondary">{rejectedTickets.length}</Badge>
                 )}
@@ -1204,7 +1227,7 @@ const RejectionDialog = () => (
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <label htmlFor="issue-type" className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                  Proposal Type
+                  Intensity
                 </label>
                 <div className="max-h-[300px] overflow-y-auto">
                 <Select

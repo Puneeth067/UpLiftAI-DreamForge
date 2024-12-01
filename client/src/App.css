@@ -1,8 +1,30 @@
+:root {
+ 
+  --bg-dark: #541ca3; /* Dark purple background */
+  --highlight-light: #646cffaa; /* Light hover effect */
+  --highlight-dark: #61dafbaa; /* Dark hover effect */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: auto;
+  padding: 2rem;
   text-align: center;
+  background-color: var(--bg-light);
+  color: var(--text-light);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark Mode Support */
+body.dark-mode #root {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
 }
 
 .logo {
@@ -11,11 +33,13 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em var(--highlight-light));
 }
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+
+body.dark-mode .logo:hover {
+  filter: drop-shadow(0 0 2em var(--highlight-dark));
 }
 
 @keyframes logo-spin {
@@ -35,9 +59,22 @@
 
 .card {
   padding: 2em;
+  background: var(--bg-light);
+  color: var(--text-light);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode .card {
+  background: var(--bg-dark);
+  color: var(--text-dark);
 }
 
 .read-the-docs {
-  color: #888;
+  color: var(--text-light);
 }
 
+body.dark-mode .read-the-docs {
+  color: var(--text-dark);
+}

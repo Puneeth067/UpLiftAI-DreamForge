@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import TicketDetailsDialog from './TicketDetailsDialog';
 
 import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import { 
@@ -15,13 +16,12 @@ import {
   Search, 
   Clock,
   User,
-  X,
-  CheckCircle2,
-  XCircle,
   Paintbrush,
   Briefcase,
   Award,
-  Rocket
+  Rocket,
+  UserIcon,
+  MailIcon
 } from "lucide-react";
 import { supabase } from "@/utils/supabase";
 import { useTheme } from '../../contexts/ThemeContext';
@@ -33,7 +33,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import LoadingScreen from "@/components/ui/loading";
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 import { Toaster } from "@/components/ui/toaster";
@@ -118,9 +117,6 @@ const AgentTickets = () => {
 const [inProgressTicketUser, setInProgressTicketUser] = useState(null);
 const [isInProgressDialogOpen, setIsInProgressDialogOpen] = useState(false);
 
-// New state for rejection dialog
-const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
-const [ setRejectionReason] = useState("");
 const [hoverTimeout, setHoverTimeout] = useState(null);
 
   const handleMouseEnter = () => {
@@ -181,87 +177,127 @@ const handleTicketClick = async (ticket) => {
     }
   };
 
-// In-Progress Ticket Details Dialog
-const InProgressTicketDetailsDialog = () => {
-  const navigate = useNavigate();
-
-  const handleStartChat = () => {
-    // Pass complete ticket data during navigation
-    navigate('/agentchatinterface', { 
-      state: { 
-        ticketId: selectedTicket.id,
-        userId: selectedTicket.user_id,
-        agentId: userData.id, // Add agent ID from userData
-        ticketData: selectedTicket // Pass the complete ticket object
-      } 
-    });
-  };
-
-  if (!selectedTicket || !inProgressTicketUser) return null;
-
-  return (
-    <Dialog 
-      open={isInProgressDialogOpen} 
-      onOpenChange={setIsInProgressDialogOpen}
-    >
-      <DialogContent className={`sm:max-w-[600px] ${
-        isDarkMode ? 'bg-gray-800 border-gray-700' : ''
-      }`}>
-        <DialogHeader>
-          <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
-            Ticket #{selectedTicket.id} - In Progress
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className={`space-y-4 ${isDarkMode ? 'text-gray-300' : ''}`}>
-          <div>
-            <p className="font-medium">User Details</p>
-            <div className={`p-3 rounded-md ${
-              isDarkMode 
-                ? 'bg-gray-700 text-gray-200' 
-                : 'bg-gray-50 text-gray-800'
-            }`}>
-              <p>Full Name: {inProgressTicketUser.fullname}</p>
-              <p>Email: {inProgressTicketUser.email}</p>
+  const InProgressTicketDetailsDialog = () => {
+    const navigate = useNavigate();
+  
+    const handleStartChat = () => {
+      navigate('/agentchatinterface', { 
+        state: {
+          ticketId: selectedTicket.id,
+          userId: selectedTicket.user_id,
+          agentId: userData.id,
+          ticketData: selectedTicket
+        }
+      });
+    };
+  
+    if (!selectedTicket || !inProgressTicketUser) return null;
+  
+    return (
+      <Dialog 
+        open={isInProgressDialogOpen} 
+        onOpenChange={setIsInProgressDialogOpen}
+      >
+        <DialogContent className={`
+          sm:max-w-[650px] 
+          ${isDarkMode 
+            ? 'bg-purple-950 border-purple-800 shadow-2xl' 
+            : 'bg-purple-50 border-purple-200 shadow-lg'
+          } 
+          rounded-xl p-6
+        `}>
+          <DialogHeader className="mb-4">
+            <DialogTitle className={`
+              text-2xl font-bold tracking-tight 
+              ${isDarkMode 
+                ? 'text-purple-100' 
+                : 'text-purple-800'
+              }`}
+            >
+              Project Proposal #{selectedTicket.id} 
+              <span className={`
+                ml-3 px-2 py-1 rounded-full text-sm 
+                ${isDarkMode 
+                  ? 'bg-purple-800 text-purple-200' 
+                  : 'bg-purple-200 text-purple-700'
+                }`}
+              >
+                In Discussion
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+  
+          <div className={`space-y-5 ${isDarkMode ? 'text-purple-200' : 'text-purple-900'}`}>
+            <div className="bg-gradient-to-br from-purple-100/50 to-purple-200/30 dark:from-purple-900/30 dark:to-purple-800/30 p-4 rounded-lg border border-purple-200/50 dark:border-purple-700/30">
+              <p className="font-semibold text-lg mb-3 text-purple-800 dark:text-purple-200">
+                Patron Details
+              </p>
+              <div className={`
+                p-3 rounded-md 
+                ${isDarkMode 
+                  ? 'bg-purple-900/50 text-purple-100' 
+                  : 'bg-white text-purple-800'
+                }`}
+              >
+                <div className="flex items-center space-x-3 mb-2">
+                  <UserIcon className={`w-6 h-6 ${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`} />
+                  <p className="font-medium">
+                    {inProgressTicketUser.fullname}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <MailIcon className={`w-6 h-6 ${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`} />
+                  <p>
+                    {inProgressTicketUser.email}
+                  </p>
+                </div>
+              </div>
+            </div>
+  
+            <div className="bg-gradient-to-br from-purple-100/50 to-purple-200/30 dark:from-purple-900/30 dark:to-purple-800/30 p-4 rounded-lg border border-purple-200/50 dark:border-purple-700/30">
+              <p className="font-semibold text-lg mb-3 text-purple-800 dark:text-purple-200">
+                Proposal Overview
+              </p>
+              <p className={`
+                p-3 rounded-md min-h-[100px] 
+                ${isDarkMode 
+                  ? 'bg-purple-900/50 text-purple-100' 
+                  : 'bg-white text-purple-800'
+                }`}
+              >
+                {selectedTicket.description || 'No description provided'}
+              </p>
             </div>
           </div>
-
-          <div>
-            <p className="font-medium">Ticket Description</p>
-            <p className={`p-3 rounded-md ${
-              isDarkMode 
-                ? 'bg-gray-700 text-gray-200' 
-                : 'bg-gray-50 text-gray-800'
-            }`}>
-              {selectedTicket.description || 'No description provided'}
-            </p>
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button 
-            variant="ghost" 
-            onClick={() => setIsInProgressDialogOpen(false)}
-            className={`mr-2 ${
-              isDarkMode 
-                ? 'text-gray-300 hover:bg-gray-700' 
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            Cancel
-          </Button>
-          <Button 
-            variant="default" 
-            onClick={handleStartChat}
-            className="mr-2"
-          >
-            Start Chat
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
+  
+          <DialogFooter className="mt-6 flex justify-end space-x-3">
+            <Button 
+              variant="outline"
+              onClick={() => setIsInProgressDialogOpen(false)}
+              className={`
+                ${isDarkMode 
+                  ? 'text-purple-200 border-purple-700 hover:bg-purple-800' 
+                  : 'text-purple-700 border-purple-300 hover:bg-purple-100'
+                }`}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="default"
+              onClick={handleStartChat}
+              className={`
+                ${isDarkMode 
+                  ? 'bg-purple-600 hover:bg-purple-500 text-white' 
+                  : 'bg-purple-600 hover:bg-purple-700 text-white'
+                }`}
+            >
+              Start Discussion
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   useEffect(() => {
     if (!userData?.id) return;
@@ -306,9 +342,21 @@ const InProgressTicketDetailsDialog = () => {
       }
 
       const active = tickets.filter((ticket) => ticket.status === "active");
-      const inProgress = tickets.filter((ticket) => ticket.status === "in_progress");
-      const resolved = tickets.filter((ticket) => ticket.status === "resolved");
-      const rejected = tickets.filter((ticket) => ticket.status === "rejected");
+    const inProgress = tickets.filter(
+      (ticket) => 
+        ticket.status === "in_progress" && 
+        ticket.agent_id === userData.id
+    );
+    const resolved = tickets.filter(
+      (ticket) => 
+        ticket.status === "resolved" && 
+        ticket.agent_id === userData.id
+    );
+    const rejected = tickets.filter(
+      (ticket) => 
+        ticket.status === "rejected" && 
+        ticket.agent_id === userData.id
+    );
 
       setOpenTickets(active);
       setInProgressTickets(inProgress);
@@ -389,10 +437,8 @@ const InProgressTicketDetailsDialog = () => {
 
       // Reset states
       setIsDialogOpen(false);
-      setIsRejectionDialogOpen(false);
       setSelectedTicket(null);
       setTicketDetails(null);
-      setRejectionReason("");
 
     } catch (error) {
       console.error("Unexpected error:", error);
@@ -442,256 +488,111 @@ const InProgressTicketDetailsDialog = () => {
       minute: '2-digit'
     });
   };
+  // Resolved Project Proposal Dialog
+const ResolvedTicketDetailsDialog = () => {
+  if (!selectedResolvedTicket) return null;
 
-  // Ticket Details Dialog
-  const TicketDetailsDialog = () => {
-    const handleReject = () => {
-      setIsDialogOpen(false);
-      setIsRejectionDialogOpen(true);
-    };
+  return (
+    <Dialog 
+  open={isResolvedDialogOpen} 
+  onOpenChange={setIsResolvedDialogOpen}
+>
+  <DialogContent 
+    className={`sm:max-w-[650px] max-h-screen flex flex-col ${
+      isDarkMode 
+        ? 'bg-purple-950 border-purple-800 shadow-2xl' 
+        : 'bg-purple-50 border-purple-200 shadow-lg'
+    } rounded-xl p-6`}
+  >
+    {/* Fixed Header */}
+    <DialogHeader className="flex-none">
+      <DialogTitle className={`
+        text-2xl font-bold tracking-tight 
+        ${isDarkMode ? 'text-purple-100' : 'text-purple-800'}
+      `}>
+        Accepted Project Proposal #{selectedResolvedTicket.id}
+      </DialogTitle>
+      <DialogDescription className={`
+        ${isDarkMode ? 'text-purple-300' : 'text-purple-600'}
+      `}>
+        Project Proposal Assigned Details
+      </DialogDescription>
+    </DialogHeader>
 
-    if (!selectedTicket || !ticketDetails) return null;
+    {/* Scrollable Content */}
+    <div 
+      className={`space-y-5 overflow-y-auto flex-grow ${
+        isDarkMode ? 'text-purple-200' : 'text-purple-900'
+      }`}
+    >
+      <div className="bg-gradient-to-br from-purple-100/50 to-purple-200/30 dark:from-purple-900/30 dark:to-purple-800/30 p-4 rounded-lg border border-purple-200/50 dark:border-purple-700/30">
+        <p className="font-semibold text-lg mb-3 text-purple-800 dark:text-purple-200">
+          Patron Suggestions
+        </p>
+        <p className={`
+          p-3 rounded-md min-h-[100px]
+          ${isDarkMode 
+            ? 'bg-purple-900/50 text-purple-100' 
+            : 'bg-white text-purple-800'
+          }`}
+        >
+          {selectedResolvedTicket.feedback || 'No feedback provided by patron'}
+        </p>
+      </div>
 
-    return (
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className={`sm:max-w-[600px] ${
-          isDarkMode ? 'bg-gray-800 border-gray-700' : ''
-        }`}>
-          <DialogHeader>
-            <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
-              Ticket #{ticketDetails.id} - {ticketDetails.issue_type}
-            </DialogTitle>
-            <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
-              Ticket details and available actions
-            </DialogDescription>
-          </DialogHeader>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-purple-100/50 dark:bg-purple-900/30 p-3 rounded-lg">
+          <p className="font-medium text-purple-700 dark:text-purple-300 mb-2">
+            Project Category
+          </p>
+          <p className={isDarkMode ? 'text-purple-200' : 'text-purple-800'}>
+            {selectedResolvedTicket.issue_type}
+          </p>
+        </div>
+        <div className="bg-purple-100/50 dark:bg-purple-900/30 p-3 rounded-lg">
+          <p className="font-medium text-purple-700 dark:text-purple-300 mb-2">
+            Accepted Date
+          </p>
+          <p className={isDarkMode ? 'text-purple-200' : 'text-purple-800'}>
+            {formatDate(selectedResolvedTicket.last_update)}
+          </p>
+        </div>
+      </div>
 
-          <div className={`space-y-4 ${isDarkMode ? 'text-gray-300' : ''}`}>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="font-medium">Status</p>
-                <Badge 
-                  variant="outline" 
-                  className={`${getStatusColor(ticketDetails.status)} capitalize mt-1`}
-                >
-                  {ticketDetails.status.replace('_', ' ')}
-                </Badge>
-              </div>
-              <div>
-                <p className="font-medium">Priority</p>
-                <Badge 
-                  variant="outline" 
-                  className={`${getPriorityColor(ticketDetails.priority)} capitalize mt-1`}
-                >
-                  {ticketDetails.priority}
-                </Badge>
-              </div>
-            </div>
+      <div className="bg-gradient-to-br from-purple-100/50 to-purple-200/30 dark:from-purple-900/30 dark:to-purple-800/30 p-4 rounded-lg border border-purple-200/50 dark:border-purple-700/30">
+        <p className="font-semibold text-lg mb-3 text-purple-800 dark:text-purple-200">
+          Project Overview
+        </p>
+        <p className={`
+          p-3 rounded-md min-h-[100px]
+          ${isDarkMode 
+            ? 'bg-purple-900/50 text-purple-100' 
+            : 'bg-white text-purple-800'
+          }`}
+        >
+          {selectedResolvedTicket.description || 'No project description provided'}
+        </p>
+      </div>
+    </div>
 
-            <div>
-              <p className="font-medium mb-2">Description</p>
-              <p className={`p-3 rounded-md ${
-                isDarkMode 
-                  ? 'bg-gray-700 text-gray-200' 
-                  : 'bg-gray-50 text-gray-800'
-              }`}>
-                {ticketDetails.description || 'No description provided'}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="font-medium">Created At</p>
-                <p>{formatDate(ticketDetails.created_at)}</p>
-              </div>
-              <div>
-                <p className="font-medium">Last Updated</p>
-                <p>{formatDate(ticketDetails.last_update)}</p>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button 
-              variant="ghost" 
-              onClick={() => setIsDialogOpen(false)}
-              className={`mr-2 ${
-                isDarkMode 
-                  ? 'text-gray-300 hover:bg-gray-700' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <X className="mr-2 h-4 w-4" /> Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleReject}
-              className="mr-2"
-            >
-              <XCircle className="mr-2 h-4 w-4" /> Reject
-            </Button>
-            <Button 
-              variant="default" 
-              onClick={() => updateTicketStatus("in_progress")}
-            >
-              <CheckCircle2 className="mr-2 h-4 w-4" /> Accept
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  };
-
-  // Rejection Reason Dialog
-  const RejectionReasonDialog = () => {
-    const [rejectionDetails, setRejectionDetails] = useState({
-      reason: ''
-    });
-  
-    const handleSubmitRejection = () => {
-      if (rejectionDetails.reason.trim()) {
-        updateTicketStatus("rejected", rejectionDetails.reason);
-      }
-    };
-  
-    return (
-      <Dialog 
-        open={isRejectionDialogOpen} 
-        onOpenChange={(open) => {
-          setIsRejectionDialogOpen(open);
-          if (!open) {
-            // Reset rejection details when dialog closes
-            setRejectionDetails({ reason: '' });
-          }
-        }}
+    {/* Fixed Footer */}
+    <DialogFooter className="flex-none mt-6 flex justify-end">
+      <Button 
+        variant="default"
+        onClick={() => setIsResolvedDialogOpen(false)}
+        className={`
+          ${isDarkMode 
+            ? 'bg-purple-600 hover:bg-purple-500 text-white' 
+            : 'bg-purple-600 hover:bg-purple-700 text-white'
+          }`}
       >
-        <DialogContent className={`sm:max-w-[500px] ${
-          isDarkMode ? 'bg-gray-800 border-gray-700' : ''
-        }`}>
-          <DialogHeader>
-            <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
-              Reject Ticket
-            </DialogTitle>
-            <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
-              Please provide a reason for rejecting this ticket
-            </DialogDescription>
-          </DialogHeader>
-  
-          <Textarea
-            placeholder="Enter detailed reason for ticket rejection..."
-            value={rejectionDetails.reason}
-            onChange={(e) => {
-              // Use functional update to ensure correct state update
-              setRejectionDetails(prev => ({ 
-                ...prev, 
-                reason: e.target.value 
-              }))
-            }}
-            className={`min-h-[100px] ${
-              isDarkMode 
-                ? 'bg-gray-700 text-gray-100 border-gray-600' 
-                : ''
-            }`}
-          />
-  
-          <DialogFooter>
-            <Button 
-              variant="ghost" 
-              onClick={() => setIsRejectionDialogOpen(false)}
-              className={`mr-2 ${
-                isDarkMode 
-                  ? 'text-gray-300 hover:bg-gray-700' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleSubmitRejection}
-              disabled={!rejectionDetails.reason.trim()}
-            >
-              <XCircle className="mr-2 h-4 w-4" /> Submit Rejection
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  };
-
-  // Resolved Ticket Details Dialog
-  const ResolvedTicketDetailsDialog = () => {
-    if (!selectedResolvedTicket) return null;
-
-    return (
-      <Dialog 
-        open={isResolvedDialogOpen} 
-        onOpenChange={setIsResolvedDialogOpen}
-      >
-        <DialogContent className={`sm:max-w-[600px] ${
-          isDarkMode ? 'bg-gray-800 border-gray-700' : ''
-        }`}>
-          <DialogHeader>
-            <DialogTitle className={isDarkMode ? 'text-gray-100' : ''}>
-              Resolved Ticket #{selectedResolvedTicket.id}
-            </DialogTitle>
-            <DialogDescription className={isDarkMode ? 'text-gray-400' : ''}>
-              Ticket Resolution Details
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className={`space-y-4 ${isDarkMode ? 'text-gray-300' : ''}`}>
-            <div>
-              <p className="font-medium mb-2">Ticket Feedback</p>
-              <p className={`p-3 rounded-md ${
-                isDarkMode 
-                  ? 'bg-gray-700 text-gray-200' 
-                  : 'bg-gray-50 text-gray-800'
-              }`}>
-                {selectedResolvedTicket.feedback || 'No feedback provided'}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="font-medium">Issue Type</p>
-                <p>{selectedResolvedTicket.issue_type}</p>
-              </div>
-              <div>
-                <p className="font-medium">Resolution Date</p>
-                <p>{formatDate(selectedResolvedTicket.last_update)}</p>
-              </div>
-            </div>
-
-            <div>
-              <p className="font-medium mb-2">Description</p>
-              <p className={`p-3 rounded-md ${
-                isDarkMode 
-                  ? 'bg-gray-700 text-gray-200' 
-                  : 'bg-gray-50 text-gray-800'
-              }`}>
-                {selectedResolvedTicket.description || 'No description provided'}
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button 
-              variant="default" 
-              onClick={() => setIsResolvedDialogOpen(false)}
-              className={`mr-2 ${
-                isDarkMode 
-                  ? 'text-gray-300 hover:bg-gray-700' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  };
+        Close Project Review
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+    </Dialog>
+  );
+};
 
   const renderRequestCard = (request) => (
     <Card 
@@ -832,7 +733,7 @@ const InProgressTicketDetailsDialog = () => {
   return (
     <div className={`min-h-screen flex justify-center ml-20 ${
       isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
+    } cursor-none`}>
       <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
       <aside 
@@ -856,9 +757,9 @@ const InProgressTicketDetailsDialog = () => {
             <div className="flex items-center gap-4">
               <div className="flex flex-col flex-grow">
                 <h1 className={`flex text-2xl font-bold ${
-                  isDarkMode ? 'text-gray-100' : 'text-gray-900'
+                  isDarkMode ? 'text-fuchsia-50' : 'text-fuchsia-950'
                 }`}>
-                  Creative Project Requests
+                  Project Proposals
                 </h1>                
               </div>
             </div>
@@ -904,7 +805,7 @@ const InProgressTicketDetailsDialog = () => {
                   )}
                 </TabsTrigger>
                 <TabsTrigger value="rejected" className="gap-2">
-                  Rejected
+                  Declined
                   {rejectedTickets.length > 0 && (
                     <Badge variant="secondary">{rejectedTickets.length}</Badge>
                   )}
@@ -1000,9 +901,15 @@ const InProgressTicketDetailsDialog = () => {
     </div>
 
       {/* Ticket Details Dialog */}
-      <TicketDetailsDialog />
+      <TicketDetailsDialog 
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+        selectedTicket={selectedTicket}
+        ticketDetails={ticketDetails}
+        isDarkMode={isDarkMode}
+        updateTicketStatus={updateTicketStatus}
+      />
       <InProgressTicketDetailsDialog />
-      <RejectionReasonDialog />
       <ResolvedTicketDetailsDialog />
     </div>
   );

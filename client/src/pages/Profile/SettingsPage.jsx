@@ -201,9 +201,18 @@ const SettingsPage = () => {
 
       setSettings(newSettings);
 
-      if (key === 'darkMode') {
-        await toggleTheme(userData.id);
+      // Apply dark mode class dynamically
+    if (key === 'darkMode') {
+      const root = document.getElementById('root');
+      if (value) {
+        root.classList.add('dark'); // Add 'dark' class for dark mode
+      } else {
+        root.classList.remove('dark'); // Remove 'dark' class for light mode
       }
+
+      // Optionally, persist the dark mode change to the backend
+      await toggleTheme(userData.id);
+    }
 
       const { error } = await supabase
         .from('user_settings')

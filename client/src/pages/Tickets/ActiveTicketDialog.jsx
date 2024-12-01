@@ -208,7 +208,7 @@ const ActiveTicketDialog = ({
 
               <div className="grid gap-2">
                 <label className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                  Proposal Level
+                  Intensity
                 </label>
                 <Select
                   value={editedTicket.priority}
