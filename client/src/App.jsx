@@ -2,8 +2,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
-// import PrivateRoute from './components/common/PrivateRoute/PrivateRoute';
-// import ProtectedLayout from './Protection/ProtectedLayout';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import './App.css';
@@ -69,10 +67,7 @@ function App() {
             <Route path={ROUTES.PUBLIC.HOME} element={<HomePage />} />
             <Route path={ROUTES.PUBLIC.AUTH} element={<AuthPages />} />
             <Route path={ROUTES.PUBLIC.NOT_FOUND} element={<NotFoundPage />} />
-
-            {/* Protected routes - wrapped with ProtectedLayout */}
-            {/* <Route element={<ProtectedLayout />}> */}
-              {/* Protected Customer routes */}
+            
               <Route
                 path={ROUTES.PROTECTED.CUSTOMER.DASHBOARD}
                 element={
