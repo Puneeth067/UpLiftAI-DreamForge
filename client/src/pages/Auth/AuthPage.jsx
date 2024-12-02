@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Mail, Lock, User, Palette, Sparkles, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, Link, Wand2, HelpCircle } from 'lucide-react';
+import { Mail, Lock, User, Palette, Sparkles, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, Link, HelpCircle } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -655,7 +655,25 @@ const AuthPages = () => {
           <Card className="w-full dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
               <div className="flex items-center justify-center mb-4">
-                <Wand2 className="h-8 w-8 text-violet-600 dark:text-violet-400" />
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 100 100" 
+                className="h-8 w-8 text-indigo-600 dark:text-indigo-400"
+                aria-hidden="true"
+              >
+                <circle cx="50" cy="50" r="48" fill="url(#forgeGradient)"/>
+                <defs>
+                  <linearGradient id="forgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#4A90E2" stopOpacity="1"/>
+                    <stop offset="100%" stopColor="#6D41A3" stopOpacity="1"/>
+                  </linearGradient>
+                </defs>
+                <path d="M30 55 Q50 35, 70 55" fill="none" stroke="white" strokeWidth="4"/>
+                <path d="M30 55 L20 45 Q15 40, 25 35 Q35 30, 40 35" fill="none" stroke="white" strokeWidth="4"/>
+                <path d="M70 55 L80 45 Q85 40, 75 35 Q65 30, 60 35" fill="none" stroke="white" strokeWidth="4"/>
+                <circle cx="50" cy="55" r="8" fill="white"/>
+                <path d="M40 70 Q50 80, 60 70" fill="none" stroke="white" strokeWidth="3"/>
+              </svg>
               </div>
               <CardTitle className="text-center dark:text-gray-100">
                 {authMode === 'login' ? 'Welcome to DreamForge' : 'Join DreamForge'}

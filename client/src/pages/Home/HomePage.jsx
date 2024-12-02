@@ -6,7 +6,6 @@ import {
   Star,
   Target,
   ArrowRight,
-  Wand2,
   Trophy,
   ChevronRight,
   Info,
@@ -306,6 +305,7 @@ const HomePage = () => {
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-50 to-rose-50 dark:from-indigo-900/70 dark:to-rose-900/70 pb-12 cursor-none">
       <HomeBackground className="z-0"/>
       <CyberCursorEffect />
+
       <motion.nav 
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -313,41 +313,95 @@ const HomePage = () => {
         className="bg-white/70 backdrop-blur-sm dark:bg-gray-900/70 shadow-sm sticky top-0 z-50"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo Section */}
+            <div className="flex items-center space-x-2">
               <motion.div
                 initial={{ rotate: -180, scale: 0 }}
                 animate={{ rotate: 0, scale: 1 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                className="flex items-center"
               >
-                <Wand2 className="h-8 w-8 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 100 100" 
+                  className="h-8 w-8 text-indigo-600 dark:text-indigo-400"
+                  aria-hidden="true"
+                >
+                  <circle cx="50" cy="50" r="48" fill="url(#forgeGradient)"/>
+                  <defs>
+                    <linearGradient id="forgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#4A90E2" stopOpacity="1"/>
+                      <stop offset="100%" stopColor="#6D41A3" stopOpacity="1"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M30 55 Q50 35, 70 55" fill="none" stroke="white" strokeWidth="4"/>
+                  <path d="M30 55 L20 45 Q15 40, 25 35 Q35 30, 40 35" fill="none" stroke="white" strokeWidth="4"/>
+                  <path d="M70 55 L80 45 Q85 40, 75 35 Q65 30, 60 35" fill="none" stroke="white" strokeWidth="4"/>
+                  <circle cx="50" cy="55" r="8" fill="white"/>
+                  <path d="M40 70 Q50 80, 60 70" fill="none" stroke="white" strokeWidth="3"/>
+                </svg>
+                <span className="ml-2 text-xl font-bold text-gray-900 dark:text-gray-100">
+                  DreamForge
+                </span>
               </motion.div>
-              <span className="ml-2 text-xl font-bold text-gray-900 dark:text-gray-100">DreamForge</span>
             </div>
+
+            {/* Navigation Actions */}
             <div className="flex items-center space-x-4">
-              <Button
-                variant={userType === 'customer' ? 'default' : 'outline'}
-                onClick={() => setUserType('customer')}
-                className="transition-all"
-                aria-pressed={userType === 'customer'}
-              >
-                Creator
-              </Button>
-              <Button
-                variant={userType === 'agent' ? 'default' : 'outline'}
-                onClick={() => setUserType('agent')}
-                className="transition-all"
-                aria-pressed={userType === 'agent'}
-              >
-                Patron
-              </Button>
+              {/* User Type Toggle */}
+              <div className="hidden sm:flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+                <Button
+                  variant={userType === 'customer' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setUserType('customer')}
+                  className="rounded-full transition-all"
+                  aria-pressed={userType === 'customer'}
+                >
+                  Creator
+                </Button>
+                <Button
+                  variant={userType === 'agent' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setUserType('agent')}
+                  className="rounded-full transition-all"
+                  aria-pressed={userType === 'agent'}
+                >
+                  Patron
+                </Button>
+              </div>
+
+              {/* Sign In Button */}
               <Button
                 variant="outline"
                 onClick={handleSignIn}
+                className="transition-all hover:bg-purple-50 dark:hover:bg-purple-900/20"
               >
                 Sign In
               </Button>
             </div>
+          </div>
+
+          {/* Mobile User Type Toggle */}
+          <div className="sm:hidden flex justify-center space-x-4 pb-2">
+            <Button
+              variant={userType === 'customer' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setUserType('customer')}
+              className="transition-all"
+              aria-pressed={userType === 'customer'}
+            >
+              Creator
+            </Button>
+            <Button
+              variant={userType === 'agent' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setUserType('agent')}
+              className="transition-all"
+              aria-pressed={userType === 'agent'}
+            >
+              Patron
+            </Button>
           </div>
         </div>
       </motion.nav>
