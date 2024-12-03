@@ -445,9 +445,7 @@ const deleteProjectImage = async (imageUrl) => {
       <CyberCursorEffect />
       {/* Sidebar modification */}
       <aside 
-        className={`hidden md:block fixed left-0 top-0 h-full z-30 transition-all duration-600 ease-in-out ${
-          isCollapsed ? 'w-20' : 'w-64'
-        }`}
+        className={`hidden md:block fixed left-0 top-0 h-full z-30 transition-all duration-600 ease-in-out`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >

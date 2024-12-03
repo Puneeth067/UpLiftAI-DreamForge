@@ -86,7 +86,7 @@ const AgentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const {isDarkMode, loadUserTheme } = useTheme();
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [setIsCollapsed] = useState(true);
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const [notifications, setNotifications] = useState([]);
 
@@ -283,9 +283,7 @@ const NotificationDropdown = () => {
       <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
       <aside 
-      className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}
+      className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       >
@@ -296,7 +294,7 @@ const NotificationDropdown = () => {
       </aside>
 
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300`}>
-        <header className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed right-0 top-0 ${isCollapsed ? 'left-20' : 'left-64'} z-20 h-16`}>
+        <header className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed right-0 top-0 left-20 z-20 h-16`}>
           <div className="flex items-center justify-between px-4 h-full">
             <div className="flex items-center space-x-3">
               <Sheet>
@@ -370,7 +368,7 @@ const NotificationDropdown = () => {
             </div>
           </div>
         </header>
-        <AgentNLP userData={userData} isCollapsed={isCollapsed} />
+        <AgentNLP userData={userData} />
       </div>
     </div>
   );

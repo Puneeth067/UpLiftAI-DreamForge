@@ -172,9 +172,10 @@ const ProfilePage = () => {
     phonenumber: '',
     department: '',
     usertype: '',
-    avatar_url: 'user.png'
+    avatar_url: 'user.png',
+    portfolio: ''
   });
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [setIsCollapsed] = useState(true);
   const [hoverTimeout, setHoverTimeout] = useState(null);
 
   const handleMouseEnter = () => {
@@ -236,7 +237,8 @@ const ProfilePage = () => {
         phonenumber: data.phonenumber || '',
         department: data.department || '',
         usertype: data.usertype || '',
-        avatar_url: data.avatar_url || 'user.png'
+        avatar_url: data.avatar_url || 'user.png',
+        portfolio: data.portfolio || ''
       });
       setSelectedAvatar(data.avatar_url || 'user.png');
       setLoading(false);
@@ -263,8 +265,9 @@ const ProfilePage = () => {
         updateData.department = formData.department;
       }
 
-      if (profile.usertype === 'customer') {
+      if (profile.usertype === 'agent') {
         updateData.phonenumber = formData.phonenumber;
+        updateData.portfolio = formData.portfolio;
       }
 
       const { error } = await supabase
@@ -359,8 +362,7 @@ const ProfilePage = () => {
       <div className="flex flex-col items-center text-center">
         
         <div className="relative group">
-          <Avatar className={`h-32 w-32 ${isDarkMode ? 'ring-gray-800' : 'ring-white'} ring-4 shadow-lg`}>
-            <AvatarImage 
+          <Avatar className={`h-24 sm:h-28 md:h-32 w-24 sm:w-28 md:w-32 ${isDarkMode ? 'ring-gray-800' : 'ring-white'} ring-2 sm:ring-3 md:ring-4 shadow-lg`}>            <AvatarImage 
               src={`${editing ? selectedAvatar : (profile?.avatar_url || 'user.png')}`} 
               alt={profile?.fullname} 
             />
@@ -381,7 +383,7 @@ const ProfilePage = () => {
           </Badge>
         </div>
         
-        <h2 className={`text-2xl font-bold mt-6 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+        <h2 className={`text-xl sm:text-2xl md:text-2xl font-bold mt-6 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
           {profile?.fullname}
         </h2>
         <Badge variant="secondary" className={`mt-2 px-4 py-1 ${getUserTypeColor(profile?.usertype)}`}>
@@ -451,7 +453,7 @@ const ProfilePage = () => {
                 }`}
               />
             </div>
-          )}
+          )}          
           {isAgent && (
             <div className="space-y-2">
               <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -464,7 +466,7 @@ const ProfilePage = () => {
                 <SelectTrigger className={`w-full ${
                   isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200'
                 }`}>
-                  <SelectValue placeholder="Select a department" />
+                  <SelectValue placeholder="Select a speciality" />
                 </SelectTrigger>
                 <SelectContent 
                   className="max-h-[300px] overflow-y-auto"
@@ -477,6 +479,22 @@ const ProfilePage = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          )}
+          {isAgent && (
+            <div className="space-y-2">
+              <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Portfolio
+              </label>
+              <Input
+                name="portfolio"
+                value={formData.portfolio}
+                onChange={handleInputChange}
+                placeholder="https://your-portfolio.com"
+                className={`transition-all focus:ring-2 ${
+                  isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200'
+                }`}
+              />
             </div>
           )}
         </div>
@@ -537,15 +555,32 @@ const ProfilePage = () => {
                 {profile?.phonenumber || 'Not provided'}
               </p>
             </div>
-          )}
+          )}          
           {isAgent && (
             <div className="space-y-2">
               <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Department
+                Speciality
               </label>
               <p className={`font-medium ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
                 {profile?.department || 'Not specified'}
               </p>
+            </div>
+          )}
+          {isAgent && profile?.portfolio && (
+            <div className="space-y-2">
+              <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Portfolio
+              </label>
+              <div>
+                <a 
+                  href={profile.portfolio} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`font-medium hover:underline ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-500'}`}
+                >
+                  {profile.portfolio}
+                </a>
+              </div>
             </div>
           )}
         </div>
@@ -557,9 +592,8 @@ const ProfilePage = () => {
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
-      <aside 
-        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
-          isCollapsed ? 'w-20' : 'w-64'
+      <aside
+        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out
         }`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -584,7 +618,7 @@ const ProfilePage = () => {
         toast={toast}
         avatars={avatars}
       />
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
         <div className="flex items-center mb-8">
           <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
             Profile Details
@@ -594,7 +628,7 @@ const ProfilePage = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8"
         >
           <Card className={`md:col-span-1 shadow-md hover:shadow-lg transition-shadow ${
             isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'

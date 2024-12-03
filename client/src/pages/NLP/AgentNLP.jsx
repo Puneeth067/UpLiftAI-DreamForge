@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Paperclip, Sparkles } from 'lucide-react';
 
-const AgentNLP = ({ userData, isCollapsed }) => {
+const AgentNLP = ({ userData }) => {
   const [message, setMessage] = useState('');
 
   const handleSend = (e) => {
@@ -24,7 +24,7 @@ const AgentNLP = ({ userData, isCollapsed }) => {
 
   return (
     <main 
-  className={`flex-1 overflow-hidden flex flex-col items-center justify-center transition-all duration-300 w-full mx-0 max-w-none  ${isCollapsed ? 'left-16' : 'left-64'} mt-8 p-16`}
+  className={`flex-1 overflow-hidden flex flex-col items-center justify-center transition-all duration-300 w-full mx-0 max-w-none mt-8 p-16`}
 >
       <div className="flex-1 overflow-hidden flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="max-w-2xl mx-auto w-full h-full flex flex-col flex-1">
@@ -105,7 +105,6 @@ const AgentNLP = ({ userData, isCollapsed }) => {
 };
 
 AgentNLP.propTypes = {
-  isCollapsed: PropTypes.bool.isRequired,
   userData: PropTypes.object
 };
 

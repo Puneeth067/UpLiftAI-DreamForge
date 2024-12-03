@@ -151,7 +151,7 @@ const CreatorDiscoverPage = () => {
   const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [setIsCollapsed] = useState(true);
   const [hoverTimeout, setHoverTimeout] = useState(null);
 
   // Pagination state
@@ -410,9 +410,7 @@ const CreatorDiscoverPage = () => {
       <CyberCursorEffect />
         <Toaster />
       <aside 
-        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
-          isCollapsed ? 'w-20' : 'w-64'
-        }`}
+        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >

@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster"
 import PropTypes from 'prop-types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Home, Proportions, Palette, User, Settings, 
-  PanelLeftOpen, PanelLeftClose 
+  PanelLeftOpen, PanelLeftClose, Menu, X, ChevronRight 
 } from 'lucide-react';
 import SidebarLoading from './SidebarLoading';
 import { supabase } from '@/utils/supabase';
@@ -17,21 +17,22 @@ const SidebarContent = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [userData, setUserData] = useState(() => {
-    if (location.state?.patron) {
-      return location.state?.patron;
-    }
-    return location.state?.userData;
+    return location.state?.patron || location.state?.userData;
   });
   const [loading, setLoading] = useState(true);
-  const [hoverTimeout, setHoverTimeout] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isPinned, setIsPinned] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [screenSize, setScreenSize] = useState({
+    width: window.innerWidth,
+    isMobile: window.innerWidth <= 768,
+    isTablet: window.innerWidth > 768 && window.innerWidth <= 1024
+  });
 
-  useEffect(() => {
-    fetchProfile();
-  }, [userId]);
+  // Optimized fetch profile function
+  const fetchProfile = useCallback(async () => {
+    if (!userId) return;
 
-  const fetchProfile = async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -52,173 +53,291 @@ const SidebarContent = ({
       });
       setLoading(false);
     }
-  };
+  }, [userId, isDarkMode]);
 
-  const handleMouseEnter = () => {
-    // Only expand sidebar if not pinned
-    if (!isPinned) {
-      if (hoverTimeout) clearTimeout(hoverTimeout);
-      setIsCollapsed(false);
-    }
-  };
-  
-  const handleMouseLeave = () => {
-    // Only auto-collapse if not pinned
-    if (!isPinned) {
-      const timeout = setTimeout(() => {
-        setIsCollapsed(true);
-      }, 400);
-      setHoverTimeout(timeout);
-    }
-  };
-
-  const togglePinning = () => {
-    // Toggle pinned state and reset collapse state
-    setIsPinned(!isPinned);
-    
-    // If unpinning and mouse is not over sidebar, collapse
-    if (isPinned) {
-      setIsCollapsed(true);
-    } else {
-      setIsCollapsed(false);
-    }
-  };
-
+  // Responsive handling
   useEffect(() => {
-    return () => {
-      if (hoverTimeout) clearTimeout(hoverTimeout);
-    };
-  }, [hoverTimeout]);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      const mobile = width <= 768;
+      const tablet = width > 768 && width <= 1024;
 
+      setScreenSize({ width, isMobile: mobile, isTablet: tablet });
+      
+      // Responsive sidebar behavior
+      if (mobile) {
+        setIsCollapsed(true);
+        setIsPinned(false);
+      } else if (tablet) {
+        setIsCollapsed(true);
+      }
+    };
+
+    // Add resize listener
+    window.addEventListener('resize', handleResize);
+    
+    // Initial fetch and check
+    fetchProfile();
+    handleResize();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [fetchProfile]);
+
+  // Menu Items Configuration
   const menuItems = [
     {
       title: 'Home',
       icon: Home,
-      onClick: () => navigate(
-        userData?.usertype === 'agent' ? '/agentdashboard' : '/customerdashboard', 
-        { state: { userData } }
-      )
+      route: userData?.usertype === 'agent' ? '/agentdashboard' : '/customerdashboard'
     },
     {
       title: 'Proposal',
       icon: Proportions,
-      onClick: () => navigate(
-        userData?.usertype === 'agent' ? '/agenttickets' : '/customertickets', 
-        { state: { userData } }
-      )
+      route: userData?.usertype === 'agent' ? '/agenttickets' : '/customertickets'
     },
     ...(userData?.usertype === 'agent' ? [
       {
         title: 'Portfolio',
         icon: Palette,
-        onClick: () => navigate('/portfolio', { state: { userData } })
+        route: '/portfolio'
       }
     ] : []),
     ...(userData?.usertype === 'customer' ? [
       {
         title: 'Discover Creators',
         icon: Palette,
-        onClick: () => navigate('/portfolioview', { state: { userData } })
+        route: '/portfolioview'
       }
     ] : []),
     {
       title: 'Profile',
       icon: User,
-      onClick: () => navigate('/profile', { state: { userData } })
+      route: '/profile'
     },
     {
       title: 'Settings',
       icon: Settings,
-      onClick: () => navigate('/settings', { state: { userData } })
-    }    
+      route: '/settings'
+    }
   ];
-  
+
+  const navigateToRoute = (route) => {
+    navigate(route, { state: { userData } });
+    if (screenSize.isMobile) setIsMobileMenuOpen(false);
+  };
+
   const MenuItem = ({ item }) => (
-    <div className="mb-2">
-      <button 
-        onClick={item.onClick}
-        className={`flex items-center w-full p-3 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-100 transition-colors duration-200 ${
-          isCollapsed ? 'justify-center' : ''
-        }`}
-        title={isCollapsed ? item.title : ''}
-      >
-        <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
-      </button>
-    </div>
+    <button 
+      onClick={() => navigateToRoute(item.route)}
+      className={`
+        group flex items-center w-full p-3 rounded-lg 
+        hover:bg-purple-100 dark:hover:bg-purple-900 
+        text-purple-900 dark:text-purple-100 
+        transition-all duration-300 ease-in-out
+        ${(isCollapsed && !screenSize.isMobile) ? 'justify-center' : 'space-x-3'}
+      `}
+      aria-label={item.title}
+      title={((isCollapsed && !screenSize.isMobile) || screenSize.isMobile) ? item.title : ''}
+    >
+      <item.icon 
+        className={`
+          h-5 w-5 flex-shrink-0 
+          transition-transform duration-300 
+          group-hover:rotate-6 
+          ${(isCollapsed && !screenSize.isMobile) ? '' : 'mr-3'}
+        `} 
+      />
+      {(!isCollapsed || screenSize.isMobile) && (
+        <span className="text-sm font-medium flex-1 truncate">
+          {item.title}
+        </span>
+      )}
+      {(!isCollapsed || screenSize.isMobile) && (
+        <ChevronRight 
+          className="h-4 w-4 opacity-50 group-hover:translate-x-1 transition-transform" 
+        />
+      )}
+    </button>
   );
 
   MenuItem.propTypes = {
     item: PropTypes.shape({
       title: PropTypes.string.isRequired,
       icon: PropTypes.elementType.isRequired,
-      onClick: PropTypes.func.isRequired,
+      route: PropTypes.string.isRequired,
     }).isRequired,
   };
 
-  return(
-  <div 
-    className={`flex flex-col h-full bg-purple-50/80 dark:bg-purple-950 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}
-    onMouseEnter={handleMouseEnter}
-    onMouseLeave={handleMouseLeave}
-  >
-    <Toaster />
-    <div className="p-3 border-b border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
-      <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
-        {!isCollapsed && <span className="text-xl font-semibold dark:text-white">Menu</span>}
-        <div 
-          className="p-2 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 rounded-lg cursor-pointer"
-          onClick={togglePinning}
+  // Mobile Overlay Menu
+  const MobileMenu = () => (
+    <div 
+      className="
+        fixed inset-0 z-50 
+        bg-purple-50/95 dark:bg-purple-950/95 
+        backdrop-blur-sm lg:hidden 
+        animate-fadeIn
+      "
+    >
+      <div className="flex justify-between p-4 border-b border-purple-100 dark:border-purple-900/50">
+        <span className="text-2xl font-bold text-purple-900 dark:text-white">Menu</span>
+        <button 
+          onClick={() => setIsMobileMenuOpen(false)} 
+          className="
+            text-purple-900 dark:text-white 
+            hover:bg-purple-100 dark:hover:bg-purple-900 
+            rounded-full p-2 transition-colors
+          "
+          aria-label="Close menu"
         >
-          {isPinned ? 
-            <PanelLeftClose className="h-6 w-6 dark:text-white" /> : 
-            <PanelLeftOpen className="h-6 w-6 dark:text-white" />
-          }
-        </div>
+          <X className="h-6 w-6" />
+        </button>
       </div>
+      <nav className="p-4 space-y-2">
+        {menuItems.map((item, index) => (
+          <MenuItem key={index} item={item} />
+        ))}
+      </nav>
     </div>
+  );
 
-    <nav className="flex-1 overflow-y-auto p-4">
-      {menuItems.map((item, index) => (
-        <MenuItem key={index} item={item} index={index} />
-      ))}
-    </nav>
-
-    <div className="border-t border-purple-100 dark:border-purple-900/50 p-4 mt-auto">
-      <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-        <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
-          {userData?.avatar_url ? (
-            <img 
-              src={`${userData.avatar_url}`}
-              alt={userData.fullname}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = `/avatars/${userData.avatar_url}`;
-              }}
-            />
-          ) : (
-            <img 
-              src="/avatars/user.png"
-              alt="Default User"
-              className="w-full h-full object-cover"
-            />
-          )}
+  return (
+    <>
+      {/* Desktop/Tablet Sidebar */}
+      <aside 
+        className={`
+          hidden lg:flex flex-col h-screen 
+          bg-purple-50/80 dark:bg-purple-950 
+          fixed left-0 top-0 bottom-0 
+          shadow-lg
+          transition-all duration-500 ease-in-out 
+          z-40 
+          ${(isCollapsed && !screenSize.isMobile) ? 'w-20' : 'w-64'}
+        `}
+        onMouseEnter={() => !isPinned && !screenSize.isMobile && setIsCollapsed(false)}
+        onMouseLeave={() => !isPinned && !screenSize.isMobile && setIsCollapsed(true)}
+      >
+        <Toaster />
+        
+        {/* Header */}
+        <div 
+          className="
+            p-4 border-b border-purple-100 
+            dark:border-purple-900/50 
+            flex items-center justify-between
+          "
+        >
+          <div className={`flex items-center ${isCollapsed ? 'justify-center w-full' : 'space-x-3'}`}>
+            {!isCollapsed && (
+              <span className="text-xl font-bold text-purple-900 dark:text-white">Menu</span>
+            )}
+            <button 
+              onClick={() => setIsPinned(!isPinned)}
+              className="
+                p-2 hover:bg-purple-100/80 
+                dark:hover:bg-purple-900/50 
+                rounded-lg cursor-pointer
+                transition-colors
+              "
+              aria-label={isPinned ? "Unpin sidebar" : "Pin sidebar"}
+            >
+              {isPinned ? 
+                <PanelLeftClose className="h-6 w-6 dark:text-white" /> : 
+                <PanelLeftOpen className="h-6 w-6 dark:text-white" />
+              }
+            </button>
+          </div>
         </div>
-        {!isCollapsed && (
-          <div className="min-w-0">
-            <p className="font-medium truncate dark:text-white">{userData.fullname}</p>
-            <p className="text-sm text-purple-600 dark:text-purple-300 truncate">{userData.email}</p>
-            {userData.department && (
-              <p className="text-xs text-purple-500 dark:text-purple-400 truncate">{userData.department}</p>
+
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+          {menuItems.map((item, index) => (
+            <MenuItem key={index} item={item} />
+          ))}
+        </nav>
+
+        {/* User Profile Footer */}
+        <div 
+          className="
+            border-t border-purple-100 
+            dark:border-purple-900/50 
+            p-4 
+            transition-all duration-300
+          "
+        >
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-4'}`}>
+            <div 
+              className="
+                w-10 h-10 rounded-full 
+                bg-purple-100 dark:bg-purple-900/50 
+                flex items-center justify-center 
+                flex-shrink-0 overflow-hidden
+                ring-2 ring-purple-200 dark:ring-purple-700
+              "
+            >
+              <img 
+                src={userData?.avatar_url || "/avatars/user.png"}
+                alt={userData?.fullname || "User"}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/avatars/user.png";
+                }}
+              />
+            </div>
+            {!isCollapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-purple-900 dark:text-white truncate">
+                  {userData?.fullname}
+                </p>
+                <p className="text-sm text-purple-600 dark:text-purple-300 truncate">
+                  {userData?.email}
+                </p>
+                {userData?.department && (
+                  <p className="text-xs text-purple-500 dark:text-purple-400 truncate">
+                    {userData.department}
+                  </p>
+                )}
+              </div>
             )}
           </div>
-        )}
-      </div>
-    </div>
-    {loading && <SidebarLoading isDarkMode={isDarkMode} />}
-  </div>
-)
+        </div>
+
+        {loading && <SidebarLoading isDarkMode={isDarkMode} />}
+      </aside>
+
+      {/* Mobile Header */}
+      <header 
+        className="
+          lg:hidden fixed top-0 left-0 right-0 
+          z-40 bg-purple-50/80 dark:bg-purple-950 
+          p-4 flex justify-between items-center 
+          border-b border-purple-100 dark:border-purple-900/50
+          shadow-sm
+        "
+      >
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={() => setIsMobileMenuOpen(true)} 
+            className="
+              text-purple-900 dark:text-white 
+              hover:bg-purple-100 dark:hover:bg-purple-900 
+              rounded-full p-2 transition-colors
+            "
+            aria-label="Open menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+          <span className="text-xl font-bold text-purple-900 dark:text-white">Menu</span>
+        </div>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && <MobileMenu />}
+    </>
+  );
 };
 
 SidebarContent.propTypes = {
