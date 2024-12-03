@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Card,
@@ -9,13 +10,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Mail, Lock, User, Palette, Sparkles, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, Link, HelpCircle } from 'lucide-react';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Mail, Lock, User, Palette, Sparkles, Phone, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, Link } from 'lucide-react';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { supabase } from '../../utils/supabase.js';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
+import { Toaster } from '@/components/ui/toaster.jsx';
+import { toast } from '@/hooks/use-toast.js';
 
 const AuthBackgroundSVG = () => (
   <svg
@@ -176,6 +179,17 @@ const AuthPages = () => {
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    if (apiError) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: apiError,
+        duration: 5000 // optional: how long the toast stays visible
+      })
+    }
+  }, [apiError, toast])
 
   // Replace the existing email check with this version
   const checkEmailExists = async (email) => {
@@ -517,15 +531,6 @@ const AuthPages = () => {
     setShowVerificationAlert(false);
   };
 
-  const handleButtonHover = (e, isHovering, type) => {
-    const button = e.currentTarget;
-    button.style.boxShadow = isHovering ? '0 0 10px rgba(0, 0, 0, 0.15)' : (userType === type ? '0 0 10px rgba(0, 0, 0, 0.2)' : 'none');
-    button.style.borderColor = isHovering ? '#D1D5DB' : (userType === type ? '#BFDBFE' : '#E5E7EB');
-  };
-
-  const handleButtonFocus = (e) => {
-    e.currentTarget.style.outline = 'none';
-  };
 
   const renderInput = (label, name, type, placeholder, icon) => {
     const isPassword = type === 'password';
@@ -533,10 +538,10 @@ const AuthPages = () => {
     const showPasswordToggle = isPassword && (name === 'password' ? showPassword : showConfirmPassword);
     
     return (
-      <div>
-        <label className="text-sm text-gray-700 dark:text-gray-300 font-bold">{label}</label>
-        <div className="mt-1 relative">
-          <div className="absolute left-3 top-3 h-5 w-5 text-gray-400 dark:text-gray-500">
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-violet-800 dark:text-violet-200">{label}</label>
+        <div className="relative">
+          <div className="absolute left-3 top-3 h-5 w-5 text-violet-500 dark:text-violet-400">
             {icon}
           </div>
           <input
@@ -547,11 +552,19 @@ const AuthPages = () => {
             placeholder={placeholder}
             disabled={isLoading}
             maxLength={isPhone ? 14 : undefined}
-            className={`pl-10 ${isPassword ? 'pr-10' : ''} w-full p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg border ${
-              errors[name] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-            } focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 ${
-              isLoading ? 'opacity-50 cursor-not-allowed' : ''
-            } placeholder-gray-400 dark:placeholder-gray-500`}
+            className={`
+              pl-10 ${isPassword ? 'pr-10' : ''} 
+              w-full p-3 
+              bg-violet-50 dark:bg-violet-900/30 
+              text-violet-900 dark:text-violet-100 
+              rounded-xl 
+              border border-violet-200 dark:border-violet-700 
+              focus:outline-none 
+              focus:ring-2 focus:ring-violet-500 dark:focus:ring-violet-400 
+              transition duration-300 ease-in-out
+              ${errors[name] ? 'border-red-500 focus:ring-red-500' : ''}
+              ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
           />
           {isPassword && (
             <button
@@ -563,7 +576,7 @@ const AuthPages = () => {
                   setShowConfirmPassword(!showConfirmPassword);
                 }
               }}
-              className="absolute right-3 top-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 focus:outline-none"
+              className="absolute right-3 top-3 text-violet-500 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 focus:outline-none transition"
               tabIndex={-1}
             >
               {showPasswordToggle ? (
@@ -574,7 +587,15 @@ const AuthPages = () => {
             </button>
           )}
           {errors[name] && (
-            <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors[name]}</p>
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400 
+              animate-in 
+              slide-in-from-top-2 
+              fade-in 
+              duration-300 
+              ease-out"
+            >
+              {errors[name]}
+            </p>
           )}
         </div>
       </div>
@@ -582,85 +603,91 @@ const AuthPages = () => {
   };
 
   return (
-    <div className="min-h-screen min-w-[42rem] bg-white dark:bg-gray-900 relative overflow-x-auto overflow-y-hidden cursor-none">
+    <div className="min-h-screen 
+      min-w-full 
+      bg-white 
+      dark:bg-gray-900 
+      relative 
+      overflow-x-hidden 
+      overflow-y-auto 
+      py-8 
+      px-4 
+      sm:px-6 
+      lg:px-8
+      flex 
+      items-center 
+      justify-center">
       <AuthBackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
-      <div className="relative z-10 max-w-lg mx-auto pt-12 px-4">
-        {showSuccess && (
-          <Alert className="mb-4 bg-violet-100 dark:bg-violet-900 border-l-4 border-violet-500 text-violet-700 dark:text-violet-200 p-4">
-            <AlertDescription>
-              {authMode === 'login' ? 'Welcome back to DreamForge!' : 'Welcome to DreamForge! Let\'s create something amazing.'}
-            </AlertDescription>
-          </Alert>
-        )}
+      <Toaster />
+      <div className="relative 
+        z-10 
+        w-full 
+        max-w-md 
+        sm:max-w-lg 
+        mx-auto">
+      {showSuccess && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-4 bg-violet-100 dark:bg-violet-900 border-l-4 border-violet-500 text-violet-700 dark:text-violet-200 p-4 rounded-lg shadow-sm"
+        >
+          <AlertDescription className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            {authMode === 'login' ? 'Welcome back to DreamForge!' : 'Welcome to DreamForge! Let\'s create something amazing.'}
+          </AlertDescription>
+        </motion.div>
+      )}
 
-         {/* Add a Help Dialog for account types */}
-         {authMode === 'register' && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="absolute top-4 right-4">
-                <HelpCircle className="h-5 w-5 text-muted-foreground" />
+      {showVerificationAlert && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="mb-4 bg-violet-50 dark:bg-violet-900 border border-violet-200 dark:border-violet-700 rounded-lg p-4 shadow-md"
+        >
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="h-6 w-6 text-violet-600 dark:text-violet-400 mt-1" />
+            <div>
+              <AlertTitle className="text-violet-800 dark:text-violet-200 font-semibold">
+                Verify your email
+              </AlertTitle>
+              <AlertDescription className="text-violet-600 dark:text-violet-300 mt-2 text">
+                We`ve sent a verification link to <span className="font-bold">{registeredEmail}</span>.
+                Please check your email and click the link to verify your account.
+                Once verified, you can sign in to your account.
+              </AlertDescription>
+              <Button
+                className="mt-4 w-full bg-violet-600 hover:bg-violet-700 dark:bg-violet-800 dark:hover:bg-violet-700 text-white"
+                onClick={() => switchMode('login')}
+              >
+                Go to Sign In
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Choose Your Account Type</DialogTitle>
-                <DialogDescription>
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-semibold flex items-center gap-2">
-                        <Palette className="h-5 w-5 text-primary" /> Patron
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Looking to commission creative work or hire talent for your projects.
-                      </p>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-primary" /> Creator
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Professional creators offering specialized creative services.
-                      </p>
-                    </div>
-                  </div>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
-        )}
-
-        {showVerificationAlert && (
-          <Alert className="mb-4 dark:bg-gray-800 dark:border-gray-700">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Verify your email</AlertTitle>
-            <AlertDescription className="mt-2 dark:text-gray-300">
-              We`ve sent a verification link to <span className="font-medium">{registeredEmail}</span>.
-              Please check your email and click the link to verify your account.
-              Once verified, you can sign in to your account.
-            </AlertDescription>
-            <Button
-              className="mt-4 w-full dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100"
-              variant="outline"
-              onClick={() => switchMode('login')}
-            >
-              Go to Sign In
-            </Button>
-          </Alert>
-        )}
+            </div>
+          </div>
+        </motion.div>
+      )}
 
         
 
         {!showVerificationAlert && (
-          <Card className="w-full dark:bg-gray-800 dark:border-gray-700">
-            <CardHeader>
+          <Card className=" w-full 
+          dark:bg-violet-900/50 
+          dark:border-violet-700 
+          shadow-xl 
+          dark:shadow-2xl 
+          rounded-2xl 
+          overflow-hidden 
+          max-w-full">
+            <CardHeader className="bg-violet-100 dark:bg-violet-900/30 py-6 px-6">
               <div className="flex items-center justify-center mb-4">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 100 100" 
-                className="h-8 w-8 text-indigo-600 dark:text-indigo-400"
-                aria-hidden="true"
-              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 100 100" 
+                  className="h-12 w-12 text-violet-600 dark:text-violet-400"
+                  aria-hidden="true"
+                >
                 <circle cx="50" cy="50" r="48" fill="url(#forgeGradient)"/>
                 <defs>
                   <linearGradient id="forgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -675,51 +702,86 @@ const AuthPages = () => {
                 <path d="M40 70 Q50 80, 60 70" fill="none" stroke="white" strokeWidth="3"/>
               </svg>
               </div>
-              <CardTitle className="text-center dark:text-gray-100">
+              <CardTitle className="text-center text-2xl font-bold text-violet-900 dark:text-violet-100 mb-2">
                 {authMode === 'login' ? 'Welcome to DreamForge' : 'Join DreamForge'}
               </CardTitle>
-              <CardDescription className="text-center dark:text-gray-400">
+              <CardDescription className="text-center text-violet-700 dark:text-violet-300">
                 {authMode === 'login' 
                   ? 'Sign in to continue your creative journey' 
                   : 'Choose your role in the creative community'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="w-full space-y-4 text-left">
-              {authMode === 'register' && (
-                <div className="space-y-2">
-                  <label className="text-gray-700 dark:text-gray-300 text-sm font-bold">Account Type</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    {['customer', 'agent'].map((type) => (
-                      <button
-                        key={type}
-                        className={`w-full p-4 flex flex-col items-center gap-2 rounded-lg border ${
-                          userType === type 
-                            ? 'bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800' 
-                            : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600'
-                        } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={() => !isLoading && setUserType(type)}
-                        disabled={isLoading}
-                        type="button"
-                        style={{
-                          boxShadow: userType === type ? '0 0 10px rgba(0, 0, 0, 0.2)' : 'none',
-                          transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
-                          outline: 'none',
-                        }}
-                        onFocus={handleButtonFocus}
-                        onMouseEnter={(e) => handleButtonHover(e, true, type)}
-                        onMouseLeave={(e) => handleButtonHover(e, false, type)}
+            <CardContent className="w-full 
+            space-y-4 
+            text-left 
+            px-4 
+            sm:px-6 
+            lg:px-8">
+            {authMode === 'register' && (
+                <div className="space-y-4">
+                  <label className="text-violet-800 dark:text-violet-200 text-sm font-bold block">
+                    Choose Account Type
+                  </label>
+                  <Tabs 
+                    defaultValue="customer" 
+                    className="w-full"
+                    onValueChange={(value) => setUserType(value)}
+                  >
+                    <TabsList className="grid w-full grid-cols-2 bg-violet-100 dark:bg-violet-900/50">
+                      <TabsTrigger 
+                        value="customer" 
+                        className={`
+                          flex items-center gap-2 
+                          data-[state=active]:bg-white 
+                          data-[state=active]:text-violet-800 
+                          dark:data-[state=active]:bg-violet-800 
+                          dark:data-[state=active]:text-white
+                          focus:outline-none focus:ring-0
+                          border-none
+                        `}
                       >
-                        {type === 'customer' ? (
-                          <Palette className="h-6 w-6 text-violet-600 dark:text-violet-400" />
-                        ) : (
-                          <Sparkles className="h-6 w-6 text-violet-600 dark:text-violet-400" />
-                        )}
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
-                          {type === 'customer' ? 'Patron' : 'Creator'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                        <Palette className="h-5 w-5" />
+                        Patron
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="agent" 
+                        className={`
+                          flex items-center gap-2 
+                          data-[state=active]:bg-white 
+                          data-[state=active]:text-violet-800 
+                          dark:data-[state=active]:bg-violet-800 
+                          dark:data-[state=active]:text-white
+                          focus:outline-none focus:ring-0
+                          border-none
+                        `}
+                      >
+                        <Sparkles className="h-5 w-5" />
+                        Creator
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="customer" className="mt-4">
+                      <div className="bg-violet-50 dark:bg-violet-900/30 p-4 rounded-lg border border-violet-200 dark:border-violet-700">
+                        <h3 className="text-violet-800 dark:text-violet-200 font-semibold mb-2">
+                          Patron Account
+                        </h3>
+                        <p className="text-sm text-violet-600 dark:text-violet-300">
+                          Looking to commission creative work or hire talent for your projects. 
+                          Browse portfolios, post projects, and connect with skilled creators.
+                        </p>
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="agent" className="mt-4">
+                      <div className="bg-violet-50 dark:bg-violet-900/30 p-4 rounded-lg border border-violet-200 dark:border-violet-700">
+                        <h3 className="text-violet-800 dark:text-violet-200 font-semibold mb-2">
+                          Creator Account
+                        </h3>
+                        <p className="text-sm text-violet-600 dark:text-violet-300">
+                          Professional creators offering specialized creative services. 
+                          Showcase your portfolio, get discovered, and take on exciting projects.
+                        </p>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </div>
               )}
 
@@ -731,29 +793,60 @@ const AuthPages = () => {
                     {userType === 'agent' && (
                       <>
                       <div>
-                        <Label className="text-sm text-gray-700 dark:text-gray-300 font-bold">Speciality</Label>
-                          <div className="relative">
-                            <div className={`w-full p-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-gray-400 dark:placeholder-gray-500`}>
-                                <Select 
-                                value={formData.department}
-                                onValueChange={(value) => handleInputChange({ 
-                                  target: { name: 'department', value } 
-                                })}
-                                disabled={isLoading}                            
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Choose Speciality" />
-                                </SelectTrigger>
-                                <SelectContent maxHeight="160px">
-                                  {DEPARTMENTS.map((dept) => (
-                                    <SelectItem key={dept} value={dept}>
-                                      {dept}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>                          
+                        <Label className="text-sm font-semibold text-violet-800 dark:text-violet-200">Speciality</Label>
+                        <div className="relative mt-2">
+                          <Select
+                            value={formData.department}
+                            onValueChange={(value) => handleInputChange({
+                              target: { name: 'department', value }
+                            })}
+                            disabled={isLoading}
+                            className={`p-4`}
+                          >
+                            <SelectTrigger 
+                              className={`
+                                w-full 
+                                bg-violet-50 dark:bg-violet-900/30 
+                                text-violet-900 dark:text-violet-100 
+                                rounded-xl 
+                                border-violet-200 dark:border-violet-700 
+                                focus:ring-2 focus:ring-violet-500 dark:focus:ring-violet-400 
+                                transition duration-300 ease-in-out
+                                ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                              `}
+                            >
+                              <SelectValue placeholder="Choose Speciality" className="text-violet-600 dark:text-violet-300" />
+                            </SelectTrigger>
+                            <SelectContent 
+                              className="
+                                bg-white dark:bg-violet-900 
+                                border-violet-200 dark:border-violet-700 
+                                rounded-xl 
+                                shadow-lg 
+                                dark:shadow-xl
+                              "
+                              maxheight="160px"
+                            >
+                              {DEPARTMENTS.map((dept) => (
+                                <SelectItem 
+                                  key={dept} 
+                                  value={dept}
+                                  className="
+                                    hover:bg-violet-100 
+                                    dark:hover:bg-violet-800 
+                                    focus:bg-violet-100 
+                                    dark:focus:bg-violet-800 
+                                    transition duration-200
+                                    text-violet-800 
+                                    dark:text-violet-200
+                                  "
+                                >
+                                  {dept}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                       {renderInput('Portfolio URL', 'portfolio', 'url', 'https://your-portfolio.com', <Link />)}
                     </>  
@@ -772,37 +865,60 @@ const AuthPages = () => {
                   renderInput('Confirm Password', 'confirmPassword', 'password', 'Confirm your password', <Lock />)
                 }
   
-                <Button 
-                  type="submit" 
-                  className="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white p-3 rounded-lg flex items-center justify-center gap-2"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {authMode === 'login' ? 'Signing In...' : 'Creating Account...'}
-                    </>
-                  ) : (
-                    <>
-                      {authMode === 'login' ? 'Sign In' : 'Create Account'}
-                      <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
-                </Button>
+            <Button 
+              type="submit" 
+              className="
+                w-full 
+                bg-violet-600 dark:bg-violet-500 
+                hover:bg-violet-700 dark:hover:bg-violet-600 
+                text-white 
+                p-3 
+                rounded-xl 
+                group 
+                transition duration-300 ease-in-out 
+                transform hover:-translate-y-1 
+                hover:shadow-lg
+                focus:outline-none focus:ring-0
+              "
+              disabled={isLoading}
+            >
+              <span className="flex items-center justify-center gap-2">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {authMode === 'login' ? 'Signing In...' : 'Creating Account...'}
+                  </>
+                ) : (
+                  <>
+                    {authMode === 'login' ? 'Sign In' : 'Create Account'}
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition" />
+                  </>
+                )}
+              </span>
+            </Button>
               </form>
             </CardContent>
   
-            <CardFooter>
-              <p className="text-sm text-center w-full dark:text-gray-300">
+            <CardFooter className="bg-violet-50 dark:bg-violet-900/20 py-4 rounded-b-xl">
+              <p className="text-sm text-center w-full text-violet-800 dark:text-violet-200">
                 {authMode === 'login' ? (
                   <>
                     New to DreamForge?{' '}
                     <button
                       onClick={() => !isLoading && switchMode('register')}
                       disabled={isLoading}
-                      className={`text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none focus:ring-0 bg-transparent border-none appearance-none ${
-                        isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                      className={`
+                        text-violet-600 dark:text-violet-400 
+                        hover:text-violet-700 dark:hover:text-violet-300 
+                        focus:outline-none 
+                        focus:ring-0
+                        border-none
+                        transition-colors 
+                        duration-300 
+                        underline-offset-4 
+                        hover:underline
+                        ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                      `}
                     >
                       Join the community
                     </button>
@@ -813,9 +929,18 @@ const AuthPages = () => {
                     <button
                       onClick={() => !isLoading && switchMode('login')}
                       disabled={isLoading}
-                      className={`text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none focus:ring-0 bg-transparent border-none appearance-none ${
-                        isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                      className={`
+                        text-violet-600 dark:text-violet-400 
+                        hover:text-violet-700 dark:hover:text-violet-300 
+                        focus:outline-none 
+                        focus:ring-0
+                        border-none
+                        transition-colors 
+                        duration-300 
+                        underline-offset-4 
+                        hover:underline
+                        ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                      `}
                     >
                       Sign in
                     </button>
@@ -824,12 +949,6 @@ const AuthPages = () => {
               </p>
             </CardFooter>
           </Card>
-        )}
-
-        {apiError && (
-          <Alert className="mt-4 mb-4 bg-red-100 dark:bg-red-900/50 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-4">
-            <AlertDescription>{apiError}</AlertDescription>
-          </Alert>
         )}
       </div>
     </div>
