@@ -217,19 +217,19 @@ const NotificationDropdown = () => {
     <div className="relative flex items-center">
       {/* Notification Bell */}
       <button
-        className="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+        className="relative p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 hover:bg-violet-100 dark:hover:bg-violet-800/50"
         onClick={toggleDropdown}
       >
         <div className="relative">
           {/* Notification Count */}
           <div
-            className={`absolute -top-2 -right-2 bg-red-500 text-white rounded-full text-xs flex items-center justify-center w-5 h-5 ${
+            className={`absolute -top-2 -right-2 bg-red-500 text-white rounded-full text-xs flex items-center justify-center w-5 h-5${
               notifications.filter((n) => !n.read).length > 0 ? 'block' : 'hidden'
             }`}
           >
             {notifications.filter((n) => !n.read).length}
           </div>
-          <BellIcon className="h-6 w-6 text-gray-800 dark:text-white" />
+          <BellIcon className="h-6 w-6  text-gray-800 dark:text-white" />
         </div>
       </button>
 
@@ -279,7 +279,7 @@ const NotificationDropdown = () => {
   }
 
   return (
-    <div className={`min-h-screen flex bg-gray-50 dark:bg-gray-900 transition-colors duration-200`}>
+    <div className={`min-h-screen flex bg-violet-50 dark:bg-violet-950/50 transition-colors duration-200`}>
       <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
       <aside 
@@ -294,13 +294,19 @@ const NotificationDropdown = () => {
       </aside>
 
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300`}>
-        <header className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed right-0 top-0 left-20 z-20 h-16`}>
+      <header className={`
+        bg-white/80 dark:bg-violet-900/30 
+        backdrop-blur-md 
+        border-b border-violet-100 dark:border-violet-800/50 
+        fixed right-0 top-0 left-20 z-20 h-16 
+        shadow-sm dark:shadow-violet-900/20
+      `}> 
           <div className="flex items-center justify-between px-4 h-full">
             <div className="flex items-center space-x-3">
               <Sheet>
-                <SheetTrigger asChild>
-                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg md:hidden">
-                    <Menu className="h-6 w-6 dark:text-white" />
+                <SheetTrigger asChild>                  
+                  <button className="p-2 hover:bg-violet-100 dark:hover:bg-violet-800/50 rounded-lg md:hidden transition-colors">
+                  <Menu className="h-6 w-6 text-violet-600 dark:text-violet-300" />
                   </button>
                 </SheetTrigger>
                 <SheetContent side="left" className="p-0 w-64">
@@ -313,28 +319,28 @@ const NotificationDropdown = () => {
               
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                <div className="p-3 absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 100 100" 
-      className="h-8 w-8 relative text-purple-600 dark:text-purple-400"
-    >
-      <circle cx="50" cy="50" r="48" fill="url(#forgeGradient)"/>
-      <defs>
-        <linearGradient id="forgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#4A90E2" stopOpacity="1"/>
-          <stop offset="100%" stopColor="#6D41A3" stopOpacity="1"/>
-        </linearGradient>
-      </defs>
-      <path d="M30 55 Q50 35, 70 55" fill="none" stroke="white" strokeWidth="4"/>
-      <path d="M30 55 L20 45 Q15 40, 25 35 Q35 30, 40 35" fill="none" stroke="white" strokeWidth="4"/>
-      <path d="M70 55 L80 45 Q85 40, 75 35 Q65 30, 60 35" fill="none" stroke="white" strokeWidth="4"/>
-      <circle cx="50" cy="55" r="8" fill="white"/>
-      <path d="M40 70 Q50 80, 60 70" fill="none" stroke="white" strokeWidth="3"/>
-    </svg>
-  </div>
-                  <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    DreamForge
+                 <div className="p-3 absolute -inset-1 bg-gradient-to-r from-violet-600 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 100 100" 
+                      className="h-8 w-8 relative text-violet-600 dark:text-violet-400"
+                    >
+                      <circle cx="50" cy="50" r="48" fill="url(#forgeGradient)"/>
+                      <defs>
+                        <linearGradient id="forgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#4A90E2" stopOpacity="1"/>
+                          <stop offset="100%" stopColor="#6D41A3" stopOpacity="1"/>
+                        </linearGradient>
+                      </defs>
+                      <path d="M30 55 Q50 35, 70 55" fill="none" stroke="white" strokeWidth="4"/>
+                      <path d="M30 55 L20 45 Q15 40, 25 35 Q35 30, 40 35" fill="none" stroke="white" strokeWidth="4"/>
+                      <path d="M70 55 L80 45 Q85 40, 75 35 Q65 30, 60 35" fill="none" stroke="white" strokeWidth="4"/>
+                      <circle cx="50" cy="55" r="8" fill="white"/>
+                      <path d="M40 70 Q50 80, 60 70" fill="none" stroke="white" strokeWidth="3"/>
+                    </svg>
+                  </div>
+                  <span className="text-xl font-bold text-violet-900 dark:text-violet-100 tracking-tight">
+                   DreamForge
                   </span>
                 </div>
               </div>
@@ -343,8 +349,8 @@ const NotificationDropdown = () => {
               <NotificationDropdown />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden sm:block">
-                    <LogOut className="h-6 w-6 dark:text-white" />
+                  <button className="p-2 hover:bg-violet-100 dark:hover:bg-violet-800/50 rounded-lg hidden sm:block transition-colors group">
+                  <LogOut className="h-6 w-6 text-violet-600 dark:text-violet-300 group-hover:rotate-6 transition-transform" />
                   </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="sm:max-w-[425px]">

@@ -100,7 +100,7 @@ const AgentTickets = () => {
   const [rejectedTickets, setRejectedTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [setIsCollapsed] = useState(true);
   
   const [selectedResolvedTicket, setSelectedResolvedTicket] = useState(null);
   const [isResolvedDialogOpen, setIsResolvedDialogOpen] = useState(false);
@@ -607,12 +607,14 @@ const ResolvedTicketDetailsDialog = () => {
   const renderRequestCard = (request) => (
     <Card 
       key={request.id} 
-      className={`group transition-all duration-200 hover:shadow-md border-l-4 cursor-pointer ${
-        isDarkMode ? 'bg-gray-800 hover:bg-gray-800/80' : 'bg-white hover:bg-gray-50'
-      }`}
+      className={`group transition-all duration-200 hover:shadow-xl border-l-4 cursor-pointer 
+        ${isDarkMode 
+          ? 'bg-violet-950/70 hover:bg-violet-950/80 border-violet-700' 
+          : 'bg-violet-50 hover:bg-violet-100 border-violet-300'}
+        rounded-lg overflow-hidden`}
       style={{
-        borderLeftColor: request.priority === 'high' ? '#ec4899' : 
-                        request.priority === 'medium' ? '#8b5cf6' : '#6366f1'
+        borderLeftColor: request.priority === 'high' ? '#9333ea' : 
+                        request.priority === 'medium' ? '#7c3aed' : '#8b5cf6'
       }}
       onClick={() => handleTicketClick(request)}
     >
@@ -741,61 +743,71 @@ const ResolvedTicketDetailsDialog = () => {
   }
 
   return (
-    <div className={`min-h-screen flex justify-center ml-20 ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+    <div className={`min-h-screen flex flex-col md:flex-row ${
+      isDarkMode ? 'bg-violet-950' : 'bg-violet-50'
     } cursor-none`}>
-      <BackgroundSVG className="z-0 "/>
+      <BackgroundSVG className="fixed inset-0 z-0 opacity-50"/>
       <CyberCursorEffect />
       <aside 
-        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
-          isCollapsed ? 'w-20' : 'w-64'
-        }`}
+        className={`md:block fixed left-0 top-0 h-full w-20 border-r border-violet-100 
+        dark:border-violet-900/50 shrink-0 bg-violet-50/80 dark:bg-violet-950/30 z-30 
+        transition-all duration-600 ease-in-out hidden`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <SidebarContent 
-        userId={userData.id}
-        isDarkMode={isDarkMode}
+          userId={userData.id}
+          isDarkMode={isDarkMode}
         />
       </aside>
-      <Toaster />
-      <div className={`flex-1 flex flex-col min-w-[1024] transition-all duration-300`}>
-        <div className={`min-w-[1024px] shadow-xl rounded-lg my-8 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} pt-8 mb-0`}>
+      <main className={`flex-1 md:ml-20 md:mr-20 p-4 md:p-8 transition-all duration-300 
+        ${isDarkMode ? 'text-violet-100' : 'text-violet-900'}`}>
+        <div className={`max-w-7xl mx-auto bg-white/80 dark:bg-violet-900/80 
+          backdrop-blur-lg rounded-2xl shadow-2xl overflow-hidden`}>
+          {/* Page Header */}
           <div className={`p-6 border-b ${
-            isDarkMode ? 'border-gray-700' : 'border-gray-100'
+            isDarkMode ? 'border-violet-700/50' : 'border-violet-200/50'
           }`}>
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col flex-grow">
-                <h1 className={`flex text-2xl font-bold ${
-                  isDarkMode ? 'text-fuchsia-50' : 'text-fuchsia-950'
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+              <div className="flex-grow">
+                <h1 className={`text-2xl md:text-3xl font-bold ${
+                  isDarkMode ? 'text-violet-100' : 'text-violet-900'
                 }`}>
                   Project Proposals
-                </h1>                
+                </h1>
               </div>
             </div>
           </div>
 
-        <div className={`p-6 border-b ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-100'
-        }`}>
-          <div className="relative">
-            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${
-              isDarkMode ? 'text-gray-500' : 'text-gray-400'
-            }`} />
-            <Input
-              className={`pl-10 ${
-                isDarkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : ''
-              }`}
-              placeholder="Search messages from patrons..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          {/* Search Input */}
+          <div className={`p-6 border-b ${
+            isDarkMode ? 'border-violet-700/50' : 'border-violet-200/50'
+          }`}>
+            <div className="relative max-w-2xl mx-auto">
+              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 ${
+                isDarkMode ? 'text-violet-500' : 'text-violet-400'
+              }`} />
+              <Input
+                className={`pl-10 py-2 rounded-xl ${
+                  isDarkMode 
+                    ? 'bg-violet-900 text-violet-100 border-violet-700 focus:ring-violet-600' 
+                    : 'bg-white text-violet-900 border-violet-200 focus:ring-violet-300'
+                }`}
+                placeholder="Search messages from patrons..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="p-6">
+        {/* Tabs Section */}
+          <div className="p-4 md:p-6">
             <Tabs defaultValue="active" className="space-y-6">
-              <TabsList className={isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50/80'}>
+              <TabsList className={`w-full flex flex-wrap justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 hover:bg-violet-100 dark:hover:bg-violet-800/50 ${
+                isDarkMode 
+                  ? 'bg-violet-900/50 text-violet-200' 
+                  : 'bg-violet-100/80 text-violet-700'
+              }`}>
                 <TabsTrigger value="active" className="gap-2">
                   New Proposals
                   {openTickets.length > 0 && (
@@ -822,6 +834,8 @@ const ResolvedTicketDetailsDialog = () => {
                 </TabsTrigger>
               </TabsList>
 
+            {/* Tabs Content - Add responsive grid */}
+            <div className="grid grid-cols-1 gap-4">
             <TabsContent value="active" className="space-y-4">
               {isLoading ? (
                 <div className="text-center py-12">
@@ -905,10 +919,10 @@ const ResolvedTicketDetailsDialog = () => {
                 )
               )}
             </TabsContent>
+            </div>
           </Tabs>
         </div>
       </div>
-    </div>
 
       {/* Ticket Details Dialog */}
       <TicketDetailsDialog 
@@ -921,6 +935,8 @@ const ResolvedTicketDetailsDialog = () => {
       />
       <InProgressTicketDetailsDialog />
       <ResolvedTicketDetailsDialog />
+      </main>
+      <Toaster />
     </div>
   );
 };

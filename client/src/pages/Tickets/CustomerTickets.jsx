@@ -23,7 +23,8 @@ import {
   Paintbrush,
   Briefcase,
   Award,
-  Rocket
+  Rocket,
+  Menu
 } from "lucide-react";
 import { 
   Dialog, 
@@ -111,12 +112,13 @@ const CustomerTickets = () => {
   const [selectedRejectedTicket, setSelectedRejectedTicket] = useState(null);
   const [selectedInProgressTicket, setSelectedInProgressTicket] = useState(null);
   const [agentProfiles, setAgentProfiles] = useState({});
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [ setIsCollapsed] = useState(true);
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState(false);
   const [selectedActiveTicket, setSelectedActiveTicket] = useState(null);
   const [showActiveTicketDialog, setShowActiveTicketDialog] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState(false);  
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [ticketData, setTicketData] = useState({
     type: '',
     priority: 'medium',
@@ -366,12 +368,19 @@ const CustomerTickets = () => {
   const renderTicketCard = (ticket) => (
     <Card 
       key={ticket.id} 
-      className={`group transition-all duration-200 hover:shadow-md border-l-4 ${
-        isDarkMode ? 'bg-gray-800 hover:bg-gray-800/80' : 'bg-white hover:bg-gray-50'
-      }`}
+      className={`
+        group transition-all duration-300 ease-in-out 
+        transform hover:-translate-y-1 hover:scale-[1.02] 
+        border-l-4 shadow-sm hover:shadow-xl
+        ${isDarkMode 
+          ? 'bg-gray-800 hover:bg-violet-900/20' 
+          : 'bg-white hover:bg-violet-50'}
+      `}
       style={{
-        borderLeftColor: ticket.priority === 'high' ? '#ec4899' : 
-                        ticket.priority === 'medium' ? '#8b5cf6' : '#6366f1'
+        borderLeftColor: 
+          ticket.priority === 'high' ? '#9333ea' : 
+          ticket.priority === 'medium' ? '#7c3aed' : 
+          '#6d28d9'
       }}
       onClick={() => {
         if (ticket.status === 'active') {
@@ -393,26 +402,30 @@ const CustomerTickets = () => {
       <CardContent className="pt-6">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-3 flex-1">
-          <div className="flex items-center gap-2">
-            {ticket.issue_type === 'easy' && (
-              <Award className="h-5 w-5 text-purple-500" />
-            )}
-            {ticket.issue_type === 'medium' && (
-              <Briefcase className="h-5 w-5 text-purple-500" />
-            )}
-            {ticket.issue_type === 'high' && (
-              <Rocket className="h-5 w-5 text-purple-500" />
-            )}
-            <h3 className={`font-semibold text-lg group-hover:text-purple-500 transition-colors ${
-              isDarkMode ? 'text-gray-100' : 'text-gray-900'
-            }`}>
-              {ticket.issue_type}
-            </h3>
-          </div>
+            <div className="flex items-center gap-2">
+              {ticket.issue_type === 'easy' && (
+                <Award className="h-5 w-5 text-violet-500 group-hover:text-violet-600 transition-colors" />
+              )}
+              {ticket.issue_type === 'medium' && (
+                <Briefcase className="h-5 w-5 text-violet-500 group-hover:text-violet-600 transition-colors" />
+              )}
+              {ticket.issue_type === 'high' && (
+                <Rocket className="h-5 w-5 text-violet-500 group-hover:text-violet-600 transition-colors" />
+              )}
+              <h3 className={`
+                font-semibold text-lg 
+                group-hover:text-violet-600 
+                transition-colors 
+                ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}
+              `}>
+                {ticket.issue_type}
+              </h3>
+            </div>
 
-            <div className={`flex items-center gap-3 text-sm ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>
+            <div className={`
+              flex items-center gap-3 text-sm 
+              ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}
+            `}>
               <div className="flex items-center gap-1">
                 <Paintbrush size={14} />
                 <span>#{ticket.id}</span>
@@ -428,13 +441,31 @@ const CustomerTickets = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-          <Badge variant="outline" className={`${getStatusColor(ticket.status)} capitalize`}>
+            <Badge 
+              variant="outline" 
+              className={`
+                ${getStatusColor(ticket.status)} 
+                capitalize 
+                group-hover:bg-violet-100 
+                group-hover:text-violet-700 
+                transition-colors
+              `}
+            >
               {ticket.status === 'active' ? 'New Proposal' :
                ticket.status === 'in_progress' ? 'Under Review' :
                ticket.status === 'resolved' ? 'Accepted' :
                'Declined'}
             </Badge>
-            <Badge variant="outline" className={`${getPriorityColor(ticket.priority)} capitalize`}>
+            <Badge 
+              variant="outline" 
+              className={`
+                ${getPriorityColor(ticket.priority)} 
+                capitalize 
+                group-hover:bg-violet-100 
+                group-hover:text-violet-700 
+                transition-colors
+              `}
+            >
               {ticket.priority === 'high' ? 'Rush' :
                ticket.priority === 'medium' ? 'Standard' :
                'Flexible'}
@@ -1035,98 +1066,171 @@ const RejectionDialog = () => (
   }
 
   return (
-    <div className={`min-h-screen flex ${
+    <div className={`min-h-screen flex flex-col sm:flex-row ${
       isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
     }`}>
       <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
+
+      {/* Mobile Header with Menu Toggle */}
+      <div className="sm:hidden fixed top-0 left-0 right-0 z-50">
+        <div className={`flex justify-between items-center p-4 ${
+          isDarkMode ? 'bg-violet-900/80' : 'bg-violet-100/80'
+        } backdrop-blur-md`}>
+          <h1 className={`text-xl font-bold ${
+            isDarkMode ? 'text-violet-100' : 'text-violet-900'
+          }`}>
+            Project Proposals
+          </h1>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Menu className={`h-6 w-6 ${
+              isDarkMode ? 'text-violet-200' : 'text-violet-700'
+            }`} />
+          </Button>
+        </div>
+      </div>
+      {/* Mobile Sidebar */}
+      {isMobileMenuOpen && (
+        <div 
+          className="sm:hidden fixed inset-0 z-40 bg-black/50"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <div 
+            className={`w-64 h-full ${
+              isDarkMode ? 'bg-violet-950' : 'bg-violet-100'
+            } shadow-lg`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <SidebarContent 
+              userId={userData.id}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Sidebar */}
       <aside 
-        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out ${
-          isCollapsed ? 'w-20' : 'w-64'
-        }`}
+        className={`hidden sm:block fixed left-0 top-0 h-full w-20 border-r border-violet-100 dark:border-violet-900/50 shrink-0 bg-violet-50/80 dark:bg-violet-950/30 z-30 transition-all duration-600 ease-in-out `}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <SidebarContent 
-        userId={userData.id}
-        isDarkMode={isDarkMode}
+          userId={userData.id}
+          isDarkMode={isDarkMode}
         />
       </aside>
+
       <Toaster />
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300`}>
-        <div className={`max-w-[1248px]' min-w-[1024px] shadow-xl rounded-lg my-8 ${
-          isDarkMode ? 'bg-gray-800' : 'bg-white'} pt-8 mb-0`}>
-          <div className={`p-6 border-b ${
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300  mt-16 sm:mt-0`}>
+        <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${
+          isDarkMode ? 'bg-gray-800' : 'bg-white'
+        } pt-8 mb-0 rounded-lg shadow-xl`}>
+          <div className={`p-4 sm:p-6 border-b ${
             isDarkMode ? 'border-gray-700' : 'border-gray-100'
           }`}>
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col flex-grow">
-              <h1 className={` flex text-2xl font-bold ${
-                isDarkMode ? 'text-gray-100' : 'text-gray-900'
-              }`}>
-                Project Proposal
-              </h1>
+            <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+              <div className="flex flex-col flex-grow">
+                <h1 className={`text-2xl font-bold ${
+                  isDarkMode ? 'text-violet-200' : 'text-violet-800'
+                }`}>
+                  Project Proposal
+                </h1>
+              </div>
+              
+              <Button 
+                className={`w-full sm:w-auto rounded-xl px-6 py-5 transform transition-all duration-300 hover:scale-105 ${
+                  isDarkMode
+                    ? 'from-violet-500 to-purple-600'
+                    : 'from-violet-600 to-purple-700'
+                } bg-gradient-to-br text-white shadow-lg hover:shadow-xl`}
+                onClick={() => setShowTicketDialog(true)}
+              >
+                Create Proposal
+              </Button>
             </div>
-            
-            <Button 
-              className={`rounded-xl px-6 py-5 transform transition-all duration-300 hover:scale-105 ${
-                isDarkMode
-                  ? 'from-purple-400 to-violet-500'
-                  : 'from-purple-500 to-violet-600'
-              } bg-gradient-to-br text-white shadow-lg hover:shadow-xl`}
-              onClick={() => setShowTicketDialog(true)}
-            >
-              Create Proposal
-            </Button>
           </div>
-        </div>
 
-        <div className={`p-6 border-b ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-100'
-        }`}>
-          <div className="relative">
-            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${
-              isDarkMode ? 'text-gray-500' : 'text-gray-400'
-            }`} />
-            <Input
-              className={`pl-10 ${
-                isDarkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : ''
-              }`}
-              placeholder="Search proposals by issue type..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className={`p-4 sm:p-6 border-b ${
+            isDarkMode ? 'border-gray-700' : 'border-gray-100'
+          }`}>
+            <div className="relative">
+              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${
+                isDarkMode ? 'text-violet-500' : 'text-violet-400'
+              }`} />
+              <Input
+                className={`pl-10 w-full ${
+                  isDarkMode ? 'bg-gray-700 text-violet-100 border-gray-600' : 'border-violet-200'
+                }`}
+                placeholder="Search proposals by issue type..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="p-6">
-          <Tabs defaultValue="active" className="space-y-6">
-            <TabsList className={isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50/80'}>
-              <TabsTrigger value="active" className="gap-2">
-                Proposal Submitted
-                {activeTickets.length > 0 && (
-                  <Badge variant="secondary">{activeTickets.length}</Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="in_progress" className="gap-2">
-                Under Review
-                {inProgressTickets.length > 0 && (
-                  <Badge variant="secondary">{inProgressTickets.length}</Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="resolved" className="gap-2">
-                Accepted
-                {resolvedTickets.length > 0 && (
-                  <Badge variant="secondary">{resolvedTickets.length}</Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="rejected" className="gap-2">
-                Declined
-                {rejectedTickets.length > 0 && (
-                  <Badge variant="secondary">{rejectedTickets.length}</Badge>
-                )}
-              </TabsTrigger>
-            </TabsList>
+          <div className="p-4 sm:p-6">
+            <Tabs defaultValue="active" className="space-y-6">
+              <TabsList className={`flex flex-wrap justify-center ${
+                isDarkMode ? 'bg-gray-700/50' : 'bg-violet-50/80'
+              }`}>
+                <TabsTrigger 
+                  value="active" 
+                  className={`w-full sm:w-auto flex-1 gap-2 ${
+                    isDarkMode 
+                      ? 'data-[state=active]:bg-violet-700 data-[state=active]:text-white' 
+                      : 'data-[state=active]:bg-violet-200'
+                  }`}
+                >
+                  Proposal Submitted
+                  {activeTickets.length > 0 && (
+                    <Badge variant="secondary">{activeTickets.length}</Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="in_progress" 
+                  className={`w-full sm:w-auto flex-1 gap-2 ${
+                    isDarkMode 
+                      ? 'data-[state=active]:bg-violet-700 data-[state=active]:text-white' 
+                      : 'data-[state=active]:bg-violet-200'
+                  }`}
+                >
+                  Under Review
+                  {inProgressTickets.length > 0 && (
+                    <Badge variant="secondary">{inProgressTickets.length}</Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="resolved" 
+                  className={`w-full sm:w-auto flex-1 gap-2 ${
+                    isDarkMode 
+                      ? 'data-[state=active]:bg-violet-700 data-[state=active]:text-white' 
+                      : 'data-[state=active]:bg-violet-200'
+                  }`}
+                >
+                  Accepted
+                  {resolvedTickets.length > 0 && (
+                    <Badge variant="secondary">{resolvedTickets.length}</Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="rejected" 
+                  className={`w-full sm:w-auto flex-1 gap-2 ${
+                    isDarkMode 
+                      ? 'data-[state=active]:bg-violet-700 data-[state=active]:text-white' 
+                      : 'data-[state=active]:bg-violet-200'
+                  }`}
+                >
+                  Declined
+                  {rejectedTickets.length > 0 && (
+                    <Badge variant="secondary">{rejectedTickets.length}</Badge>
+                  )}
+                </TabsTrigger>
+              </TabsList>
 
             <TabsContent value="active" className="space-y-4">
               {isLoading ? (

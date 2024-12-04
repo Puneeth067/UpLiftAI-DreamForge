@@ -102,7 +102,6 @@ function AgentChatInterface() {
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
   const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
-  const [ setRejectionReason] = useState("");
   const [setIsCollapsed] = useState(true);
   const [hoverTimeout, setHoverTimeout] = useState(null);
 
@@ -277,7 +276,6 @@ const updateTicketStatus = async (status, reason = "") => {
 
     // Reset states
     setIsRejectionDialogOpen(false);
-    setRejectionReason("");
 
   } catch (error) {
     console.error("Unexpected error:", error);
