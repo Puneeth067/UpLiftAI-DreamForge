@@ -359,6 +359,7 @@ const updateTicketStatus = async (status, reason = "") => {
       if (rejectionDetails.reason.trim()) {
         updateTicketStatus("rejected", rejectionDetails.reason);
       }
+      setTimeout(() => window.history.back(), 1500);
     };
    
     return (

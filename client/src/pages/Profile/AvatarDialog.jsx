@@ -132,6 +132,7 @@ const AvatarDialog = ({
         description: "Avatar uploaded successfully",
         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
       });
+      setTimeout(() => window.location.href = '/profile', 2000);
     } catch (error) {
       console.error('Error uploading avatar:', error);
       toast({
@@ -182,6 +183,7 @@ const AvatarDialog = ({
         description: "Custom avatar deleted successfully",
         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
       });
+      setTimeout(() => window.location.href = '/profile', 2000);
     } catch (error) {
       console.error('Error deleting custom avatar:', error);
       toast({
@@ -216,7 +218,7 @@ const AvatarDialog = ({
       setSelectedAvatar(avatar);
       setProfile(prev => ({
         ...prev,
-        avatar_url: avatar,
+        avatar_url: `https://byoenyaekxtufmzsfqxq.supabase.co/storage/v1/object/public/user-avatars/avatars/${avatar}`,
         is_custom_avatar: false,
         updated_at: new Date().toISOString()
       }));
@@ -228,6 +230,8 @@ const AvatarDialog = ({
         description: "Avatar updated successfully",
         className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
       });
+
+      setTimeout(() => window.location.href = '/profile', 2000);
     } catch (error) {
       console.error('Error updating avatar:', error);
       toast({
