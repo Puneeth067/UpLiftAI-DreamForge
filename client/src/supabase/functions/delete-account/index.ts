@@ -41,29 +41,66 @@ serve(async (req) => {
       })
     }
 
-    // Delete user from auth.users
-    const { error: authError } = await supabase.auth.admin.deleteUser(user_id)
+    // Start a transaction-like approach
+    try {
+      // Delete related records first
+      const { error: profilesError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', user_id)
+
+      if (profilesError) {
+        console.error('Error deleting profiles:', profilesError);
+        throw profilesError;
+      }
+
+      const { error: settingsError } = await supabase
+        .from('user_settings')
+        .delete()
+        .eq('user_id', user_id)
+
+      if (settingsError) {
+        console.error('Error deleting user settings:', settingsError);
+        throw settingsError;
+      }
+
+      // Delete user from auth.users
+      const { error: authError } = await supabase.auth.admin.deleteUser(user_id)
     
-    if (authError) {
-      throw authError
+      if (authError) {
+        console.error('Error deleting auth user:', authError);
+        throw authError;
+      }
+
+      return new Response(JSON.stringify({ 
+        message: 'Account deleted successfully' 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+
+    } catch (deletionError) {
+      console.error('Detailed account deletion error:', {
+        message: deletionError.message,
+        code: deletionError.code,
+        details: deletionError.details
+      });
+
+      return new Response(JSON.stringify({ 
+        error: 'Failed to delete account',
+        details: deletionError.message,
+        code: deletionError.code
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
 
-    // Delete related records in other tables
-    await supabase.from('profiles').delete().eq('id', user_id)
-    await supabase.from('user_settings').delete().eq('user_id', user_id)
-    // Add more table deletions as needed for your specific application
-
-    return new Response(JSON.stringify({ 
-      message: 'Account deleted successfully' 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
-
   } catch (error) {
-    console.error('Account deletion error:', error)
+    console.error('Unexpected error in account deletion:', error)
 
     return new Response(JSON.stringify({ 
-      error: error.message || 'Failed to delete account' 
+      error: 'Unexpected error during account deletion',
+      details: error.message
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
