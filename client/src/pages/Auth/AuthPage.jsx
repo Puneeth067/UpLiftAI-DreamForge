@@ -19,6 +19,8 @@ import { supabase } from '../../utils/supabase.js';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 import { Toaster } from '@/components/ui/toaster.jsx';
 import { toast } from '@/hooks/use-toast.js';
+import PageSounds from '../../locales/PageSounds';
+
 
 const AuthBackgroundSVG = () => (
   <svg
@@ -951,6 +953,7 @@ const AuthPages = () => {
           </Card>
         )}
       </div>
+      <PageSounds />
     </div>
   );
 };

@@ -18,7 +18,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import CyberCursorEffect from '@/components/ui/CyberCursorEffect';
 import PropTypes from 'prop-types';
-import HomePageSounds from './HomePageSounds';
+import PageSounds from '../../locales/PageSounds';
 
 const HomeBackground = () => (
   <svg 
@@ -569,7 +569,7 @@ const HomePage = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <HomePageSounds />
+      <PageSounds />
     </div>
   );
 };

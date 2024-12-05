@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 
-const HomePageSounds = () => {
+const PageSounds = () => {
   const [isSoundEnabled, setIsSoundEnabled] = useState(false);
 
   // Sound effect references
   const hoverSoundRef = useRef(new Audio('/sounds/soft-hover.mp3'));
   const clickSoundRef = useRef(new Audio('/sounds/click-elegant.mp3'));
   const toggleSoundRef = useRef(new Audio('/sounds/toggle-switch.mp3'));
+  const typingSoundRef = useRef(new Audio('/sounds/typing-sound.mp3')); // New typing sound
 
   // Sound volume and settings
   useEffect(() => {
     hoverSoundRef.current.volume = 0.3;
     clickSoundRef.current.volume = 0.4;
     toggleSoundRef.current.volume = 0.5;
+    typingSoundRef.current.volume = 0.2; // Set volume for typing sound
 
     // Add event listener for first user interaction
     const enableSounds = () => {
@@ -30,7 +32,6 @@ const HomePageSounds = () => {
     if (!isSoundEnabled) return;
 
     try {
-      
       // Add sound effects to various elements
       const addHoverSounds = () => {
         const hoverableElements = document.querySelectorAll('button, [role="button"], .hover-sound');
@@ -71,10 +72,30 @@ const HomePageSounds = () => {
         });
       };
 
+      const addTypingSounds = () => {
+        const inputElements = document.querySelectorAll('input, textarea');
+        
+        inputElements.forEach(el => {
+          let lastKeyPressTime = 0;
+          
+          el.addEventListener('keydown', (event) => {
+            // Prevent rapid, continuous sound triggering
+            const currentTime = Date.now();
+            if (currentTime - lastKeyPressTime > 100) { // Minimum 100ms between sounds
+              typingSoundRef.current.currentTime = 0;
+              typingSoundRef.current.play().catch(error => {
+                console.error('Typing sound play error:', error);
+              });
+              lastKeyPressTime = currentTime;
+            }
+          });
+        });
+      };
+
       addHoverSounds();
       addClickSounds();
       addToggleSounds();
-
+      addTypingSounds(); // Add the new typing sound function
       
     } catch (error) {
       console.error('Sound initialization error:', error);
@@ -84,4 +105,4 @@ const HomePageSounds = () => {
   return null; // This component doesn't render anything visually
 };
 
-export default HomePageSounds;
+export default PageSounds;
