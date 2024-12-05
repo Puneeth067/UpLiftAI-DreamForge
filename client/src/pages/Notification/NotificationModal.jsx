@@ -12,6 +12,42 @@ import { Button } from '@/components/ui/button';
 import { Loader2, XCircle, CheckCircle } from 'lucide-react';
 import PropTypes from 'prop-types';
 
+const playSoundEffect = (soundType) => {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    // Different sound parameters for accept and decline
+    if (soundType === 'accept') {
+      // Higher pitched, positive sound
+      oscillator.type = 'triangle';
+      oscillator.frequency.setValueAtTime(587.33, audioContext.currentTime); // D5 note
+      gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+    } else if (soundType === 'decline') {
+      // Lower pitched, negative sound
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime); // C4 note
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    }
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    
+    // Stop the sound after a short duration
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.001, 
+      audioContext.currentTime + 0.5
+    );
+    
+    oscillator.stop(audioContext.currentTime + 0.5);
+  } catch (error) {
+    console.error('Error playing sound effect:', error);
+  }
+};
+
 const NotificationModal = ({ notification, onClose }) => {
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDelining, setIsDelining] = useState(false);
@@ -52,6 +88,8 @@ const NotificationModal = ({ notification, onClose }) => {
 
     setIsAccepting(true);
     try {
+
+      playSoundEffect('accept');
       // Transaction to ensure data consistency
       const { error } = await supabase.from('tickets').insert([
         {
@@ -80,6 +118,8 @@ const NotificationModal = ({ notification, onClose }) => {
   const handleDeclineProposal = async () => {
     setIsDelining(true);
     try {      
+
+      playSoundEffect('decline');
       const { error } = await supabase.from('collaboration_requests').delete().eq('id', notification.id);
 
       if (error) throw error;

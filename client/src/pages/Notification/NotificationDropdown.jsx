@@ -12,6 +12,47 @@ import { supabase } from '../../utils/supabase.js';
 import PropTypes from 'prop-types';
 import NotificationModal from './NotificationModal';
 
+// Sound effect utility function
+const playSoundEffect = (soundType) => {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    switch (soundType) {
+      case 'hover':
+        // Soft, short ping sound
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4 note
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+        break;
+      case 'click':
+        // Slightly more pronounced click sound
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5 note
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        break;
+      default:
+        return;
+    }
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    
+    // Stop the sound after a short duration
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.001, 
+      audioContext.currentTime + 0.1
+    );
+    
+    oscillator.stop(audioContext.currentTime + 0.1);
+  } catch (error) {
+    console.error('Error playing sound effect:', error);
+  }
+};
+
 const NotificationDropdown = ({ userId }) => {
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +61,8 @@ const NotificationDropdown = ({ userId }) => {
   const [selectedNotification, setSelectedNotification] = useState(null);
 
   const handleNotificationClick = (notification) => {
+    // Play click sound effect
+    playSoundEffect('click');
     setSelectedNotification(notification);
     setIsModalOpen(true);
   };
@@ -149,7 +192,10 @@ const NotificationDropdown = ({ userId }) => {
   return (
     <>
        <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger 
+      asChild
+      onMouseEnter={() => playSoundEffect('hover')}
+      >
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5 text-fuchsia-700 dark:text-fuchsia-300" />
           {unreadCount > 0 && (
@@ -171,7 +217,11 @@ const NotificationDropdown = ({ userId }) => {
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={markAllAsRead}
+              onClick={() => {
+                playSoundEffect('click');
+                markAllAsRead();
+              }}
+              onMouseEnter={() => playSoundEffect('hover')}
               className="text-sm text-fuchsia-700 hover:text-fuchsia-900 dark:text-fuchsia-300 dark:hover:text-fuchsia-100"
             >
               Mark all as read
@@ -191,6 +241,7 @@ const NotificationDropdown = ({ userId }) => {
                   markAsRead(notification.id);
                   handleNotificationClick(notification);
                 }}
+                onMouseEnter={() => playSoundEffect('hover')}
               >
                 <div className="flex items-start gap-3">
                   <div className={`mt-1 h-2 w-2 rounded-full ${
