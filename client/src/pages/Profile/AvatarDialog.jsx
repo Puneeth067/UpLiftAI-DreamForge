@@ -199,12 +199,12 @@ const AvatarDialog = ({
       if (profile.is_custom_avatar && profile.avatar_url) {
         await deleteOldAvatar(profile.avatar_url);
       }
-
+      
       // Update profile with selected default avatar
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          avatar_url: avatar,
+          avatar_url: `https://byoenyaekxtufmzsfqxq.supabase.co/storage/v1/object/public/user-avatars/avatars/${avatar}`,
           is_custom_avatar: false,
           updated_at: new Date().toISOString()
         })

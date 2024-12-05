@@ -453,7 +453,7 @@ function CustomerChatInterface() {
                         </div>
                         <div className="flex items-center gap-3 mb-2">
                           <Wand2 className="h-5 w-5 text-purple-500 flex-shrink-0" />
-                          <span className="font-medium break-words">{ticketDetails?.description}</span>
+                          <span className="font-medium break-words text-left">{ticketDetails?.description}</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <Calendar className="h-5 w-5 text-purple-500 flex-shrink-0" />

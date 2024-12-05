@@ -58,6 +58,7 @@ const CollabRequestDialog = ({ patron, creator }) => {
           message: `New collaboration request from ${patron.data.fullname}`,
           data: JSON.stringify({
             patron_name: patron.data.fullname,
+            patron_email: patron.data.email,
             project_title: projectTitle
           }),
           read: false
@@ -142,7 +143,7 @@ const CollabRequestDialog = ({ patron, creator }) => {
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
               className="col-span-3"
-              placeholder="Estimated budget (optional)"
+              placeholder="Estimated budget (in USD($) - optional)"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -177,6 +178,7 @@ CollabRequestDialog.propTypes = {
     data: PropTypes.shape({
       id: PropTypes.string.isRequired,
       fullname: PropTypes.string.isRequired,
+      email: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
   creator: PropTypes.shape({

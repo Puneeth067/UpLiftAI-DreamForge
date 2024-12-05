@@ -1126,7 +1126,7 @@ const RejectionDialog = () => (
       </aside>
 
       <Toaster />
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300  mt-16 sm:mt-0`}>
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 mt-16 sm:mt-0`}>
         <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${
           isDarkMode ? 'bg-gray-800' : 'bg-white'
         } pt-8 mb-0 rounded-lg shadow-xl`}>
