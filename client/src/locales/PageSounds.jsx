@@ -4,14 +4,12 @@ const PageSounds = () => {
   const [isSoundEnabled, setIsSoundEnabled] = useState(false);
 
   // Sound effect references
-  const hoverSoundRef = useRef(new Audio('/sounds/soft-hover.mp3'));
   const clickSoundRef = useRef(new Audio('/sounds/click-elegant.mp3'));
   const toggleSoundRef = useRef(new Audio('/sounds/toggle-switch.mp3'));
   const typingSoundRef = useRef(new Audio('/sounds/typing-sound.mp3')); // New typing sound
 
   // Sound volume and settings
   useEffect(() => {
-    hoverSoundRef.current.volume = 0.3;
     clickSoundRef.current.volume = 0.4;
     toggleSoundRef.current.volume = 0.5;
     typingSoundRef.current.volume = 0.2; // Set volume for typing sound
@@ -33,18 +31,6 @@ const PageSounds = () => {
 
     try {
       // Add sound effects to various elements
-      const addHoverSounds = () => {
-        const hoverableElements = document.querySelectorAll('button, [role="button"], .hover-sound');
-        
-        hoverableElements.forEach(el => {
-          el.addEventListener('mouseenter', () => {
-            hoverSoundRef.current.currentTime = 0;
-            hoverSoundRef.current.play().catch(error => {
-              console.error('Hover sound play error:', error);
-            });
-          });
-        });
-      };
 
       const addClickSounds = () => {
         const clickableElements = document.querySelectorAll('button, [role="button"], .click-sound');
@@ -92,7 +78,6 @@ const PageSounds = () => {
         });
       };
 
-      addHoverSounds();
       addClickSounds();
       addToggleSounds();
       addTypingSounds(); // Add the new typing sound function
