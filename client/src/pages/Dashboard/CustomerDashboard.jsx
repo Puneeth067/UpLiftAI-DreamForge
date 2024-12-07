@@ -23,7 +23,7 @@ import LoadingScreen from "@/components/ui/loading";
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../utils/supabase.js';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
-import AgentNLP from '../NLP/AgentNLP';
+import CustomerNLP from '../NLP/CustomerNLP';
 import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 
 const BackgroundSVG = () => (
@@ -282,7 +282,7 @@ const CustomerDashboard = () => {
             </div>
           </div>
         </header>
-        <AgentNLP userData={userData} />
+        <CustomerNLP userData={userData} />
       </div>
     </div>
   );
