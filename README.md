@@ -124,4 +124,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Contact
 
 Project Maintainer: Team Uplift
-Project Link: [https://github.com/puneeth067/UPLIFTAI-SUPPORT](https://github.com/puneeth067/UPLIFTAI-DreamForge)
+Project Link: [https://github.com/puneeth067/UPLIFTAI-DreamForge](https://github.com/puneeth067/UPLIFTAI-DreamForge)
