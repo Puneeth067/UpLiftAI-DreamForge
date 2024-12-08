@@ -27,6 +27,7 @@ import { v4 as uuidv4 } from 'uuid';
 import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import PortfolioExportPDF from './PortfolioExportPDF';
 import CollabRequestDialog from './CollabRequestDialog';
+import EditProjectDialog from "./EditProjectDialog"
 
 
 const BackgroundSVG = () => (
@@ -651,20 +652,29 @@ const deleteProjectImage = async (imageUrl) => {
                   transition={{ duration: 0.2 }}
                 >
                   <div className="relative h-48">
-                    <img 
-                      src={project.image} 
+                    <img
+                      src={project.image}
                       alt={project.title}
                       className="w-full h-full object-cover transition-transform group-hover:scale-105"
                     />
                     {isEditing && (
                       <div className="absolute top-2 right-2 flex gap-2">
+                        <EditProjectDialog
+                          project={project}
+                          userId={userData.id} // Make sure to pass the userId
+                          onEdit={(editedProject) => {
+                            const newProjects = [...portfolioData.projects];
+                            newProjects[index] = editedProject;
+                            setPortfolioData({ ...portfolioData, projects: newProjects });
+                          }}
+                        />
                         <Button
                           variant="secondary"
                           size="icon"
                           onClick={async () => {
                             // Delete the image from storage first
                             await deleteProjectImage(project.image);
-                            
+                          
                             // Then remove the project from the state
                             const newProjects = portfolioData.projects.filter((_, i) => i !== index);
                             setPortfolioData({ ...portfolioData, projects: newProjects });
@@ -707,7 +717,7 @@ const deleteProjectImage = async (imageUrl) => {
               ))}
             </div>
           </CardContent>
-          </MotionCard>
+        </MotionCard>
 
           {/* Experience Timeline */}
         <MotionCard
