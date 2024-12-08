@@ -626,10 +626,10 @@ const AgentNLP = ({ userData }) => {
 
                   <button
                     type="submit"
-                    className="flex items-center gap-2 px-5 py-2.5 
-                      bg-purple-600 text-white rounded-lg 
-                      hover:bg-purple-700 transition-colors 
-                      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-lg ${ message.trim()
+                            ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        } transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2`}
                   >
                     <Send className="w-5 h-5" />
                     <span>Send</span>
