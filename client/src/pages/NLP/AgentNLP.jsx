@@ -6,10 +6,13 @@ import { Send, Bot, Mic, MicOff, FileUp, X } from 'lucide-react';
 import { supabase } from '@/utils/supabase';
 
 class PortfolioNLPBot {
-  constructor() {
+  constructor({userData}) {
+
+    this.userData = userData || {};
+
     this.intents = {
       'greet': ['hi', 'hello', 'hey', 'greetings'],
-      'create_portfolio': ['create portfolio', 'make portfolio', 'portfolio', 'build portfolio'],
+      'create_portfolio': ['create portfolio', 'make portfolio', 'portfolio','yes','ok','create', 'build portfolio'],
       'help': ['help', 'assistance', 'guide me'],
       'exit': ['exit', 'quit', 'stop']
     };
@@ -22,6 +25,9 @@ class PortfolioNLPBot {
       projects: [],
       experience: []
     };
+
+    this.social_platforms = ['github', 'twitter', 'linkedin', 'instagram'];
+    this.current_social_platform = null;
     
     this.current_step = null;
     this.portfolio_data = {};
@@ -95,13 +101,44 @@ class PortfolioNLPBot {
       }
       
       case 'social_links': {
-        const socialPlatforms = ['github', 'twitter', 'linkedin', 'instagram'];
-        const matchedPlatform = socialPlatforms.find(platform => 
-          message.toLowerCase().includes(platform)
-        );
-        return matchedPlatform 
-          ? { [matchedPlatform]: message.split(matchedPlatform)[1].trim() } 
-          : null;
+        // If no platform is currently being asked, start with the first platform
+        if (!this.current_social_platform) {
+          this.current_social_platform = this.social_platforms[0];
+          return {
+            prompt: `Please enter your ${this.current_social_platform} username`,
+            platform: this.current_social_platform
+          };
+        }
+  
+        // Validate the input (alphanumeric username)
+        const usernamePattern = /^[a-zA-Z0-9._-]+$/;
+        const trimmedMessage = message.trim();
+  
+        if (usernamePattern.test(trimmedMessage)) {
+          // Store the social username
+          this.portfolio_data.social_links = this.portfolio_data.social_links || {};
+          this.portfolio_data.social_links[this.current_social_platform] = trimmedMessage;
+  
+          // Move to next platform
+          const currentIndex = this.social_platforms.indexOf(this.current_social_platform);
+          if (currentIndex < this.social_platforms.length - 1) {
+            this.current_social_platform = this.social_platforms[currentIndex + 1];
+            return {
+              prompt: `Great! Now, please enter your ${this.current_social_platform} username`,
+              platform: this.current_social_platform
+            };
+          } else {
+            // All platforms collected
+            this.current_social_platform = null;
+            return this.portfolio_data.social_links;
+          }
+        } else {
+          // Invalid username
+          return {
+            prompt: `Invalid username. Please enter a valid username for ${this.current_social_platform} (letters, numbers, underscore, or hyphen)`,
+            platform: this.current_social_platform
+          };
+        }
       }
       
       default:
@@ -137,7 +174,7 @@ class PortfolioNLPBot {
           try {
             const { error } = await supabase
               .from('portfolio')
-              .insert({ user_id: this.userData.id, ...this.portfolio_data });
+              .upsert({ user_id: this.userData.id, ...this.portfolio_data });
 
             if (error) {
               console.error("Error saving portfolio:", error);
@@ -175,7 +212,7 @@ class PortfolioNLPBot {
       'skills': "List your skills, separated by commas (e.g., Python, React, Machine Learning)",
       'projects': "Tell me about a project (Format: Project Title | Project Description)",
       'experience': "Share your work experience (Format: Role | Company | Period | Description)",
-      'social_links': "Share a social link (e.g., github johndoe)"
+      'social_links': "We'll collect your social media profile links. I'll guide you through each platform."
     };
 
     return prompts[this.current_step];
@@ -183,9 +220,44 @@ class PortfolioNLPBot {
 
   async savePortfolioToSupabase() {
     try {
+
+      const userId = 
+      this.userData?.id || 
+      this.userData?.user?.id || 
+      this.userData?.userId;
+
+      console.log("Comprehensive User ID extraction:", {
+        directId: this.userData?.id,
+        userObjectId: this.userData?.user?.id,
+        userIdProperty: this.userData?.userId
+      });
+
+      if (!userId) {
+        console.error("No user ID available for saving portfolio");
+        console.error("Full userData structure:", JSON.stringify(this.userData));
+        return false;
+      }
+      const portfolioData = {
+        user_id: userId,
+        title: this.portfolio_data.bio ? "Software Developer" : "",
+        bio: this.portfolio_data.bio || "",
+        skills: this.portfolio_data.skills || [],
+        experience: this.portfolio_data.experience || [],
+        projects: this.portfolio_data.projects || [],
+        social_links: {
+          github: this.portfolio_data.social_links?.github || "",
+          twitter: this.portfolio_data.social_links?.twitter || "",
+          linkedin: this.portfolio_data.social_links?.linkedin || "",
+          instagram: this.portfolio_data.social_links?.instagram || ""
+        }
+      };
+      console.log("Portfolio Data to Save:", portfolioData);
       const { data, error } = await supabase
         .from("portfolio")
-        .insert({ user_id: this.userData.id, ...this.portfolio_data });
+        .upsert({ 
+          user_id: userId, 
+          ...this.portfolio_data 
+        });
       
       if (error) throw error;
       return true;
@@ -202,12 +274,22 @@ class PortfolioNLPBot {
     if (intent === 'create_portfolio' || this.current_step) {
       if (!this.current_step) {
         return {
-          response: "Let's create your portfolio! I'll guide you through each step.",
+          response: `Let's create your portfolio! I'll guide you through each step.
+          ( Follow the instructions carefully. Don't miss out on any steps or it may lead to improper portfolio and further changes have to be done manually. Hover on the Sidebar and click on Portfolio for manual editing )`,
           prompt: this.getNextPrompt()
         };
       }
       
       const info = this.extractInfo(message);
+      
+      // Handle social links special case with prompts
+      if (this.current_step === 'social_links' && info.prompt) {
+        return {
+          response: info.prompt,
+          prompt: info.prompt
+        };
+      }
+      
       if (this.validateAndStore(info)) {
         this.moveToNextStep();
         
@@ -227,7 +309,7 @@ class PortfolioNLPBot {
         };
       } else {
         return {
-          response: "Sorry, I couldn`t understand that. Please provide a valid input.",
+          response: "Sorry, I couldn't understand that. Please provide a valid input.",
           prompt: this.getNextPrompt()
         };
       }
@@ -258,9 +340,29 @@ class PortfolioNLPBot {
 }
 
 const AgentNLP = ({ userData }) => {
+
+  useEffect(() => {
+    console.log('Full userData type:', typeof userData);
+    console.log('Full userData keys:', Object.keys(userData));
+    console.log('Full userData stringified:', JSON.stringify(userData));
+  }, [userData]);
+
+  // Explicitly extract user ID
+  const userId = userData?.id || 
+                 (userData && userData.user?.id) || 
+                 null;
+
+  const [nlpBot] = useState(() => new PortfolioNLPBot({ 
+    userData: { 
+      id: userId,
+      // Spread any other known properties
+      ...userData 
+    } 
+  }));
+ 
+
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const [nlpBot] = useState(() => new PortfolioNLPBot(userData.id));
   const [currentStep, setCurrentStep] = useState(null);
   const [isListening, setIsListening] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -322,14 +424,6 @@ const AgentNLP = ({ userData }) => {
       }
   
       try {
-        // Ensure bucket exists (optional, as you should create it in Supabase dashboard)
-        const { data: bucketData, error: bucketError } = await supabase.storage.getBucket('portfolio-uploads');
-        
-        if (bucketError) {
-          console.error('Bucket check error:', bucketError);
-          alert('Storage bucket is not configured. Please contact support.');
-          return null;
-        }
   
         // Upload to Supabase storage
         const fileExt = file.name.split('.').pop();
@@ -432,7 +526,7 @@ const AgentNLP = ({ userData }) => {
           </CardHeader>
 
           {/* Message Area - Scrollable */}
-          <CardContent className="flex-1 overflow-hidden p-0 relative">
+          <CardContent className="flex-1 overflow-hidden p-0 bg-purple-100 dark:bg-purple-950 relative">
             <div className="h-full overflow-y-auto px-6 py-4 space-y-4">
               {messages.map((msg, index) => (
                 <div 
