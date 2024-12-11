@@ -21,6 +21,10 @@ const ProfilePage = lazy(() => import('./pages/Profile/ProfilePage'));
 const AgentPortfolio = lazy(() => import('./pages/Portfolio/AgentPortfolio'));
 const NotFoundPage = lazy(() => import('./pages/Error/NotFoundPage'));
 const CreatorDiscoverPage = lazy(() => import('./pages/Portfolio/CreatorDiscoverPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/QuickLinks/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('./pages/QuickLinks/TermsOfServicePage'));
+const AboutPage = lazy(() => import('./pages/QuickLinks/AboutPage'));
+const FAQPage = lazy(() => import('./pages/QuickLinks/FAQPage'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -34,7 +38,11 @@ const ROUTES = {
   PUBLIC: {
     HOME: '/',
     AUTH: '/auth',
-    NOT_FOUND: '/404'
+    NOT_FOUND: '/404',
+    PrivacyPolicyPage: '/privacy',
+    TermsOfServicePage: '/terms',
+    AboutPage: '/about',
+    FAQPage: '/faq'
   },
   PROTECTED: {
     CUSTOMER: {
@@ -67,6 +75,10 @@ function App() {
             <Route path={ROUTES.PUBLIC.HOME} element={<HomePage />} />
             <Route path={ROUTES.PUBLIC.AUTH} element={<AuthPages />} />
             <Route path={ROUTES.PUBLIC.NOT_FOUND} element={<NotFoundPage />} />
+            <Route path={ROUTES.PUBLIC.PrivacyPolicyPage} element={<PrivacyPolicyPage />} />
+            <Route path={ROUTES.PUBLIC.TermsOfServicePage} element={<TermsOfServicePage />} />
+            <Route path={ROUTES.PUBLIC.AboutPage} element={<AboutPage />} />
+            <Route path={ROUTES.PUBLIC.FAQPage} element={<FAQPage />} />
             
               <Route
                 path={ROUTES.PROTECTED.CUSTOMER.DASHBOARD}

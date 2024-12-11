@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CyberCursorEffect from '@/components/ui/CyberCursorEffect';
 import PropTypes from 'prop-types';
 import PageSounds from '../../locales/PageSounds';
+import Footer from '@/components/layout/Footer/Footer';
 
 const HomeBackground = () => (
   <svg 
@@ -304,7 +305,7 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-50 to-rose-50 dark:from-indigo-900/70 dark:to-rose-900/70 pb-12 cursor-none">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-50 to-rose-50 dark:from-indigo-900/70 dark:to-rose-900/70 pb-4 cursor-none">
       <HomeBackground className="z-0"/>
       <CyberCursorEffect />
 
@@ -542,7 +543,7 @@ const HomePage = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-[100]"
+            className="fixed bottom-4 right-2 max-w-md mx-auto z-[100]"
           >
             <Alert
               className="bg-indigo-100/90 dark:bg-indigo-900/90 
@@ -570,6 +571,7 @@ const HomePage = () => {
         )}
       </AnimatePresence>
       <PageSounds />
+      <Footer />
     </div>
   );
 };
