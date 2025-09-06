@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  Send, Sparkles, Bot, User, MessageCircleQuestion 
+  Sparkles, Bot, User, MessageCircleQuestion 
 } from 'lucide-react';
 import { 
   Select, 
@@ -124,7 +124,6 @@ const CustomerNLP = ({ userData }) => {
   ]);
   const [selectedPrompt, setSelectedPrompt] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const scrollAreaRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {

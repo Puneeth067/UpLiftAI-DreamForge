@@ -266,8 +266,11 @@ const ProfilePage = () => {
       }
 
       if (profile.usertype === 'agent') {
-        updateData.phonenumber = formData.phonenumber;
         updateData.portfolio = formData.portfolio;
+      }
+
+      if (profile.usertype === 'customer') {
+        updateData.phonenumber = formData.phonenumber;
       }
 
       const { error } = await supabase

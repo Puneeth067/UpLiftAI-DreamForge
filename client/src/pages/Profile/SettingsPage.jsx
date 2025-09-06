@@ -17,11 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   Moon,
-  Bell,
   AlertTriangle,
-  Mail,
-  MessageCircle,
-  AlertOctagon,
 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -342,75 +338,6 @@ const SettingsPage = () => {
                     onCheckedChange={(checked) => updateSetting('darkMode', checked)}
                     className="ml-4"
                   />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Notification Preferences */}
-            <Card className="overflow-hidden border-purple-200 dark:border-purple-700 shadow-lg">
-              <CardHeader className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-6">
-                <div className="flex items-center gap-3">
-                  <Bell size={20} className="text-blue-600 dark:text-blue-500" />
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                    Notification Preferences
-                  </h2>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Notification Channels */}
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Notification Channels
-                    </h3>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Mail size={16} className="text-gray-500" />
-                        <span>Email Notifications</span>
-                      </div>
-                      <Switch 
-                        checked={settings.notifications.email}
-                        onCheckedChange={(checked) => updateSetting('notifications', checked, 'email')}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <MessageCircle size={16} className="text-gray-500" />
-                        <span>Push Notifications</span>
-                      </div>
-                      <Switch 
-                        checked={settings.notifications.push}
-                        onCheckedChange={(checked) => updateSetting('notifications', checked, 'push')}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Notification Types */}
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Notification Types
-                    </h3>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <AlertOctagon size={16} className="text-red-500" />
-                        <span>Critical Alerts</span>
-                      </div>
-                      <Switch 
-                        checked={settings.notifications.criticalAlerts}
-                        onCheckedChange={(checked) => updateSetting('notifications', checked, 'criticalAlerts')}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle size={16} className="text-yellow-500" />
-                        <span>Ticket Updates</span>
-                      </div>
-                      <Switch 
-                        checked={settings.notifications.ticketUpdates}
-                        onCheckedChange={(checked) => updateSetting('notifications', checked, 'ticketUpdates')}
-                      />
-                    </div>
-                  </div>
                 </div>
               </CardContent>
             </Card>
