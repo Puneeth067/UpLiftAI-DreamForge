@@ -22,7 +22,6 @@ import { Toaster } from '@/components/ui/toaster.jsx';
 import { toast } from '@/hooks/use-toast.js';
 import PageSounds from '../../locales/PageSounds';
 
-
 const AuthBackgroundSVG = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -40,9 +39,15 @@ const AuthBackgroundSVG = () => (
         <stop offset="0%" stopColor="#6366F1" stopOpacity="1" />
         <stop offset="100%" stopColor="#4F46E5" stopOpacity="0.6" />
       </radialGradient>
+      
       <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#111827" stopOpacity="1" />
-        <stop offset="100%" stopColor="#0A0F1C" stopOpacity="0.9" />
+        <stop offset="0%" stopColor="#1F2937" stopOpacity="1" />
+        <stop offset="100%" stopColor="#111827" stopOpacity="0.9" />
+      </radialGradient>
+      
+      <radialGradient id="darkAccent" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.8" />
+        <stop offset="100%" stopColor="#6366F1" stopOpacity="0.4" />
       </radialGradient>
      
       <filter id="blurFilter">
@@ -50,8 +55,8 @@ const AuthBackgroundSVG = () => (
       </filter>
     </defs>
    
-    {/* Light Mode Patterns */}
-    <g className="opacity-100 dark:opacity-0">
+    {/* Light Mode Patterns - Hidden in dark mode */}
+    <g className="opacity-100 dark:opacity-0 transition-opacity duration-500">
       <circle cx="400" cy="250" r="200" fill="url(#lightGradient)" filter="url(#blurFilter)" />
       <circle cx="1000" cy="400" r="300" fill="url(#lightGradient)" opacity="0.8" />
       <circle cx="700" cy="700" r="150" fill="url(#accentGradient)" opacity="0.7" />
@@ -59,11 +64,13 @@ const AuthBackgroundSVG = () => (
       <ellipse cx="1200" cy="700" rx="450" ry="300" fill="url(#lightGradient)" filter="url(#blurFilter)" />
     </g>
    
-    {/* Dark Mode Patterns */}
-    <g className="opacity-0 dark:opacity-100">
+    {/* Dark Mode Patterns - Visible in dark mode */}
+    <g className="opacity-0 dark:opacity-100 transition-opacity duration-500">
       <circle cx="400" cy="250" r="350" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+      <circle cx="1000" cy="400" r="250" fill="url(#darkAccent)" opacity="0.6" />
       <polygon points="700,500 1100,800 500,800" fill="url(#darkGradient)" opacity="0.8" />
       <ellipse cx="1100" cy="600" rx="500" ry="320" fill="url(#darkGradient)" filter="url(#blurFilter)" />
+      <circle cx="300" cy="600" r="180" fill="url(#darkAccent)" opacity="0.5" />
     </g>
   </svg>
 );
@@ -546,7 +553,7 @@ const AuthPages = () => {
     
     return (
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-foreground dark:text-foreground">{label}</label>
+        <label className="text-sm font-semibold text-gray-900 dark:text-gray-100">{label}</label>
         <div className="relative">
           <div className="absolute left-3 top-3 h-5 w-5 text-primary dark:text-primary">
             {icon}
@@ -562,9 +569,9 @@ const AuthPages = () => {
             className={`
               pl-10 ${isPassword ? 'pr-10' : ''} 
               w-full p-3 
-              bg-white dark:bg-surface 
-              text-foreground dark:text-foreground 
-              placeholder:text-foreground/60 dark:placeholder:text-foreground/60
+              bg-white dark:bg-gray-700 
+              text-gray-900 dark:text-gray-100 
+              placeholder:text-gray-500 dark:placeholder:text-gray-400
               rounded-xl 
               border-2 border-primary/30 dark:border-primary/40 
               focus:outline-none 
@@ -615,7 +622,7 @@ const AuthPages = () => {
   return (
     <div className="min-h-screen 
       min-w-full 
-      bg-background dark:bg-background 
+      bg-gray-50 dark:bg-gray-900 
       relative 
       overflow-x-hidden 
       overflow-y-auto 
@@ -625,7 +632,9 @@ const AuthPages = () => {
       lg:px-8
       flex 
       items-center 
-      justify-center">
+      justify-center
+      transition-colors
+      duration-300">
       <AuthBackgroundSVG className="z-0" />
       <CyberCursorEffect />
       <Toaster />
@@ -640,7 +649,7 @@ const AuthPages = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="mb-6 bg-white dark:bg-surface border-l-4 border-accent dark:border-accent text-foreground dark:text-foreground p-4 rounded-xl shadow-lg backdrop-blur-sm"
+          className="mb-6 bg-white dark:bg-gray-800 border-l-4 border-accent dark:border-accent text-gray-900 dark:text-gray-100 p-4 rounded-xl shadow-lg backdrop-blur-sm"
         >
           <AlertDescription className="flex items-center gap-3">
             <Sparkles className="h-5 w-5 text-accent dark:text-accent" />
@@ -656,15 +665,15 @@ const AuthPages = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="mb-6 bg-white dark:bg-surface border-2 border-primary/40 dark:border-primary/50 rounded-xl p-6 shadow-xl backdrop-blur-sm"
+          className="mb-6 bg-white dark:bg-gray-800 border-2 border-primary/40 dark:border-primary/50 rounded-xl p-6 shadow-xl backdrop-blur-sm"
         >
           <div className="flex items-start space-x-4">
             <AlertCircle className="h-6 w-6 text-accent dark:text-accent mt-1 flex-shrink-0" />
             <div className="flex-1">
-              <AlertTitle className="text-foreground dark:text-foreground font-bold text-lg mb-2">
+              <AlertTitle className="text-gray-900 dark:text-gray-100 font-bold text-lg mb-2">
                 Verify your email
               </AlertTitle>
-              <AlertDescription className="text-foreground/80 dark:text-foreground/80 text-sm leading-relaxed mb-4">
+              <AlertDescription className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-4">
                 We&apos;ve sent a verification link to <span className="font-bold text-primary dark:text-primary">{registeredEmail}</span>.
                 Please check your email and click the link to verify your account.
                 Once verified, you can sign in to your account.
@@ -684,15 +693,17 @@ const AuthPages = () => {
 
         {!showVerificationAlert && (
           <Card className="w-full 
-          bg-white dark:bg-surface 
+          bg-white dark:bg-gray-800 
           border-2 border-primary/30 dark:border-primary/40
           shadow-2xl 
           dark:shadow-2xl 
           rounded-2xl 
           overflow-hidden 
           max-w-full
-          backdrop-blur-sm">
-            <CardHeader className="bg-white dark:bg-surface py-8 px-6 border-b border-primary/20 dark:border-primary/30">
+          backdrop-blur-sm
+          transition-colors
+          duration-300">
+            <CardHeader className="bg-white dark:bg-gray-800 py-8 px-6 border-b border-primary/20 dark:border-primary/30">
               <div className="flex items-center justify-center mb-6">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
@@ -714,10 +725,10 @@ const AuthPages = () => {
                 <path d="M40 70 Q50 80, 60 70" fill="none" stroke="white" strokeWidth="3"/>
               </svg>
               </div>
-              <CardTitle className="text-center text-3xl font-bold text-foreground dark:text-foreground mb-3">
+              <CardTitle className="text-center text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3">
                 {authMode === 'login' ? 'Welcome to DreamForge' : 'Join DreamForge'}
               </CardTitle>
-              <CardDescription className="text-center text-foreground/70 dark:text-foreground/70 text-base">
+              <CardDescription className="text-center text-gray-600 dark:text-gray-400 text-base">
                 {authMode === 'login' 
                   ? 'Sign in to continue your creative journey' 
                   : 'Choose your role in the creative community'}
@@ -731,7 +742,7 @@ const AuthPages = () => {
             py-8">
             {authMode === 'register' && (
               <div className="space-y-4">
-                <label className="text-foreground dark:text-foreground text-sm font-bold block">
+                <label className="text-gray-900 dark:text-gray-100 text-sm font-bold block">
                   Choose Account Type
                 </label>
                 <Tabs 
@@ -739,7 +750,7 @@ const AuthPages = () => {
                   className="w-full"
                   onValueChange={(value) => setUserType(value)}
                 >
-                  <TabsList className="grid w-full grid-cols-2 bg-white dark:bg-surface border border-primary/20 dark:border-primary/30 p-2 rounded-lg h-14">
+                  <TabsList className="grid w-full grid-cols-2 bg-white dark:bg-gray-700 border border-primary/20 dark:border-primary/30 p-2 rounded-lg h-14">
                     <TabsTrigger 
                       value="customer" 
                       className="flex items-center justify-center gap-2 
@@ -747,10 +758,10 @@ const AuthPages = () => {
                         data-[state=active]:text-white 
                         dark:data-[state=active]:bg-primary 
                         dark:data-[state=active]:text-white
-                        data-[state=inactive]:text-foreground/70
-                        dark:data-[state=inactive]:text-foreground/70
-                        data-[state=inactive]:hover:text-foreground
-                        dark:data-[state=inactive]:hover:text-foreground
+                        data-[state=inactive]:text-gray-600
+                        dark:data-[state=inactive]:text-gray-400
+                        data-[state=inactive]:hover:text-gray-900
+                        dark:data-[state=inactive]:hover:text-gray-100
                         focus:outline-none focus:ring-0
                         border-none
                         transition-all duration-200
@@ -770,10 +781,10 @@ const AuthPages = () => {
                         data-[state=active]:text-white 
                         dark:data-[state=active]:bg-primary 
                         dark:data-[state=active]:text-white
-                        data-[state=inactive]:text-foreground/70
-                        dark:data-[state=inactive]:text-foreground/70
-                        data-[state=inactive]:hover:text-foreground
-                        dark:data-[state=inactive]:hover:text-foreground
+                        data-[state=inactive]:text-gray-600
+                        dark:data-[state=inactive]:text-gray-400
+                        data-[state=inactive]:hover:text-gray-900
+                        dark:data-[state=inactive]:hover:text-gray-100
                         focus:outline-none focus:ring-0
                         border-none
                         transition-all duration-200
@@ -789,11 +800,11 @@ const AuthPages = () => {
                   </TabsList>
                   <TabsContent value="customer" className="mt-4">
                     <div className="bg-gradient-to-br from-primary/5 to-accent/5 dark:from-primary/10 dark:to-accent/10 p-4 rounded-xl border-2 border-primary/20 dark:border-primary/30 backdrop-blur-sm">
-                      <h3 className="text-foreground dark:text-foreground font-semibold mb-2 flex items-center gap-2">
+                      <h3 className="text-gray-900 dark:text-gray-100 font-semibold mb-2 flex items-center gap-2">
                         <Palette className="h-5 w-5 text-primary dark:text-primary" />
                         Patron Account
                       </h3>
-                      <p className="text-sm text-foreground/70 dark:text-foreground/70">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         Connect with professional creators and commission amazing creative work. 
                         Browse portfolios, request quotes, and bring your creative vision to life.
                       </p>
@@ -802,11 +813,11 @@ const AuthPages = () => {
                   
                   <TabsContent value="agent" className="mt-4">
                     <div className="bg-gradient-to-br from-accent/5 to-primary/5 dark:from-accent/10 dark:to-primary/10 p-4 rounded-xl border-2 border-accent/20 dark:border-accent/30 backdrop-blur-sm">
-                      <h3 className="text-foreground dark:text-foreground font-semibold mb-2 flex items-center gap-2">
+                      <h3 className="text-gray-900 dark:text-gray-100 font-semibold mb-2 flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-accent dark:text-accent" />
                         Creator Account
                       </h3>
-                      <p className="text-sm text-foreground/70 dark:text-foreground/70">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         Professional creators offering specialized creative services. 
                         Showcase your portfolio, get discovered, and take on exciting projects.
                       </p>
@@ -825,7 +836,7 @@ const AuthPages = () => {
                     {userType === 'agent' && (
                       <>
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-foreground dark:text-foreground flex items-center gap-2">
+                        <Label className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                           <Sparkles className="h-4 w-4 text-accent dark:text-accent" />
                           Specialty
                         </Label>
@@ -839,8 +850,8 @@ const AuthPages = () => {
                           >
                             <SelectTrigger 
                               className="w-full 
-                                bg-gradient-to-r from-surface to-surface/80 dark:from-surface dark:to-surface/80
-                                text-foreground dark:text-foreground 
+                                bg-gradient-to-r from-white to-gray-50 dark:from-gray-700 dark:to-gray-600
+                                text-gray-900 dark:text-gray-100 
                                 rounded-xl 
                                 border-2 border-accent/30 dark:border-accent/40 
                                 focus:ring-2 focus:ring-accent dark:focus:ring-accent 
@@ -857,12 +868,12 @@ const AuthPages = () => {
                                 <div className="h-2 w-2 rounded-full bg-gradient-to-r from-accent to-primary opacity-60"></div>
                                 <SelectValue 
                                   placeholder="Choose your specialty" 
-                                  className="text-foreground/80 dark:text-foreground/80 font-medium" 
+                                  className="text-gray-600 dark:text-gray-400 font-medium" 
                                 />
                               </div>
                             </SelectTrigger>
                             <SelectContent 
-                              className="bg-gradient-to-br from-surface via-surface to-surface/95 dark:from-surface dark:via-surface dark:to-surface/95
+                              className="bg-gradient-to-br from-white via-white to-gray-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-700
                                 border-2 border-accent/30 dark:border-accent/40 
                                 rounded-xl 
                                 shadow-2xl 
@@ -887,8 +898,8 @@ const AuthPages = () => {
                                       focus:bg-gradient-to-r focus:from-accent/15 focus:to-primary/15 
                                       dark:focus:from-accent/25 dark:focus:to-primary/25 
                                       transition-all duration-200
-                                      text-foreground 
-                                      dark:text-foreground
+                                      text-gray-900 
+                                      dark:text-gray-100
                                       cursor-pointer
                                       py-3
                                       px-3
@@ -959,15 +970,15 @@ const AuthPages = () => {
               </form>
             </CardContent>
   
-            <CardFooter className="bg-white dark:bg-surface py-6 rounded-b-2xl border-t border-primary/20 dark:border-primary/30">
-              <p className="text-sm text-center w-full text-foreground dark:text-foreground">
+            <CardFooter className="bg-gray-50 dark:bg-gray-800 py-6 rounded-b-2xl border-t border-primary/20 dark:border-primary/30">
+              <p className="text-sm text-center w-full text-gray-900 dark:text-gray-100">
                 {authMode === 'login' ? (
                   <>
                     New to DreamForge?{' '}
                     <button
                       onClick={() => !isLoading && switchMode('register')}
                       disabled={isLoading}
-                      className="text-primary dark:text-primary 
+                      className={`text-primary dark:text-primary 
                         hover:text-primary-hover dark:hover:text-primary-hover 
                         focus:outline-none 
                         focus:ring-0
@@ -977,7 +988,7 @@ const AuthPages = () => {
                         duration-300 
                         underline-offset-4 
                         hover:underline
-                        ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}"
+                        ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       Join the community
                     </button>
@@ -988,7 +999,7 @@ const AuthPages = () => {
                     <button
                       onClick={() => !isLoading && switchMode('login')}
                       disabled={isLoading}
-                      className="text-primary dark:text-primary 
+                      className={`text-primary dark:text-primary 
                         hover:text-primary-hover dark:hover:text-primary-hover 
                         focus:outline-none 
                         focus:ring-0
@@ -998,7 +1009,7 @@ const AuthPages = () => {
                         duration-300 
                         underline-offset-4 
                         hover:underline
-                        ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}"
+                        ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       Sign in
                     </button>
