@@ -746,7 +746,7 @@ const AuthPages = () => {
                   Choose Account Type
                 </label>
                 <Tabs 
-                  defaultValue="customer" 
+                  value={userType}
                   className="w-full"
                   onValueChange={(value) => setUserType(value)}
                 >
