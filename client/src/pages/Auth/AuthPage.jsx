@@ -562,7 +562,7 @@ const AuthPages = () => {
             className={`
               pl-10 ${isPassword ? 'pr-10' : ''} 
               w-full p-3 
-              bg-surface dark:bg-surface 
+              bg-white dark:bg-surface 
               text-foreground dark:text-foreground 
               placeholder:text-foreground/60 dark:placeholder:text-foreground/60
               rounded-xl 
@@ -640,7 +640,7 @@ const AuthPages = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="mb-6 bg-surface dark:bg-surface border-l-4 border-accent dark:border-accent text-foreground dark:text-foreground p-4 rounded-xl shadow-lg backdrop-blur-sm"
+          className="mb-6 bg-white dark:bg-surface border-l-4 border-accent dark:border-accent text-foreground dark:text-foreground p-4 rounded-xl shadow-lg backdrop-blur-sm"
         >
           <AlertDescription className="flex items-center gap-3">
             <Sparkles className="h-5 w-5 text-accent dark:text-accent" />
@@ -656,7 +656,7 @@ const AuthPages = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="mb-6 bg-surface dark:bg-surface border-2 border-primary/40 dark:border-primary/50 rounded-xl p-6 shadow-xl backdrop-blur-sm"
+          className="mb-6 bg-white dark:bg-surface border-2 border-primary/40 dark:border-primary/50 rounded-xl p-6 shadow-xl backdrop-blur-sm"
         >
           <div className="flex items-start space-x-4">
             <AlertCircle className="h-6 w-6 text-accent dark:text-accent mt-1 flex-shrink-0" />
@@ -684,7 +684,7 @@ const AuthPages = () => {
 
         {!showVerificationAlert && (
           <Card className="w-full 
-          bg-surface dark:bg-surface 
+          bg-white dark:bg-surface 
           border-2 border-primary/30 dark:border-primary/40
           shadow-2xl 
           dark:shadow-2xl 
@@ -692,7 +692,7 @@ const AuthPages = () => {
           overflow-hidden 
           max-w-full
           backdrop-blur-sm">
-            <CardHeader className="bg-surface dark:bg-surface py-8 px-6 border-b border-primary/20 dark:border-primary/30">
+            <CardHeader className="bg-white dark:bg-surface py-8 px-6 border-b border-primary/20 dark:border-primary/30">
               <div className="flex items-center justify-center mb-6">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
@@ -739,7 +739,7 @@ const AuthPages = () => {
                   className="w-full"
                   onValueChange={(value) => setUserType(value)}
                 >
-                  <TabsList className="grid w-full grid-cols-2 bg-surface dark:bg-surface border border-primary/20 dark:border-primary/30 p-2 rounded-lg h-14">
+                  <TabsList className="grid w-full grid-cols-2 bg-white dark:bg-surface border border-primary/20 dark:border-primary/30 p-2 rounded-lg h-14">
                     <TabsTrigger 
                       value="customer" 
                       className="flex items-center justify-center gap-2 
@@ -816,102 +816,7 @@ const AuthPages = () => {
               </div>
             )}
 
-            {/* Improved Specialty Selection for Agent */}
-            {authMode === 'register' && userType === 'agent' && (
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-foreground dark:text-foreground flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-accent dark:text-accent" />
-                  Specialty
-                </Label>
-                <div className="relative">
-                  <Select
-                    value={formData.department}
-                    onValueChange={(value) => handleInputChange({
-                      target: { name: 'department', value }
-                    })}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger 
-                      className="w-full 
-                        bg-gradient-to-r from-surface to-surface/80 dark:from-surface dark:to-surface/80
-                        text-foreground dark:text-foreground 
-                        rounded-xl 
-                        border-2 border-accent/30 dark:border-accent/40 
-                        focus:ring-2 focus:ring-accent dark:focus:ring-accent 
-                        focus:border-accent dark:focus:border-accent
-                        hover:border-accent/50 dark:hover:border-accent/60
-                        hover:bg-gradient-to-r hover:from-accent/5 hover:to-primary/5 dark:hover:from-accent/10 dark:hover:to-primary/10
-                        transition-all duration-300 ease-in-out
-                        h-12
-                        shadow-sm
-                        backdrop-blur-sm"
-                      style={{ opacity: isLoading ? 0.5 : 1 }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-2 w-2 rounded-full bg-gradient-to-r from-accent to-primary opacity-60"></div>
-                        <SelectValue 
-                          placeholder="Choose your specialty" 
-                          className="text-foreground/80 dark:text-foreground/80 font-medium" 
-                        />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent 
-                      className="bg-gradient-to-br from-surface via-surface to-surface/95 dark:from-surface dark:via-surface dark:to-surface/95
-                        border-2 border-accent/30 dark:border-accent/40 
-                        rounded-xl 
-                        shadow-2xl 
-                        dark:shadow-2xl
-                        backdrop-blur-lg
-                        max-h-60
-                        overflow-hidden"
-                    >
-                      <div className="p-2 border-b border-accent/20 dark:border-accent/30 mb-2">
-                        <div className="text-xs font-semibold text-accent dark:text-accent uppercase tracking-wider flex items-center gap-2">
-                          <Sparkles className="h-3 w-3" />
-                          Select Specialty
-                        </div>
-                      </div>
-                      <div className="space-y-1 px-1">
-                        {DEPARTMENTS.map((dept, index) => (
-                          <SelectItem 
-                            key={dept} 
-                            value={dept}
-                            className="hover:bg-gradient-to-r hover:from-accent/10 hover:to-primary/10 
-                              dark:hover:from-accent/20 dark:hover:to-primary/20 
-                              focus:bg-gradient-to-r focus:from-accent/15 focus:to-primary/15 
-                              dark:focus:from-accent/25 dark:focus:to-primary/25 
-                              transition-all duration-200
-                              text-foreground 
-                              dark:text-foreground
-                              cursor-pointer
-                              py-3
-                              px-3
-                              rounded-lg
-                              font-medium
-                              text-sm
-                              border-l-2 border-transparent
-                              hover:border-l-accent dark:hover:border-l-accent
-                              focus:border-l-accent dark:focus:border-l-accent
-                              group"
-                            style={{
-                              animationDelay: `${index * 20}ms`
-                            }}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-accent/60 to-primary/60 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200"></div>
-                              <span className="group-hover:translate-x-1 transition-transform duration-200">
-                                {dept}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </div>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-
+            {/* Improved specialty Selection for Agent */}
               <form onSubmit={handleSubmit} className="space-y-6">
                 {authMode === 'register' && (
                   <>
@@ -919,9 +824,12 @@ const AuthPages = () => {
 
                     {userType === 'agent' && (
                       <>
-                      <div>
-                        <Label className="text-sm font-semibold text-foreground dark:text-foreground">Speciality</Label>
-                        <div className="relative mt-2">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold text-foreground dark:text-foreground flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-accent dark:text-accent" />
+                          Specialty
+                        </Label>
+                        <div className="relative">
                           <Select
                             value={formData.department}
                             onValueChange={(value) => handleInputChange({
@@ -931,45 +839,79 @@ const AuthPages = () => {
                           >
                             <SelectTrigger 
                               className="w-full 
-                                bg-surface dark:bg-surface 
+                                bg-gradient-to-r from-surface to-surface/80 dark:from-surface dark:to-surface/80
                                 text-foreground dark:text-foreground 
                                 rounded-xl 
-                                border-2 border-primary/30 dark:border-primary/40 
-                                focus:ring-2 focus:ring-primary dark:focus:ring-primary 
-                                focus:border-primary dark:focus:border-primary
-                                hover:border-primary/50 dark:hover:border-primary/60
+                                border-2 border-accent/30 dark:border-accent/40 
+                                focus:ring-2 focus:ring-accent dark:focus:ring-accent 
+                                focus:border-accent dark:focus:border-accent
+                                hover:border-accent/50 dark:hover:border-accent/60
+                                hover:bg-gradient-to-r hover:from-accent/5 hover:to-primary/5 dark:hover:from-accent/10 dark:hover:to-primary/10
                                 transition-all duration-300 ease-in-out
                                 h-12
-                                ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}"
+                                shadow-sm
+                                backdrop-blur-sm"
+                              style={{ opacity: isLoading ? 0.5 : 1 }}
                             >
-                              <SelectValue placeholder="Choose Speciality" className="text-foreground/60 dark:text-foreground/60" />
+                              <div className="flex items-center gap-3">
+                                <div className="h-2 w-2 rounded-full bg-gradient-to-r from-accent to-primary opacity-60"></div>
+                                <SelectValue 
+                                  placeholder="Choose your specialty" 
+                                  className="text-foreground/80 dark:text-foreground/80 font-medium" 
+                                />
+                              </div>
                             </SelectTrigger>
                             <SelectContent 
-                              className="bg-surface dark:bg-surface 
-                                border-2 border-primary/30 dark:border-primary/40 
+                              className="bg-gradient-to-br from-surface via-surface to-surface/95 dark:from-surface dark:via-surface dark:to-surface/95
+                                border-2 border-accent/30 dark:border-accent/40 
                                 rounded-xl 
                                 shadow-2xl 
                                 dark:shadow-2xl
-                                backdrop-blur-sm
-                                max-h-60"
+                                backdrop-blur-lg
+                                max-h-60
+                                overflow-hidden"
                             >
-                              {DEPARTMENTS.map((dept) => (
-                                <SelectItem 
-                                  key={dept} 
-                                  value={dept}
-                                  className="hover:bg-primary/10 
-                                    dark:hover:bg-primary/20 
-                                    focus:bg-primary/10 
-                                    dark:focus:bg-primary/20 
-                                    transition-colors duration-200
-                                    text-foreground 
-                                    dark:text-foreground
-                                    cursor-pointer
-                                    py-2"
-                                >
-                                  {dept}
-                                </SelectItem>
-                              ))}
+                              <div className="p-2 border-b border-accent/20 dark:border-accent/30 mb-2">
+                                <div className="text-xs font-semibold text-accent dark:text-accent uppercase tracking-wider flex items-center gap-2">
+                                  <Sparkles className="h-3 w-3" />
+                                  Select specialty
+                                </div>
+                              </div>
+                              <div className="space-y-1 px-1">
+                                {DEPARTMENTS.map((dept, index) => (
+                                  <SelectItem 
+                                    key={dept} 
+                                    value={dept}
+                                    className="hover:bg-gradient-to-r hover:from-accent/10 hover:to-primary/10 
+                                      dark:hover:from-accent/20 dark:hover:to-primary/20 
+                                      focus:bg-gradient-to-r focus:from-accent/15 focus:to-primary/15 
+                                      dark:focus:from-accent/25 dark:focus:to-primary/25 
+                                      transition-all duration-200
+                                      text-foreground 
+                                      dark:text-foreground
+                                      cursor-pointer
+                                      py-3
+                                      px-3
+                                      rounded-lg
+                                      font-medium
+                                      text-sm
+                                      border-l-2 border-transparent
+                                      hover:border-l-accent dark:hover:border-l-accent
+                                      focus:border-l-accent dark:focus:border-l-accent
+                                      group"
+                                    style={{
+                                      animationDelay: `${index * 20}ms`
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-accent/60 to-primary/60 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200"></div>
+                                      <span className="group-hover:translate-x-1 transition-transform duration-200">
+                                        {dept}
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </div>
                             </SelectContent>
                           </Select>
                         </div>
@@ -1017,7 +959,7 @@ const AuthPages = () => {
               </form>
             </CardContent>
   
-            <CardFooter className="bg-surface dark:bg-surface py-6 rounded-b-2xl border-t border-primary/20 dark:border-primary/30">
+            <CardFooter className="bg-white dark:bg-surface py-6 rounded-b-2xl border-t border-primary/20 dark:border-primary/30">
               <p className="text-sm text-center w-full text-foreground dark:text-foreground">
                 {authMode === 'login' ? (
                   <>
