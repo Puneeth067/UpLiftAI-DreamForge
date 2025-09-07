@@ -899,7 +899,7 @@ const AgentNLP = ({ userData }) => {
           )}
 
           {/* Footer */}
-          <CardFooter className="sticky bottom-0 z-10 p-6 bg-gradient-to-r from-surface/80 to-primary/5 border-t-2 border-primary/30">
+          <CardFooter className="sticky bottom-0 z-10 p-6 bg-gradient-to-r from-white/95 to-white/90 dark:from-surface/80 dark:to-primary/5 border-t-2 border-primary/30">
             <form onSubmit={handleSend} className="w-full">
               <div className="flex flex-col space-y-4">
                 <div className="relative">
@@ -920,7 +920,7 @@ const AgentNLP = ({ userData }) => {
                         : "Ask me anything about creating portfolios..."
                     }
                     rows="3"
-                    className="w-full p-4 pr-12 bg-gradient-to-r from-background/90 to-surface/60 border-2 border-primary/40 rounded-xl resize-none max-h-48 overflow-y-auto text-foreground placeholder-foreground/50 focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-md shadow-primary/20 backdrop-blur-sm"
+                    className="w-full p-4 pr-12 bg-gradient-to-r from-white/95 to-white/90 dark:from-background/90 dark:to-surface/60 border-2 border-primary/40 rounded-xl resize-none max-h-48 overflow-y-auto text-foreground placeholder-foreground/50 focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-md shadow-primary/20 backdrop-blur-sm"
                   />
                   {isListening && (
                     <div className="absolute top-2 right-2 flex items-center space-x-2">
@@ -963,7 +963,7 @@ const AgentNLP = ({ userData }) => {
                     className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all shadow-lg ${
                       message.trim() || uploadedFiles.length > 0
                         ? 'bg-gradient-to-r from-primary to-secondary hover:from-primary-hover hover:to-secondary-hover text-white shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transform hover:scale-105'
-                        : 'bg-gradient-to-r from-surface/80 to-background/60 text-foreground/40 cursor-not-allowed border-2 border-primary/20'
+                        : 'bg-gradient-to-r from-white/80 to-white/70 dark:from-surface/80 dark:to-background/60 text-foreground/40 cursor-not-allowed border-2 border-primary/20'
                     }`}
                   >
                     <Send className="w-5 h-5" />
