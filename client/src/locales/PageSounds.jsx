@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { chat } from './supabase-chat.js';
+import { chat } from '../utils/supabase-chat';
 
 // Cache sound URLs globally to avoid repeated fetching
 // const SOUND_CACHE = {
