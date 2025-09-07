@@ -721,14 +721,14 @@ const AgentNLP = ({ userData }) => {
         <div className={`flex items-start max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
           <div className={`flex-shrink-0 ${isUser ? 'ml-3' : 'mr-3'}`}>
             {isUser ? (
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-primary to-primary-hover rounded-full flex items-center justify-center shadow-lg shadow-primary/30">
                 <span className="text-white text-sm font-semibold">
                   {userData?.fullname?.charAt(0) || 'U'}
                 </span>
               </div>
             ) : (
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                isSystem ? 'bg-accent' : 'bg-secondary'
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${
+                isSystem ? 'bg-gradient-to-r from-accent to-accent shadow-accent/30' : 'bg-gradient-to-r from-secondary to-secondary shadow-secondary/30'
               }`}>
                 {isSystem ? '⚠️' : <Brain className="w-5 h-5 text-white" />}
               </div>
@@ -736,12 +736,12 @@ const AgentNLP = ({ userData }) => {
           </div>
 
           <div className="flex flex-col text-left">
-            <div className={`p-4 rounded-2xl ${
+            <div className={`p-4 rounded-2xl shadow-lg ${
               isUser 
-                ? 'bg-primary text-white rounded-br-md' 
+                ? 'bg-gradient-to-r from-primary/15 to-primary/10 text-primary rounded-br-md border-2 border-primary/30 shadow-primary/20' 
                 : isSystem
-                ? 'bg-surface text-foreground rounded-bl-md border border-accent/20'
-                : 'bg-surface text-foreground rounded-bl-md border border-primary/20'
+                ? 'bg-gradient-to-r from-surface/90 to-background/70 text-foreground rounded-bl-md border-2 border-accent/30 shadow-accent/20'
+                : 'bg-gradient-to-r from-surface/90 to-background/70 text-foreground rounded-bl-md border-2 border-secondary/30 shadow-secondary/20'
             }`}>
               <div className="whitespace-pre-wrap">
                 {msg.text.split('\n').map((line, index) => {
@@ -758,7 +758,7 @@ const AgentNLP = ({ userData }) => {
               {msg.files && msg.files.length > 0 && (
                 <div className="mt-3 space-y-2">
                   {msg.files.map((file, index) => (
-                    <div key={index} className="flex items-center p-2 bg-black/10 rounded">
+                    <div key={index} className="flex items-center p-2 bg-gradient-to-r from-background/80 to-surface/60 rounded border border-primary/20">
                       <FileUp className="w-4 h-4 mr-2" />
                       <span className="text-sm truncate">{file.name}</span>
                     </div>
@@ -773,7 +773,7 @@ const AgentNLP = ({ userData }) => {
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="px-3 py-1 text-sm bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-full transition-colors"
+                    className="px-3 py-1 text-sm bg-gradient-to-r from-primary/15 to-primary/10 hover:from-primary/25 hover:to-primary/15 text-primary border border-primary/30 rounded-full transition-all shadow-sm shadow-primary/10"
                   >
                     {suggestion}
                   </button>
@@ -782,14 +782,14 @@ const AgentNLP = ({ userData }) => {
             )}
 
             {msg.progress && (
-              <div className="mt-3 p-3 bg-secondary/10 border border-secondary/20 rounded-lg">
+              <div className="mt-3 p-3 bg-gradient-to-r from-secondary/15 to-secondary/10 border-2 border-secondary/30 rounded-lg shadow-sm shadow-secondary/10">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-foreground">Portfolio Progress</span>
                   <span className="text-sm text-foreground/70">{msg.progress.percentage}%</span>
                 </div>
-                <div className="w-full bg-surface rounded-full h-2 border border-primary/20">
+                <div className="w-full bg-gradient-to-r from-surface/80 to-background/60 rounded-full h-2 border border-primary/20">
                   <div 
-                    className="bg-secondary h-2 rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-secondary to-accent h-2 rounded-full transition-all duration-300"
                     style={{ width: `${msg.progress.percentage}%` }}
                   ></div>
                 </div>
@@ -813,11 +813,11 @@ const AgentNLP = ({ userData }) => {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden pt-16">
+    <div className="flex-1 flex flex-col overflow-hidden pt-16 bg-gradient-to-br from-background via-surface/30 to-primary/5">
       <div className="flex-1 flex container min-w-3xl mx-auto px-4 py-4 max-w-4xl w-full">
-        <Card className="w-full flex flex-col shadow-lg rounded-xl overflow-hidden relative bg-surface border-primary/20">
+        <Card className="w-full flex flex-col shadow-2xl shadow-primary/20 rounded-xl overflow-hidden relative bg-gradient-to-br from-surface/95 to-background/80 border-2 border-primary/40 backdrop-blur-xl">
           {/* Enhanced Header */}
-          <CardHeader className="bg-gradient-to-r from-primary to-secondary text-white border-b border-primary/20 py-4 px-6 sticky top-0 z-10">
+          <CardHeader className="bg-gradient-to-r from-primary to-secondary text-white border-b-2 border-primary/30 py-4 px-6 sticky top-0 z-10">
             <div className="flex flex-col items-start text-left space-y-2">
               <div className="flex items-center gap-2">
                 <Brain className="w-6 h-6" />
@@ -849,7 +849,7 @@ const AgentNLP = ({ userData }) => {
           </CardHeader>
 
           {/* Message Area */}
-          <CardContent className="flex-1 overflow-hidden p-0 bg-background relative">
+          <CardContent className="flex-1 overflow-hidden p-0 bg-gradient-to-b from-background/50 to-surface/30 relative">
             <div className="h-full overflow-y-auto px-6 py-4 space-y-4">
               {messages.map(renderMessage)}
               
@@ -857,11 +857,11 @@ const AgentNLP = ({ userData }) => {
                 <div className="flex justify-start mb-4">
                   <div className="flex items-center">
                     <Brain className="w-8 h-8 mr-3 text-secondary" />
-                    <div className="p-3 bg-surface border border-secondary/20 rounded-2xl rounded-bl-md">
+                    <div className="p-3 bg-gradient-to-r from-surface/90 to-background/70 border-2 border-secondary/30 rounded-2xl rounded-bl-md shadow-lg shadow-secondary/20">
                       <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-secondary rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-secondary rounded-full animate-bounce delay-100"></div>
-                        <div className="w-2 h-2 bg-secondary rounded-full animate-bounce delay-200"></div>
+                        <div className="w-2 h-2 bg-gradient-to-r from-secondary to-accent rounded-full animate-bounce shadow-sm"></div>
+                        <div className="w-2 h-2 bg-gradient-to-r from-accent to-primary rounded-full animate-bounce delay-100 shadow-sm"></div>
+                        <div className="w-2 h-2 bg-gradient-to-r from-primary to-secondary rounded-full animate-bounce delay-200 shadow-sm"></div>
                       </div>
                     </div>
                   </div>
@@ -874,12 +874,12 @@ const AgentNLP = ({ userData }) => {
 
           {/* File Upload Preview */}
           {uploadedFiles.length > 0 && (
-            <div className="px-6 pb-4 bg-surface border-t border-primary/20">
+            <div className="px-6 pb-4 bg-gradient-to-r from-surface/80 to-primary/5 border-t-2 border-primary/30">
               <div className="flex flex-wrap gap-2">
                 {uploadedFiles.map((file, index) => (
                   <div 
                     key={index} 
-                    className="bg-background p-3 rounded-lg flex items-center shadow-sm border border-accent/20"
+                    className="bg-gradient-to-r from-background/90 to-surface/60 p-3 rounded-lg flex items-center shadow-lg shadow-accent/20 border-2 border-accent/40"
                   >
                     <FileUp className="w-4 h-4 mr-2 text-secondary" />
                     <div className="flex flex-col">
@@ -899,7 +899,7 @@ const AgentNLP = ({ userData }) => {
           )}
 
           {/* Footer */}
-          <CardFooter className="sticky bottom-0 z-10 p-6 bg-surface border-t border-primary/20">
+          <CardFooter className="sticky bottom-0 z-10 p-6 bg-gradient-to-r from-surface/80 to-primary/5 border-t-2 border-primary/30">
             <form onSubmit={handleSend} className="w-full">
               <div className="flex flex-col space-y-4">
                 <div className="relative">
@@ -920,7 +920,7 @@ const AgentNLP = ({ userData }) => {
                         : "Ask me anything about creating portfolios..."
                     }
                     rows="3"
-                    className="w-full p-4 pr-12 bg-background border-2 border-primary/20 rounded-xl resize-none max-h-48 overflow-y-auto text-foreground placeholder-foreground/50 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    className="w-full p-4 pr-12 bg-gradient-to-r from-background/90 to-surface/60 border-2 border-primary/40 rounded-xl resize-none max-h-48 overflow-y-auto text-foreground placeholder-foreground/50 focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-md shadow-primary/20 backdrop-blur-sm"
                   />
                   {isListening && (
                     <div className="absolute top-2 right-2 flex items-center space-x-2">
@@ -960,10 +960,10 @@ const AgentNLP = ({ userData }) => {
                   <button
                     type="submit"
                     disabled={!message.trim() && uploadedFiles.length === 0}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all shadow-lg ${
                       message.trim() || uploadedFiles.length > 0
-                        ? 'bg-gradient-to-r from-primary to-secondary hover:from-primary-hover hover:to-secondary-hover text-white shadow-lg hover:shadow-xl transform hover:scale-105'
-                        : 'bg-surface text-foreground/40 cursor-not-allowed border border-primary/20'
+                        ? 'bg-gradient-to-r from-primary to-secondary hover:from-primary-hover hover:to-secondary-hover text-white shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transform hover:scale-105'
+                        : 'bg-gradient-to-r from-surface/80 to-background/60 text-foreground/40 cursor-not-allowed border-2 border-primary/20'
                     }`}
                   >
                     <Send className="w-5 h-5" />
