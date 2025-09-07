@@ -18,7 +18,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import CyberCursorEffect from '@/components/ui/CyberCursorEffect';
 import PropTypes from 'prop-types';
-import PageSounds from '../../locales/PageSounds';
+import PageSounds from '@/locales/PageSounds';
 import Footer from '@/components/layout/Footer/Footer';
 
 const HomeBackground = () => (
@@ -253,8 +253,6 @@ FeatureCard.propTypes = {
   description: PropTypes.string.isRequired,
 };
 
-FeatureCard.displayName = 'FeatureCard';
-
 const HomePage = () => {
   const [userType, setUserType] = useState('customer');
   const [showAlert, setShowAlert] = useState(false);
@@ -313,7 +311,7 @@ const HomePage = () => {
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white/70 backdrop-blur-sm dark:bg-gray-900/70 shadow-sm sticky top-0 z-50"
+        className="bg-white/95 backdrop-blur-md dark:bg-gray-900/95 shadow-lg dark:shadow-purple-900/20 sticky top-0 z-50 border-b border-purple-100/50 dark:border-purple-800/50"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -323,42 +321,56 @@ const HomePage = () => {
                 initial={{ rotate: -180, scale: 0 }}
                 animate={{ rotate: 0, scale: 1 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="flex items-center"
+                className="flex items-center group"
               >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 100 100" 
-                  className="h-8 w-8 text-indigo-600 dark:text-indigo-400"
-                  aria-hidden="true"
-                >
-                  <circle cx="50" cy="50" r="48" fill="url(#forgeGradient)"/>
-                  <defs>
-                    <linearGradient id="forgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#4A90E2" stopOpacity="1"/>
-                      <stop offset="100%" stopColor="#6D41A3" stopOpacity="1"/>
-                    </linearGradient>
-                  </defs>
-                  <path d="M30 55 Q50 35, 70 55" fill="none" stroke="white" strokeWidth="4"/>
-                  <path d="M30 55 L20 45 Q15 40, 25 35 Q35 30, 40 35" fill="none" stroke="white" strokeWidth="4"/>
-                  <path d="M70 55 L80 45 Q85 40, 75 35 Q65 30, 60 35" fill="none" stroke="white" strokeWidth="4"/>
-                  <circle cx="50" cy="55" r="8" fill="white"/>
-                  <path d="M40 70 Q50 80, 60 70" fill="none" stroke="white" strokeWidth="3"/>
-                </svg>
-                <span className="ml-2 text-xl font-bold text-gray-900 dark:text-gray-100">
+                <div className="relative">
+                  {/* Glow effect */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-lg blur opacity-30 group-hover:opacity-70 transition duration-1000 group-hover:duration-200"></div>
+                  
+                  {/* Logo SVG */}
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 100 100" 
+                    className="h-8 w-8 relative text-primary transition-transform group-hover:scale-110"
+                    aria-hidden="true"
+                  >
+                    <circle cx="50" cy="50" r="48" fill="url(#forgeGradient)"/>
+                    <defs>
+                      <linearGradient id="forgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        {/* Use theme-consistent colors */}
+                        <stop offset="0%" stopColor="#6366F1" />   {/* Indigo-500 Light / Indigo-400 Dark */}
+                        <stop offset="100%" stopColor="#06B6D4" /> {/* Cyan-500 Light / Cyan-400 Dark */}
+                      </linearGradient>
+                    </defs>
+                    <path d="M30 55 Q50 35, 70 55" fill="none" stroke="white" strokeWidth="4"/>
+                    <path d="M30 55 L20 45 Q15 40, 25 35 Q35 30, 40 35" fill="none" stroke="white" strokeWidth="4"/>
+                    <path d="M70 55 L80 45 Q85 40, 75 35 Q65 30, 60 35" fill="none" stroke="white" strokeWidth="4"/>
+                    <circle cx="50" cy="55" r="8" fill="white"/>
+                    <path d="M40 70 Q50 80, 60 70" fill="none" stroke="white" strokeWidth="3"/>
+                  </svg>
+                </div>
+
+                {/* Brand Name */}
+                <span className="ml-2 text-xl font-bold text-foreground dark:text-foreground transition-colors group-hover:text-primary dark:group-hover:text-primary">
                   DreamForge
                 </span>
               </motion.div>
             </div>
 
+
             {/* Navigation Actions */}
             <div className="flex items-center space-x-4">
               {/* User Type Toggle */}
-              <div className="hidden sm:flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+              <div className="hidden sm:flex items-center space-x-2 bg-indigo-100/50 dark:bg-indigo-900/30 backdrop-blur-sm rounded-full p-1 shadow-inner">
                 <Button
                   variant={userType === 'customer' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setUserType('customer')}
-                  className="rounded-full transition-all"
+                  className={`rounded-full transition-all font-medium ${
+                    userType === 'customer'
+                      ? 'bg-white text-indigo-700 shadow-md dark:bg-indigo-700 dark:text-indigo-200'
+                      : 'text-indigo-600 dark:text-indigo-300 hover:text-indigo-800 dark:hover:text-indigo-100 hover:bg-white/50 dark:hover:bg-indigo-700/50'
+                  }`}
                   aria-pressed={userType === 'customer'}
                 >
                   Creator
@@ -367,18 +379,23 @@ const HomePage = () => {
                   variant={userType === 'agent' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setUserType('agent')}
-                  className="rounded-full transition-all"
+                  className={`rounded-full transition-all font-medium ${
+                    userType === 'agent'
+                      ? 'bg-white text-indigo-700 shadow-md dark:bg-indigo-700 dark:text-indigo-200'
+                      : 'text-indigo-600 dark:text-indigo-300 hover:text-indigo-800 dark:hover:text-indigo-100 hover:bg-white/50 dark:hover:bg-indigo-700/50'
+                  }`}
                   aria-pressed={userType === 'agent'}
                 >
                   Patron
                 </Button>
               </div>
 
+
               {/* Sign In Button */}
               <Button
                 variant="outline"
                 onClick={handleSignIn}
-                className="transition-all hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                className="transition-all font-medium border-2 border-purple-200 dark:border-purple-700 text-gray-800 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-300 dark:hover:border-purple-600 hover:text-purple-700 dark:hover:text-purple-300 shadow-md hover:shadow-lg"
               >
                 Sign In
               </Button>
@@ -386,25 +403,35 @@ const HomePage = () => {
           </div>
 
           {/* Mobile User Type Toggle */}
-          <div className="sm:hidden flex justify-center space-x-4 pb-2">
-            <Button
-              variant={userType === 'customer' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setUserType('customer')}
-              className="transition-all"
-              aria-pressed={userType === 'customer'}
-            >
-              Creator
-            </Button>
-            <Button
-              variant={userType === 'agent' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setUserType('agent')}
-              className="transition-all"
-              aria-pressed={userType === 'agent'}
-            >
-              Patron
-            </Button>
+          <div className="sm:hidden flex justify-center space-x-4 pb-3">
+            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-full p-1 shadow-inner">
+              <Button
+                variant={userType === 'customer' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setUserType('customer')}
+                className={`rounded-full transition-all font-medium ${
+                  userType === 'customer' 
+                    ? 'bg-white text-gray-900 shadow-md dark:bg-gray-700 dark:text-gray-100' 
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-white/80 dark:hover:bg-gray-700/80'
+                }`}
+                aria-pressed={userType === 'customer'}
+              >
+                Creator
+              </Button>
+              <Button
+                variant={userType === 'agent' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setUserType('agent')}
+                className={`rounded-full transition-all font-medium ${
+                  userType === 'agent' 
+                    ? 'bg-white text-gray-900 shadow-md dark:bg-gray-700 dark:text-gray-100' 
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-white/80 dark:hover:bg-gray-700/80'
+                }`}
+                aria-pressed={userType === 'agent'}
+              >
+                Patron
+              </Button>
+            </div>
           </div>
         </div>
       </motion.nav>
@@ -420,7 +447,7 @@ const HomePage = () => {
                 className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28"
               >
                 <div className="sm:text-center lg:text-left">
-                  <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-gray-100 sm:text-5xl md:text-6xl">
+                  <h1 className="text-4xl tracking-tight font-extrabold text-heading-theme sm:text-5xl  ` md:text-6xl">
                     <span className="block">
                       {userType === 'customer' ? 'Showcase Your Expertise' : 'Find Your Perfect Creator'}
                     </span>
@@ -428,7 +455,7 @@ const HomePage = () => {
                       {userType === 'customer' ? 'Connect with Dream Projects' : 'Discover Expert Talent'}
                     </span>
                   </h1>
-                  <p className="mt-3 text-base text-gray-500 dark:text-gray-400 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                  <p className="mt-3 text-base-theme sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                     {userType === 'customer'
                       ? `Showcase your portfolio, highlight your expertise, and connect with patrons who value your unique creative skills. Build your brand and grow your creative career.`
                       : `Find the perfect creator for your project. Browse portfolios, review expertise, and connect with talented professionals who can bring your vision to life.`}
@@ -440,7 +467,7 @@ const HomePage = () => {
                     >
                       <Button 
                         onClick={handleGetStarted}
-                        className="w-full sm:w-auto px-8 py-3 text-base font-medium rounded-md shadow"
+                        className="w-full sm:w-auto px-8 py-3 text-base font-medium rounded-md shadow-lg hover:shadow-xl transition-all"
                         size="lg"
                       >
                         {userType === 'customer' ? 'Showcase Portfolio' : 'Browse Creators'}
@@ -466,7 +493,7 @@ const HomePage = () => {
             <div className="text-center">
               <h2 
                 id="features-heading" 
-                className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 sm:text-4xl"
+                className="text-3xl font-extrabold text-header-theme sm:text-4xl"
               >
                 {userType === 'customer' ? 'Amplify Your Creative Journey' : 'Commission Unique Creations'}
               </h2>
@@ -511,7 +538,7 @@ const HomePage = () => {
           className="bg-indigo-50 mb-4 dark:bg-indigo-900/20 py-12"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl">
+            <h2 className="text-3xl font-extrabold tracking-tight text-heading-theme sm:text-4xl">
               <span className="block">Ready to dream bigger?</span>
               <span className="block text-indigo-600 dark:text-indigo-400">
                 {userType === 'customer' ? 'Your next masterpiece awaits.' : 'Find your perfect creator.'}
@@ -525,7 +552,7 @@ const HomePage = () => {
                 <Button 
                   onClick={user ? handleDashboardNavigation : handleSignIn}
                   variant="outline" 
-                  className="px-8"
+                  className="px-8 border-2 border-indigo-200 dark:border-indigo-700 text-gray-800 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-600 shadow-md hover:shadow-lg"
                   size="lg"
                 >
                   {user ? 'Go to Dashboard' : 'Sign In'}
@@ -561,7 +588,7 @@ const HomePage = () => {
                 >
                   <Info className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
                 </motion.div>
-                <span className="text-gray-700 dark:text-gray-200">
+                <span className="text-base-theme">
                   Currently showing the {userType === 'customer' ? 'creator' : 'patron'} view. 
                   Toggle above to see different perspectives.
                 </span>

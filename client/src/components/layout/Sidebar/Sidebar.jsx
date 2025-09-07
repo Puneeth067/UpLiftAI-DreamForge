@@ -81,11 +81,10 @@ const SidebarContent = ({
         title: "Error",
         description: "Failed to load profile data",
         variant: "destructive",
-        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
       });
       setLoading(false);
     }
-  }, [userId, isDarkMode]);
+  }, [userId]);
 
   useEffect(() => {
     // Responsive sidebar behavior
@@ -139,105 +138,105 @@ const SidebarContent = ({
   ];
 
   // Memoized MenuItem component
-const MenuItem = React.memo(function MenuItem({ 
-  item, 
-  isCollapsed, 
-  isMobile, 
-  onNavigate 
-}) {
-  const handleClick = () => onNavigate(item.route);
+  const MenuItem = React.memo(function MenuItem({ 
+    item, 
+    isCollapsed, 
+    isMobile, 
+    onNavigate 
+  }) {
+    const handleClick = () => onNavigate(item.route);
 
-  return (
-    <button 
-      onClick={handleClick}
-      className={`
-        group flex items-center w-full p-3 rounded-lg 
-        hover:bg-purple-100 dark:hover:bg-purple-900 
-        text-purple-900 dark:text-purple-100 
-        transition-all duration-300 ease-in-out
-        focus:outline-none focus:ring-2 focus:ring-purple-300
-        ${isCollapsed && !isMobile ? 'justify-center' : 'space-x-3'}
-      `}
-      aria-label={item.title}
-      title={(isCollapsed && !isMobile) || isMobile ? item.title : ''}
-      role="menuitem"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && handleClick()}
-    >
-      <item.icon 
+    return (
+      <button 
+        onClick={handleClick}
         className={`
-          h-5 w-5 flex-shrink-0 
-          transition-transform duration-300 
-          group-hover:rotate-6 
-          ${isCollapsed && !isMobile ? '' : 'mr-3'}
-        `} 
-      />
-      {(!isCollapsed || isMobile) && (
-        <>
-          <span 
-            className="text-sm font-medium flex-1 truncate"
-            aria-hidden={isCollapsed && !isMobile}
-          >
-            {item.title}
-          </span>
-          <ChevronRight 
-            className="h-4 w-4 opacity-50 group-hover:translate-x-1 transition-transform" 
-            aria-hidden="true"
-          />
-        </>
-      )}
-    </button>
-  );
-});
+          group flex items-center w-full p-3 rounded-lg 
+          hover:bg-primary/10 dark:hover:bg-primary/20 
+          text-foreground 
+          transition-all duration-300 ease-in-out
+          focus:outline-none focus:ring-2 focus:ring-primary
+          ${isCollapsed && !isMobile ? 'justify-center' : 'space-x-3'}
+        `}
+        aria-label={item.title}
+        title={(isCollapsed && !isMobile) || isMobile ? item.title : ''}
+        role="menuitem"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+      >
+        <item.icon 
+          className={`
+            h-5 w-5 flex-shrink-0 text-primary
+            transition-transform duration-300 
+            group-hover:rotate-6 
+            ${isCollapsed && !isMobile ? '' : 'mr-3'}
+          `} 
+        />
+        {(!isCollapsed || isMobile) && (
+          <>
+            <span 
+              className="text-sm font-medium flex-1 truncate"
+              aria-hidden={isCollapsed && !isMobile}
+            >
+              {item.title}
+            </span>
+            <ChevronRight 
+              className="h-4 w-4 opacity-50 group-hover:translate-x-1 transition-transform text-muted-foreground" 
+              aria-hidden="true"
+            />
+          </>
+        )}
+      </button>
+    );
+  });
 
-MenuItem.propTypes = {
-  item: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-    route: PropTypes.string.isRequired,
-    icon: PropTypes.elementType.isRequired,
-  }).isRequired,
-  isCollapsed: PropTypes.bool.isRequired,
-  isMobile: PropTypes.bool.isRequired,
-  onNavigate: PropTypes.func.isRequired,
-};
+  MenuItem.propTypes = {
+    item: PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      route: PropTypes.string.isRequired,
+      icon: PropTypes.elementType.isRequired,
+    }).isRequired,
+    isCollapsed: PropTypes.bool.isRequired,
+    isMobile: PropTypes.bool.isRequired,
+    onNavigate: PropTypes.func.isRequired,
+  };
 
-const navigateToRoute = useCallback((route) => {
-  try {
-    navigate(route, { 
-      state: { 
-        userData,
-        navigationSource: 'sidebar' 
-      }
-    });
-    
-    // Close mobile menu if open
-    if (screenSize.isMobile) setIsMobileMenuOpen(false);
-  } catch {
-    toast({
-      title: "Navigation Error",
-      description: "Unable to navigate to the requested route",
-      variant: "destructive"
-    });
-  }
-}, [navigate, userData, screenSize.isMobile]);
+  const navigateToRoute = useCallback((route) => {
+    try {
+      navigate(route, { 
+        state: { 
+          userData,
+          navigationSource: 'sidebar' 
+        }
+      });
+      
+      // Close mobile menu if open
+      if (screenSize.isMobile) setIsMobileMenuOpen(false);
+    } catch {
+      toast({
+        title: "Navigation Error",
+        description: "Unable to navigate to the requested route",
+        variant: "destructive"
+      });
+    }
+  }, [navigate, userData, screenSize.isMobile]);
 
   // Mobile Overlay Menu
   const MobileMenu = () => (
     <div 
       className="
         fixed inset-0 z-50 
-        bg-purple-50/95 dark:bg-purple-950/95 
+        bg-background/95 
         backdrop-blur-sm lg:hidden 
         animate-fadeIn
       "
     >
-      <div className="flex justify-between p-4 border-b border-purple-100 dark:border-purple-900/50">
-        <span className="text-2xl font-bold text-purple-900 dark:text-white">Menu</span>
+      <div className="flex justify-between p-4 border-b border-border">
+        <span className="text-2xl font-bold text-foreground">Menu</span>
         <button 
           onClick={() => setIsMobileMenuOpen(false)} 
           className="
-            text-purple-900 dark:text-white 
-            hover:bg-purple-100 dark:hover:bg-purple-900 
+            text-foreground 
+            hover:bg-muted 
             rounded-full p-2 transition-colors
           "
           aria-label="Close menu"
@@ -247,7 +246,13 @@ const navigateToRoute = useCallback((route) => {
       </div>
       <nav className="p-4 space-y-2">
         {menuItems.map((item, index) => (
-          <MenuItem key={index} item={item} />
+          <MenuItem 
+            key={index} 
+            item={item}
+            isCollapsed={false}
+            isMobile={true}
+            onNavigate={navigateToRoute}
+          />
         ))}
       </nav>
     </div>
@@ -261,9 +266,9 @@ const navigateToRoute = useCallback((route) => {
         aria-label="Main Menu"
         className={`
           hidden lg:flex flex-col h-screen 
-          bg-purple-50/80 dark:bg-purple-950 
+          bg-card 
           fixed left-0 top-0 bottom-0 
-          shadow-lg
+          shadow-lg border-r border-border
           transition-all duration-500 ease-in-out 
           z-40 
           ${(isCollapsed && !screenSize.isMobile) ? 'w-20' : 'w-64'}
@@ -276,28 +281,26 @@ const navigateToRoute = useCallback((route) => {
         {/* Header */}
         <div 
           className="
-            p-4 border-b border-purple-100 
-            dark:border-purple-900/50 
+            p-4 border-b border-border 
             flex items-center justify-between
           "
         >
           <div className={`flex items-center ${isCollapsed ? 'justify-center w-full' : 'space-x-3'}`}>
             {!isCollapsed && (
-              <span className="text-xl font-bold text-purple-900 dark:text-white">Menu</span>
+              <span className="text-xl font-bold text-foreground">Menu</span>
             )}
             <button 
               onClick={() => setIsPinned(!isPinned)}
               className="
-                p-2 hover:bg-purple-100/80 
-                dark:hover:bg-purple-900/50 
+                p-2 hover:bg-muted 
                 rounded-lg cursor-pointer
                 transition-colors
               "
               aria-label={isPinned ? "Unpin sidebar" : "Pin sidebar"}
             >
               {isPinned ? 
-                <PanelLeftClose className="h-6 w-6 dark:text-white" /> : 
-                <PanelLeftOpen className="h-6 w-6 dark:text-white" />
+                <PanelLeftClose className="h-6 w-6 text-foreground" /> : 
+                <PanelLeftOpen className="h-6 w-6 text-foreground" />
               }
             </button>
           </div>
@@ -319,8 +322,7 @@ const navigateToRoute = useCallback((route) => {
         {/* User Profile Footer */}
         <div 
           className="
-            border-t border-purple-100 
-            dark:border-purple-900/50 
+            border-t border-border 
             p-4 
             transition-all duration-300
           "
@@ -329,10 +331,10 @@ const navigateToRoute = useCallback((route) => {
             <div 
               className="
                 w-10 h-10 rounded-full 
-                bg-purple-100 dark:bg-purple-900/50 
+                bg-muted 
                 flex items-center justify-center 
                 flex-shrink-0 overflow-hidden
-                ring-2 ring-purple-200 dark:ring-purple-700
+                ring-2 ring-primary/20
               "
             >
               <img 
@@ -347,14 +349,14 @@ const navigateToRoute = useCallback((route) => {
             </div>
             {!isCollapsed && (
               <div className="min-w-0 flex-1">
-                <p className="font-bold text-purple-900 dark:text-white truncate">
+                <p className="font-bold text-foreground truncate">
                   {userData?.fullname}
                 </p>
-                <p className="text-sm text-purple-600 dark:text-purple-300 truncate">
+                <p className="text-sm text-muted-foreground truncate">
                   {userData?.email}
                 </p>
                 {userData?.department && (
-                  <p className="text-xs text-purple-500 dark:text-purple-400 truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     {userData.department}
                   </p>
                 )}
@@ -370,9 +372,9 @@ const navigateToRoute = useCallback((route) => {
       <header 
         className="
           lg:hidden fixed top-0 left-0 right-0 
-          z-40 bg-purple-50/80 dark:bg-purple-950 
+          z-40 bg-card 
           p-4 flex justify-between items-center 
-          border-b border-purple-100 dark:border-purple-900/50
+          border-b border-border
           shadow-sm
         "
       >
@@ -380,15 +382,15 @@ const navigateToRoute = useCallback((route) => {
           <button 
             onClick={() => setIsMobileMenuOpen(true)} 
             className="
-              text-purple-900 dark:text-white 
-              hover:bg-purple-100 dark:hover:bg-purple-900 
+              text-foreground 
+              hover:bg-muted 
               rounded-full p-2 transition-colors
             "
             aria-label="Open menu"
           >
             <Menu className="h-6 w-6" />
           </button>
-          <span className="text-xl font-bold text-purple-900 dark:text-white">Menu</span>
+          <span className="text-xl font-bold text-foreground">Menu</span>
         </div>
       </header>
 

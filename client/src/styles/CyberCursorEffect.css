@@ -1,8 +1,13 @@
 :root {
-  --cyber-primary: #00f0ff;
-  --cyber-secondary: #ff00f0;
+  --cyber-primary: hsl(var(--primary));
+  --cyber-secondary: hsl(var(--secondary));
   --cursor-size: 20px;
   --ring-size: 60px;
+}
+
+.dark {
+  --cyber-primary: hsl(var(--primary));
+  --cyber-secondary: hsl(var(--secondary));
 }
 
 .cyber-cursor {

@@ -6,11 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Edit } from 'lucide-react';
-import { supabase } from '@/utils/supabase'; // Adjust the import path as needed
+import { supabase } from '@/utils/supabase';
 import { v4 as uuidv4 } from 'uuid';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const EditProjectDialog = ({ project, onEdit, userId }) => {
-  // Remove the unused isDarkMode variable
+  const { isDarkMode } = useTheme();
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState(project.image);
   const [title, setTitle] = useState(project.title);
@@ -106,23 +107,42 @@ const EditProjectDialog = ({ project, onEdit, userId }) => {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="bg-white dark:bg-black" size="icon">
+        <Button 
+          variant="ghost" 
+          className={`${
+            isDarkMode 
+              ? 'bg-surface hover:bg-primary/20 text-foreground' 
+              : 'bg-white hover:bg-primary/10 text-foreground'
+          } border border-primary/30`} 
+          size="icon"
+        >
           <Edit className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className={`sm:max-w-[425px] ${
+        isDarkMode 
+          ? 'bg-surface border-primary/30 text-foreground' 
+          : 'bg-white border-primary/20 text-foreground'
+      }`}>
         <DialogHeader>
-          <DialogTitle>Edit Project</DialogTitle>
+          <DialogTitle className={isDarkMode ? 'text-foreground' : 'text-foreground'}>
+            Edit Project
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="project-image">Project Image</Label>
+            <Label 
+              htmlFor="project-image" 
+              className={isDarkMode ? 'text-foreground/80' : 'text-foreground/80'}
+            >
+              Project Image
+            </Label>
             <div className="flex flex-col items-center gap-4">
               {preview && (
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-full h-48 object-cover rounded-lg"
+                  className="w-full h-48 object-cover rounded-lg border border-primary/30"
                 />
               )}
               <Input
@@ -130,30 +150,63 @@ const EditProjectDialog = ({ project, onEdit, userId }) => {
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="w-full"
+                className={`w-full ${
+                  isDarkMode 
+                    ? 'bg-background border-primary/30 text-foreground file:bg-primary/20 file:text-primary file:border-primary/30' 
+                    : 'bg-white border-primary/30 text-foreground file:bg-primary/10 file:text-primary file:border-primary/30'
+                }`}
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label 
+              htmlFor="title" 
+              className={isDarkMode ? 'text-foreground/80' : 'text-foreground/80'}
+            >
+              Title
+            </Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              className={`${
+                isDarkMode 
+                  ? 'bg-background border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary' 
+                  : 'bg-white border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary'
+              }`}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label 
+              htmlFor="description" 
+              className={isDarkMode ? 'text-foreground/80' : 'text-foreground/80'}
+            >
+              Description
+            </Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              className={`${
+                isDarkMode 
+                  ? 'bg-background border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary' 
+                  : 'bg-white border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary'
+              }`}
               required
             />
           </div>
           <DialogClose asChild>
-            <Button type="submit" disabled={isLoading} className="w-full"  onClick={handleSubmit}>
+            <Button 
+              type="submit" 
+              disabled={isLoading} 
+              className={`w-full ${
+                isDarkMode
+                  ? 'bg-primary text-white hover:bg-primary-hover disabled:bg-primary/50'
+                  : 'bg-primary text-white hover:bg-primary-hover disabled:bg-primary/50'
+              }`}
+              onClick={handleSubmit}
+            >
               {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogClose>          

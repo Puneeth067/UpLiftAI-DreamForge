@@ -25,6 +25,7 @@ import { supabase } from '../../utils/supabase.js';
 import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 import CustomerNLP from '../NLP/CustomerNLP';
 import SidebarContent from '@/components/layout/Sidebar/Sidebar';
+import PageSounds from '../../locales/PageSounds'; // Updated import path
 
 const BackgroundSVG = () => (
   <svg
@@ -187,7 +188,7 @@ const CustomerDashboard = () => {
   }
 
   return (
-    <div className={`min-h-screen flex bg-violet-50 dark:bg-violet-950/50 transition-colors duration-200`}>
+    <div className={`min-h-screen flex bg-violet-50 dark:bg-violet-950/50 transition-colors duration-200 cursor-none`}>
       <BackgroundSVG className="z-0 "/>
       <CyberCursorEffect />
       <aside 
@@ -283,6 +284,7 @@ const CustomerDashboard = () => {
           </div>
         </header>
         <CustomerNLP userData={userData} />
+        <PageSounds />
       </div>
     </div>
   );

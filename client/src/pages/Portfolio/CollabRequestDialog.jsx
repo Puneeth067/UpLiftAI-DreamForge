@@ -69,7 +69,7 @@ const CollabRequestDialog = ({ patron, creator }) => {
         title: "Success",
         description: "Collaboration request sent successfully!",
         variant: "default",
-        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+        className: isDarkMode ? "bg-surface border-primary/50 text-foreground" : ""
       });
 
       // Close the dialog by triggering the DialogTrigger's click
@@ -89,7 +89,7 @@ const CollabRequestDialog = ({ patron, creator }) => {
         title: "Error",
         description: "Failed to send collaboration request",
         variant: "destructive",
-        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+        className: isDarkMode ? "bg-surface border-red-500/50 text-foreground" : ""
       });
     } finally {
       setIsSubmitting(false);
@@ -99,62 +99,99 @@ const CollabRequestDialog = ({ patron, creator }) => {
   return (
     <Dialog>
       <DialogTrigger ref={dialogTriggerRef} asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button 
+          variant="outline" 
+          className={`flex items-center gap-2 ${
+            isDarkMode 
+              ? 'border-primary/50 text-primary hover:bg-primary/10 hover:text-primary-hover' 
+              : 'border-primary text-primary hover:bg-primary hover:text-white'
+          }`}
+        >
           Collab
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className={`sm:max-w-[500px] ${
+        isDarkMode 
+          ? 'bg-surface border-primary/30 text-foreground' 
+          : 'bg-white border-primary/20'
+      }`}>
         <DialogHeader>
-          <DialogTitle>Initiate Collaboration Request</DialogTitle>
+          <DialogTitle className={isDarkMode ? 'text-foreground' : 'text-foreground'}>
+            Initiate Collaboration Request
+          </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="projectTitle" className="text-right">
+            <Label htmlFor="projectTitle" className={`text-right ${
+              isDarkMode ? 'text-foreground/80' : 'text-foreground/80'
+            }`}>
               Project Title
             </Label>
             <Input
               id="projectTitle"
               value={projectTitle}
               onChange={(e) => setProjectTitle(e.target.value)}
-              className="col-span-3"
+              className={`col-span-3 ${
+                isDarkMode 
+                  ? 'bg-background border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary' 
+                  : 'bg-white border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary'
+              }`}
               placeholder="Enter project title"
               required
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="projectDescription" className="text-right">
+            <Label htmlFor="projectDescription" className={`text-right ${
+              isDarkMode ? 'text-foreground/80' : 'text-foreground/80'
+            }`}>
               Project Description
             </Label>
             <Textarea
               id="projectDescription"
               value={projectDescription}
               onChange={(e) => setProjectDescription(e.target.value)}
-              className="col-span-3"
+              className={`col-span-3 ${
+                isDarkMode 
+                  ? 'bg-background border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary' 
+                  : 'bg-white border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary'
+              }`}
               placeholder="Describe your project in detail"
               required
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="budget" className="text-right">
+            <Label htmlFor="budget" className={`text-right ${
+              isDarkMode ? 'text-foreground/80' : 'text-foreground/80'
+            }`}>
               Budget
             </Label>
             <Input
               id="budget"
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
-              className="col-span-3"
+              className={`col-span-3 ${
+                isDarkMode 
+                  ? 'bg-background border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary' 
+                  : 'bg-white border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary'
+              }`}
               placeholder="Estimated budget (in USD($) - optional)"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="timeline" className="text-right">
+            <Label htmlFor="timeline" className={`text-right ${
+              isDarkMode ? 'text-foreground/80' : 'text-foreground/80'
+            }`}>
               Timeline
             </Label>
             <Input
               id="timeline"
               value={timeline}
               onChange={(e) => setTimeline(e.target.value)}
-              className="col-span-3"
+              className={`col-span-3 ${
+                isDarkMode 
+                  ? 'bg-background border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary' 
+                  : 'bg-white border-primary/30 text-foreground placeholder:text-foreground/50 focus:border-primary'
+              }`}
               placeholder="Estimated project timeline (optional)"
             />
           </div>
@@ -164,6 +201,11 @@ const CollabRequestDialog = ({ patron, creator }) => {
             type="submit" 
             onClick={handleSubmitCollabRequest}
             disabled={isSubmitting}
+            className={`${
+              isDarkMode
+                ? 'bg-primary text-white hover:bg-primary-hover disabled:bg-primary/50'
+                : 'bg-primary text-white hover:bg-primary-hover disabled:bg-primary/50'
+            }`}
           >
             {isSubmitting ? 'Sending...' : 'Send Collaboration Request'}
           </Button>

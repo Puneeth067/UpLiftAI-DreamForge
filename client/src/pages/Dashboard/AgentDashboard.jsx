@@ -26,6 +26,7 @@ import CyberCursorEffect from "@/components/ui/CyberCursorEffect";
 import AgentNLP from '../NLP/AgentNLP';
 import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import NotificationDropdown from '../Notification/NotificationDropdown';
+import PageSounds from '@/locales/PageSounds'; // Updated import path
 
 const BackgroundSVG = () => (
   <svg
@@ -166,86 +167,6 @@ const AgentDashboard = () => {
   }
 };
 
-// const NotificationDropdown = () => {
-//   const [isOpen, setIsOpen] = useState(false);
-
-//   const toggleDropdown = () => {
-//     setIsOpen(!isOpen);
-//   };
-
-//   const markAsRead = async (notificationId) => {
-//     try {
-//       const { error } = await supabase
-//         .from('notifications')
-//         .update({ read: true })
-//         .eq('id', notificationId);
-
-//       if (error) throw error;
-
-//       // Update the notifications state
-//       setNotifications((prevNotifications) =>
-//         prevNotifications.map((notification) =>
-//           notification.id === notificationId ? { ...notification, read: true } : notification
-//         )
-//       );
-//     } catch (error) {
-//       console.error('Error updating notification:', error);
-//     }
-//   };
-
-//   return (
-//     <div className="relative flex items-center">
-//       {/* Notification Bell */}
-//       <button
-//         className="relative p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 hover:bg-violet-100 dark:hover:bg-violet-800/50"
-//         onClick={toggleDropdown}
-//       >
-//         <div className="relative">
-//           {/* Notification Count */}
-//           <div
-//             className={`absolute -top-2 -right-2 bg-red-500 text-white rounded-full text-xs flex items-center justify-center w-5 h-5${
-//               notifications.filter((n) => !n.read).length > 0 ? 'block' : 'hidden'
-//             }`}
-//           >
-//             {notifications.filter((n) => !n.read).length}
-//           </div>
-//           <BellIcon className="h-6 w-6  text-gray-800 dark:text-white" />
-//         </div>
-//       </button>
-
-//       {/* Notification Dropdown */}
-//       {isOpen && (
-//         <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-20 overflow-hidden">
-//           {/* Dropdown Caret */}
-//           <div className="absolute -top-2 right-4 w-4 h-4 bg-white dark:bg-gray-800 transform rotate-45 shadow-sm" />
-//           <div className="py-2 max-h-80 overflow-y-auto">
-//             {notifications.map((notification) => (
-//               <div
-//                 key={notification.id}
-//                 className={`px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-start ${
-//                   !notification.read ? 'bg-gray-50 dark:bg-gray-700 border-l-4 border-purple-500' : ''
-//                 }`}
-//                 onClick={() => markAsRead(notification.id)}
-//               >
-//                 <div className="flex-1 text-left">
-//                   {/* Left-Aligned Content */}
-//                   <div className="text-gray-900 dark:text-gray-100 text-sm font-medium">
-//                     {notification.message}
-//                   </div>
-//                   <div className="text-gray-500 dark:text-gray-400 text-xs mt-1">
-//                     {new Date(notification.created_at).toLocaleString()}
-//                   </div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-
   if (loading) {
     return <LoadingScreen />;
   }
@@ -357,6 +278,7 @@ const AgentDashboard = () => {
           </div>
         </header>
         <AgentNLP userData={userData} />
+        <PageSounds />
       </div>
     </div>
   );

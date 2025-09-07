@@ -15,7 +15,7 @@ const Header = ({ title }) => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200">
+    <header className="bg-card border-b border-border">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Left section: Logo and Navigation */}
@@ -25,7 +25,7 @@ const Header = ({ title }) => {
               src="/icons/customer-care-logo.png"
               alt="Customer Care Logo"
             />
-            <h1 className="text-xl font-bold">{title}</h1>
+            <h1 className="text-xl font-bold text-foreground">{title}</h1>
             <Navigation userType={userType} />
           </div>
 
@@ -33,7 +33,7 @@ const Header = ({ title }) => {
           <div className="flex items-center gap-4">
             {/* Notification button */}
             <button 
-              className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-full"
+              className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"
               aria-label="Notifications"
             >
               <NotificationDropdown />
@@ -42,26 +42,26 @@ const Header = ({ title }) => {
             {/* Settings button */}
             <button
               onClick={() => navigate('/settings')}
-              className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-full"
+              className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"
               aria-label="Settings"
             >
               <Settings className="h-5 w-5" />
             </button>
 
             {/* Separator */}
-            <div className="h-6 w-px bg-gray-200" />
+            <div className="h-6 w-px bg-border" />
 
             {/* User profile section */}
             <div className="flex items-center gap-3">
               <div className="text-sm">
-                <p className="font-medium text-gray-700">{userName}</p>
-                <p className="text-gray-500 capitalize">{userType}</p>
+                <p className="font-medium text-foreground">{userName}</p>
+                <p className="text-muted-foreground capitalize">{userType}</p>
               </div>
               
               {/* Logout button */}
               <button
                 onClick={handleLogout}
-                className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-full"
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"
                 aria-label="Logout"
               >
                 <LogOut className="h-5 w-5" />

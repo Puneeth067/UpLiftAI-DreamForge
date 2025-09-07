@@ -27,7 +27,8 @@ import { v4 as uuidv4 } from 'uuid';
 import SidebarContent from '@/components/layout/Sidebar/Sidebar';
 import PortfolioExportPDF from './PortfolioExportPDF';
 import CollabRequestDialog from './CollabRequestDialog';
-import EditProjectDialog from "./EditProjectDialog"
+import EditProjectDialog from "./EditProjectDialog";
+import LoadingScreen from "@/components/ui/loading";
 
 
 const BackgroundSVG = () => (
@@ -39,18 +40,23 @@ const BackgroundSVG = () => (
   >
     <defs>
       <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#F8F0FF" stopOpacity="0.4" />
-        <stop offset="100%" stopColor="#F0E6FF" stopOpacity="0.2" />
+        <stop offset="0%" stopColor="#6366F1" stopOpacity="0.1" />
+        <stop offset="100%" stopColor="#818CF8" stopOpacity="0.05" />
       </radialGradient>
      
       <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.15" />
-        <stop offset="100%" stopColor="#D4BBFF" stopOpacity="0.1" />
+        <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.1" />
+        <stop offset="100%" stopColor="#FBBF24" stopOpacity="0.05" />
+      </radialGradient>
+
+      <radialGradient id="secondaryGradient" cx="50%" cy="50%" r="75%">
+        <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.1" />
+        <stop offset="100%" stopColor="#22D3EE" stopOpacity="0.05" />
       </radialGradient>
 
       <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#2A1352" stopOpacity="0.3" />
-        <stop offset="100%" stopColor="#1A0B38" stopOpacity="0.2" />
+        <stop offset="0%" stopColor="#818CF8" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="#6366F1" stopOpacity="0.08" />
       </radialGradient>
      
       <filter id="blurFilter">
@@ -58,7 +64,7 @@ const BackgroundSVG = () => (
       </filter>
 
       <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-purple-200 dark:text-purple-900" opacity="0.3" />
+        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-primary/20 dark:text-primary/30" opacity="0.5" />
       </pattern>
     </defs>
    
@@ -66,19 +72,19 @@ const BackgroundSVG = () => (
     <g className="opacity-100 dark:opacity-0">
       <rect width="100%" height="100%" fill="url(#dots)" />
       <circle cx="200" cy="150" r="400" fill="url(#lightGradient)" filter="url(#blurFilter)" />
-      <circle cx="1200" cy="300" r="500" fill="url(#lightGradient)" opacity="0.4" filter="url(#blurFilter)" />
-      <circle cx="800" cy="600" r="300" fill="url(#accentGradient)" opacity="0.3" filter="url(#blurFilter)" />
-      <path d="M0,300 Q720,400 1440,300 Q720,500 0,300" fill="url(#accentGradient)" opacity="0.15" />
-      <ellipse cx="600" cy="750" rx="600" ry="300" fill="url(#lightGradient)" opacity="0.2" filter="url(#blurFilter)" />
+      <circle cx="1200" cy="300" r="500" fill="url(#secondaryGradient)" opacity="0.6" filter="url(#blurFilter)" />
+      <circle cx="800" cy="600" r="300" fill="url(#accentGradient)" opacity="0.8" filter="url(#blurFilter)" />
+      <path d="M0,300 Q720,400 1440,300 Q720,500 0,300" fill="url(#accentGradient)" opacity="0.3" />
+      <ellipse cx="600" cy="750" rx="600" ry="300" fill="url(#lightGradient)" opacity="0.4" filter="url(#blurFilter)" />
     </g>
    
     {/* Dark Mode Patterns */}
     <g className="opacity-0 dark:opacity-100">
       <rect width="100%" height="100%" fill="url(#dots)" />
       <circle cx="300" cy="200" r="600" fill="url(#darkGradient)" filter="url(#blurFilter)" />
-      <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#darkGradient)" opacity="0.25" />
-      <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#darkGradient)" opacity="0.2" filter="url(#blurFilter)" />
-      <circle cx="800" cy="750" r="400" fill="url(#darkGradient)" opacity="0.15" filter="url(#blurFilter)" />
+      <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#darkGradient)" opacity="0.6" />
+      <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#darkGradient)" opacity="0.4" filter="url(#blurFilter)" />
+      <circle cx="800" cy="750" r="400" fill="url(#darkGradient)" opacity="0.3" filter="url(#blurFilter)" />
     </g>
   </svg>
 );
@@ -338,24 +344,24 @@ const AddProjectDialog = ({ onAdd }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-primary dark:hover:bg-primary/20">
           <Plus className="w-4 h-4 mr-2" />
           Add Project
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-surface dark:bg-surface border-primary/20">
         <DialogHeader>
-          <DialogTitle>Add New Project</DialogTitle>
+          <DialogTitle className="text-foreground dark:text-foreground">Add New Project</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="project-image">Project Image</Label>
+            <Label htmlFor="project-image" className="text-foreground dark:text-foreground">Project Image</Label>
             <div className="flex flex-col items-center gap-4">
               {preview && (
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-full h-48 object-cover rounded-lg"
+                  className="w-full h-48 object-cover rounded-lg border border-primary/20"
                 />
               )}
               <Input
@@ -363,29 +369,35 @@ const AddProjectDialog = ({ onAdd }) => {
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="w-full"
+                className="w-full border-primary/30 focus:border-primary"
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title" className="text-foreground dark:text-foreground">Title</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
+              className="border-primary/30 focus:border-primary"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-foreground dark:text-foreground">Description</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required
+              className="border-primary/30 focus:border-primary"
             />
           </div>
-          <Button type="submit" disabled={isLoading} className="w-full">
+          <Button 
+            type="submit" 
+            disabled={isLoading} 
+            className="w-full bg-primary hover:bg-primary-hover text-white dark:bg-primary dark:hover:bg-primary-hover"
+          >
             {isLoading ? 'Adding...' : 'Add Project'}
           </Button>
         </form>
@@ -434,8 +446,8 @@ const deleteProjectImage = async (imageUrl) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <LoadingScreen />
       </div>
     );
   }
@@ -458,16 +470,19 @@ const deleteProjectImage = async (imageUrl) => {
 
       {/* Header with Edit Toggle */}
 
-      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-primary/20">
         <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-        <h1 className="text-xl font-semibold">Portfolio</h1>
+        <h1 className="text-xl font-semibold text-foreground dark:text-foreground">Portfolio</h1>
           {canEditPortfolio && (
             <div className="flex items-center gap-2">
               <PortfolioExportPDF userid={userData.id} />
               <Button
                 onClick={isEditing ? handleSave : () => setIsEditing(true)}
                 variant={isEditing ? "default" : "outline"}
-                className="flex items-center gap-2"
+                className={isEditing 
+                  ? "flex items-center gap-2 bg-primary hover:bg-primary-hover text-white dark:bg-primary dark:hover:bg-primary-hover"
+                  : "flex items-center gap-2 border-primary/30 text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-primary dark:hover:bg-primary/20"
+                }
               >
                 {isEditing ? (
                   <>
@@ -500,16 +515,16 @@ const deleteProjectImage = async (imageUrl) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-background p-8 backdrop-blur-sm"
+          className="relative rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-background p-8 backdrop-blur-sm border border-primary/20"
         >
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="relative">
-              <Avatar className="w-48 h-48">
+              <Avatar className="w-48 h-48 border-2 border-primary/30">
               <AvatarImage 
               src={`${userData ? userData.avatar_url :  'avatars/user.png' }`} 
               alt={userData?.fullname} 
             />
-            <AvatarFallback>
+            <AvatarFallback className="bg-surface text-foreground">
               <img src={`/avatars/${userData?.avatar_url}`} alt="Default Avatar" />
             </AvatarFallback>
               </Avatar>
@@ -517,8 +532,8 @@ const deleteProjectImage = async (imageUrl) => {
             
             <div className="flex-1 space-y-4 text-center md:text-left">
               <div>
-                <h1 className="text-4xl font-bold">{userProfile?.fullname}</h1>                
-                <h2 className="text-2xl text-muted-foreground mt-2">{userProfile.department}</h2>
+                <h1 className="text-4xl font-bold text-foreground dark:text-foreground">{userProfile?.fullname}</h1>                
+                <h2 className="text-2xl text-primary dark:text-primary mt-2">{userProfile.department}</h2>
                 
               </div>
 
@@ -526,11 +541,11 @@ const deleteProjectImage = async (imageUrl) => {
                 <Textarea
                   value={portfolioData.bio}
                   onChange={(e) => setPortfolioData({ ...portfolioData, bio: e.target.value })}
-                  className="min-h-[100px]"
+                  className="min-h-[100px] border-primary/30 focus:border-primary"
                   placeholder="Tell your story..."
                 />
               ) : (
-                <p className="text-lg text-muted-foreground">{portfolioData.bio}</p>
+                <p className="text-lg text-foreground/70 dark:text-foreground/70">{portfolioData.bio}</p>
               )}
 
               <div className="flex flex-wrap gap-2 justify-center md:justify-start">
@@ -540,6 +555,7 @@ const deleteProjectImage = async (imageUrl) => {
                     size="sm"
                     onClick={handleEmailClick}
                     disabled={!userProfile?.email}
+                    className="border-secondary/30 text-secondary hover:bg-secondary/10 dark:border-secondary/40 dark:text-secondary dark:hover:bg-secondary/20"
                   >
                     <Mail className="w-4 h-4 mr-2" />
                     {userProfile?.email || 'Email not available'}
@@ -551,6 +567,7 @@ const deleteProjectImage = async (imageUrl) => {
                     size="sm"
                     onClick={handlePortfolioClick}
                     disabled={!userProfile?.portfolio}
+                    className="border-secondary/30 text-secondary hover:bg-secondary/10 dark:border-secondary/40 dark:text-secondary dark:hover:bg-secondary/20"
                   >
                     <Globe className="w-4 h-4 mr-2" />
                     {userProfile?.portfolio || 'Portfolio not available'}
@@ -566,9 +583,10 @@ const deleteProjectImage = async (imageUrl) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="bg-surface dark:bg-surface border-primary/20"
         >
           <CardHeader className="text-left">
-            <CardTitle>Skills & Expertise</CardTitle>
+            <CardTitle className="text-foreground dark:text-foreground">Skills & Expertise</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
@@ -576,7 +594,7 @@ const deleteProjectImage = async (imageUrl) => {
                 <Badge
                   key={index}
                   variant="secondary"
-                  className="text-sm px-3 py-1"
+                  className="text-sm px-3 py-1 bg-primary/20 text-primary hover:bg-primary/30 dark:bg-primary/30 dark:text-primary dark:hover:bg-primary/40"
                 >
                   {skill}
                   {isEditing && (
@@ -585,7 +603,7 @@ const deleteProjectImage = async (imageUrl) => {
                         const newSkills = portfolioData.skills.filter((_, i) => i !== index);
                         setPortfolioData({ ...portfolioData, skills: newSkills });
                       }}
-                      className="ml-2"
+                      className="ml-2 text-red-500 hover:text-red-700"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -595,17 +613,18 @@ const deleteProjectImage = async (imageUrl) => {
               {isEditing && (
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="border-primary/30 text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-primary dark:hover:bg-primary/20">
                       <Plus className="w-4 h-4 mr-2" />
                       Add Skill
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="bg-surface dark:bg-surface border-primary/20">
                     <DialogHeader>
-                      <DialogTitle>Add New Skill</DialogTitle>
+                      <DialogTitle className="text-foreground dark:text-foreground">Add New Skill</DialogTitle>
                     </DialogHeader>
                     <Input
                       placeholder="Enter skill"
+                      className="border-primary/30 focus:border-primary"
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
                           setPortfolioData({
@@ -628,9 +647,10 @@ const deleteProjectImage = async (imageUrl) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="bg-surface dark:bg-surface border-primary/20"
         >
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Featured Projects</CardTitle>
+            <CardTitle className="text-foreground dark:text-foreground">Featured Projects</CardTitle>
             {isEditing && (
               <AddProjectDialog
                 onAdd={(newProject) => {
@@ -647,7 +667,7 @@ const deleteProjectImage = async (imageUrl) => {
               {portfolioData.projects.map((project, index) => (
                 <MotionCard
                   key={index}
-                  className="overflow-hidden group relative"
+                  className="overflow-hidden group relative bg-background dark:bg-background border-primary/20"
                   whileHover={{ y: -5 }}
                   transition={{ duration: 0.2 }}
                 >
@@ -679,6 +699,7 @@ const deleteProjectImage = async (imageUrl) => {
                             const newProjects = portfolioData.projects.filter((_, i) => i !== index);
                             setPortfolioData({ ...portfolioData, projects: newProjects });
                           }}
+                          className="bg-red-500/20 text-red-600 hover:bg-red-500/30 dark:bg-red-500/30 dark:text-red-400 dark:hover:bg-red-500/40"
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -695,7 +716,7 @@ const deleteProjectImage = async (imageUrl) => {
                             newProjects[index] = { ...project, title: e.target.value };
                             setPortfolioData({ ...portfolioData, projects: newProjects });
                           }}
-                          className="mb-2"
+                          className="mb-2 border-primary/30 focus:border-primary"
                         />
                         <Textarea
                           value={project.description}
@@ -704,12 +725,13 @@ const deleteProjectImage = async (imageUrl) => {
                             newProjects[index] = { ...project, description: e.target.value };
                             setPortfolioData({ ...portfolioData, projects: newProjects });
                           }}
+                          className="border-primary/30 focus:border-primary"
                         />
                       </>
                     ) : (
                       <>
-                        <h3 className="font-semibold mb-2">{project.title}</h3>
-                        <p className="text-muted-foreground">{project.description}</p>
+                        <h3 className="font-semibold mb-2 text-foreground dark:text-foreground">{project.title}</h3>
+                        <p className="text-foreground/70 dark:text-foreground/70">{project.description}</p>
                       </>
                     )}
                   </CardContent>
@@ -724,20 +746,21 @@ const deleteProjectImage = async (imageUrl) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="bg-surface dark:bg-surface border-primary/20"
         >
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Experience</CardTitle>
+            <CardTitle className="text-foreground dark:text-foreground">Experience</CardTitle>
             {isEditing && (
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-primary dark:hover:bg-primary/20">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Experience
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[500px] bg-surface dark:bg-surface border-primary/20">
                   <DialogHeader>
-                    <DialogTitle>Add New Experience</DialogTitle>
+                    <DialogTitle className="text-foreground dark:text-foreground">Add New Experience</DialogTitle>
                   </DialogHeader>
                   <form
                     onSubmit={(e) => {
@@ -758,22 +781,22 @@ const deleteProjectImage = async (imageUrl) => {
                     className="space-y-4"
                   >
                     <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
-                      <Input id="role" name="role" required />
+                      <Label htmlFor="role" className="text-foreground dark:text-foreground">Role</Label>
+                      <Input id="role" name="role" required className="border-primary/30 focus:border-primary" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="company">Company</Label>
-                      <Input id="company" name="company" required />
+                      <Label htmlFor="company" className="text-foreground dark:text-foreground">Company</Label>
+                      <Input id="company" name="company" required className="border-primary/30 focus:border-primary" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="period">Period</Label>
-                      <Input id="period" name="period" placeholder="e.g., 2020 - Present" required />
+                      <Label htmlFor="period" className="text-foreground dark:text-foreground">Period</Label>
+                      <Input id="period" name="period" placeholder="e.g., 2020 - Present" required className="border-primary/30 focus:border-primary" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea id="description" name="description" required />
+                      <Label htmlFor="description" className="text-foreground dark:text-foreground">Description</Label>
+                      <Textarea id="description" name="description" required className="border-primary/30 focus:border-primary" />
                     </div>
-                    <Button type="submit" className="w-full">Add Experience</Button>
+                    <Button type="submit" className="w-full bg-primary hover:bg-primary-hover text-white dark:bg-primary dark:hover:bg-primary-hover">Add Experience</Button>
                   </form>
                 </DialogContent>
               </Dialog>
@@ -782,7 +805,7 @@ const deleteProjectImage = async (imageUrl) => {
           <CardContent>
             <div className="relative space-y-8">
               {/* Vertical timeline line */}
-              <div className="absolute left-0 top-0 bottom-0 w-px bg-border" />
+              <div className="absolute left-0 top-0 bottom-0 w-px bg-primary/30 dark:bg-primary/40" />
               
               {portfolioData.experience.map((exp, index) => (
                 <motion.div
@@ -800,17 +823,17 @@ const deleteProjectImage = async (imageUrl) => {
                       <div className="absolute right-0 top-0 flex gap-2">
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" className="hover:bg-primary/10 text-primary">
                               <Edit className="w-4 h-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
+                          <DialogContent className="bg-surface dark:bg-surface border-primary/20">
                             <DialogHeader>
-                              <DialogTitle>Edit Experience</DialogTitle>
+                              <DialogTitle className="text-foreground dark:text-foreground">Edit Experience</DialogTitle>
                             </DialogHeader>
                             <form className="space-y-4">
                               <div className="space-y-2">
-                                <Label>Role</Label>
+                                <Label className="text-foreground dark:text-foreground">Role</Label>
                                 <Input
                                   value={exp.role}
                                   onChange={(e) => {
@@ -818,10 +841,11 @@ const deleteProjectImage = async (imageUrl) => {
                                     newExp[index] = { ...exp, role: e.target.value };
                                     setPortfolioData({ ...portfolioData, experience: newExp });
                                   }}
+                                  className="border-primary/30 focus:border-primary"
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label>Company</Label>
+                                <Label className="text-foreground dark:text-foreground">Company</Label>
                                 <Input
                                   value={exp.company}
                                   onChange={(e) => {
@@ -829,10 +853,11 @@ const deleteProjectImage = async (imageUrl) => {
                                     newExp[index] = { ...exp, company: e.target.value };
                                     setPortfolioData({ ...portfolioData, experience: newExp });
                                   }}
+                                  className="border-primary/30 focus:border-primary"
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label>Period</Label>
+                                <Label className="text-foreground dark:text-foreground">Period</Label>
                                 <Input
                                   value={exp.period}
                                   onChange={(e) => {
@@ -840,10 +865,11 @@ const deleteProjectImage = async (imageUrl) => {
                                     newExp[index] = { ...exp, period: e.target.value };
                                     setPortfolioData({ ...portfolioData, experience: newExp });
                                   }}
+                                  className="border-primary/30 focus:border-primary"
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label>Description</Label>
+                                <Label className="text-foreground dark:text-foreground">Description</Label>
                                 <Textarea
                                   value={exp.description}
                                   onChange={(e) => {
@@ -851,6 +877,7 @@ const deleteProjectImage = async (imageUrl) => {
                                     newExp[index] = { ...exp, description: e.target.value };
                                     setPortfolioData({ ...portfolioData, experience: newExp });
                                   }}
+                                  className="border-primary/30 focus:border-primary"
                                 />
                               </div>
                             </form>
@@ -863,15 +890,16 @@ const deleteProjectImage = async (imageUrl) => {
                             const newExp = portfolioData.experience.filter((_, i) => i !== index);
                             setPortfolioData({ ...portfolioData, experience: newExp });
                           }}
+                          className="hover:bg-red-500/10 text-red-500"
                         >
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-lg font-semibold">
+                    <div className="flex items-center gap-2 text-lg font-semibold text-foreground dark:text-foreground">
                       {exp.role}
                     </div>
-                    <div className="flex items-center gap-4 text-muted-foreground mt-1">
+                    <div className="flex items-center gap-4 text-foreground/70 dark:text-foreground/70 mt-1">
                       <div className="flex items-center gap-1">
                         <Building className="w-4 h-4" />
                         {exp.company}
@@ -881,7 +909,7 @@ const deleteProjectImage = async (imageUrl) => {
                         {exp.period}
                       </div>
                     </div>
-                    <p className="mt-2 text-left">{exp.description}</p>
+                    <p className="mt-2 text-left text-foreground/80 dark:text-foreground/80">{exp.description}</p>
                   </div>
                 </motion.div>
               ))}
@@ -894,9 +922,10 @@ const deleteProjectImage = async (imageUrl) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
+          className="bg-surface dark:bg-surface border-primary/20"
         >
           <CardHeader className="text-left">
-            <CardTitle>Connect With Me</CardTitle>
+            <CardTitle className="text-foreground dark:text-foreground">Connect With Me</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -907,7 +936,7 @@ const deleteProjectImage = async (imageUrl) => {
                 linkedin: { icon: Linkedin, label: "LinkedIn", baseUrl: "https://linkedin.com/in/" }
               }).map(([key, { icon: Icon, label, baseUrl }]) => (
                 <div key={key} className="flex items-center gap-4">
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-5 h-5 text-primary dark:text-primary" />
                   {isEditing ? (
                     <Input
                       value={portfolioData.social_links[key] || ''}
@@ -921,6 +950,7 @@ const deleteProjectImage = async (imageUrl) => {
                         });
                       }}
                       placeholder={`${label} username`}
+                      className="border-primary/30 focus:border-primary"
                     />
                   ) : portfolioData.social_links[key] ? (
                     <a
@@ -929,7 +959,7 @@ const deleteProjectImage = async (imageUrl) => {
                         : `${baseUrl}${portfolioData.social_links[key]}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-foreground/70 hover:text-primary dark:text-foreground/70 dark:hover:text-primary transition-colors"
                       onClick={(e) => {
                         e.preventDefault();
                         const url = portfolioData.social_links[key].startsWith('http')
@@ -941,7 +971,7 @@ const deleteProjectImage = async (imageUrl) => {
                       {portfolioData.social_links[key]}
                     </a>
                   ) : (
-                    <span className="text-muted-foreground">Not connected</span>
+                    <span className="text-foreground/50 dark:text-foreground/50">Not connected</span>
                   )}
                 </div>
               ))}

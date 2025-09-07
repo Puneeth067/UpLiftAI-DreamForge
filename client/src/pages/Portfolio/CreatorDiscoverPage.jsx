@@ -40,18 +40,18 @@ const BackgroundSVG = () => (
   >
     <defs>
       <radialGradient id="lightGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#F8F0FF" stopOpacity="0.4" />
-        <stop offset="100%" stopColor="#F0E6FF" stopOpacity="0.2" />
+        <stop offset="0%" stopColor="#F0F4FF" stopOpacity="0.4" />
+        <stop offset="100%" stopColor="#FAFAFF" stopOpacity="0.2" />
       </radialGradient>
      
       <radialGradient id="accentGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.15" />
-        <stop offset="100%" stopColor="#D4BBFF" stopOpacity="0.1" />
+        <stop offset="0%" stopColor="#6366F1" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="#818CF8" stopOpacity="0.1" />
       </radialGradient>
 
       <radialGradient id="darkGradient" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stopColor="#2A1352" stopOpacity="0.3" />
-        <stop offset="100%" stopColor="#1A0B38" stopOpacity="0.2" />
+        <stop offset="0%" stopColor="#111827" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#0A0F1C" stopOpacity="0.2" />
       </radialGradient>
      
       <filter id="blurFilter">
@@ -59,9 +59,18 @@ const BackgroundSVG = () => (
       </filter>
 
       <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-purple-200 dark:text-purple-900" opacity="0.3" />
+        <circle cx="2" cy="2" r="1" fill="currentColor" className="text-primary/30 dark:text-primary/20" opacity="0.3" />
       </pattern>
     </defs>
+   
+    {/* Light Mode Patterns */}
+    <g className="opacity-100 dark:opacity-0">
+      <rect width="100%" height="100%" fill="url(#dots)" />
+      <circle cx="300" cy="200" r="600" fill="url(#lightGradient)" filter="url(#blurFilter)" />
+      <path d="M1440,600 Q720,800 0,600 Q720,400 1440,600" fill="url(#accentGradient)" opacity="0.25" />
+      <ellipse cx="1100" cy="500" rx="700" ry="400" fill="url(#lightGradient)" opacity="0.2" filter="url(#blurFilter)" />
+      <circle cx="800" cy="750" r="400" fill="url(#accentGradient)" opacity="0.15" filter="url(#blurFilter)" />
+    </g>
    
     {/* Dark Mode Patterns */}
     <g className="opacity-0 dark:opacity-100">
@@ -221,8 +230,8 @@ const CreatorDiscoverPage = () => {
           description: 'Click on a creator card to view their portfolio!',
           variant: 'default',
           className: isDarkMode 
-            ? 'bg-purple-900 border-purple-700 text-purple-100' 
-            : 'bg-purple-100 border-purple-300 text-purple-700'
+            ? 'bg-surface border-primary/50 text-foreground' 
+            : 'bg-surface border-primary/50 text-foreground'
         });
 
       } catch (error) {
@@ -232,8 +241,8 @@ const CreatorDiscoverPage = () => {
           description: 'Failed to load data',
           variant: 'destructive',
           className: isDarkMode 
-            ? 'bg-purple-900 border-purple-700 text-purple-100' 
-            : 'bg-purple-100 border-purple-300 text-purple-900'
+            ? 'bg-surface border-red-500/50 text-foreground' 
+            : 'bg-surface border-red-500/50 text-foreground'
         });
       } finally {
         setIsLoading(false);
@@ -314,7 +323,7 @@ const CreatorDiscoverPage = () => {
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className={`text-3xl font-bold ${isDarkMode ? 'text-purple-300' : 'text-purple-700'}`}
+          className={`text-3xl font-bold ${isDarkMode ? 'text-primary' : 'text-primary'}`}
         >
           Discover Creators
         </motion.h1>
@@ -326,8 +335,8 @@ const CreatorDiscoverPage = () => {
             onClick={clearFilters}
             className={`flex items-center space-x-2 p-2 rounded-md transition-all duration-300 ${
               isDarkMode 
-                ? 'bg-purple-800 hover:bg-purple-700 text-purple-100' 
-                : 'bg-purple-100 hover:bg-purple-200 text-purple-700'
+                ? 'bg-primary/20 hover:bg-primary/30 text-primary' 
+                : 'bg-primary/10 hover:bg-primary/20 text-primary'
             }`}
           >
             <X className="w-5 h-5" />
@@ -361,16 +370,16 @@ const CreatorDiscoverPage = () => {
           className={`p-2 rounded-md transition-all ${
             currentPage === 1 
               ? 'opacity-50 cursor-not-allowed' 
-              : 'hover:bg-purple-100 dark:hover:bg-purple-800'
+              : 'hover:bg-primary/10'
           } ${
             isDarkMode 
-              ? 'text-purple-300 bg-gray-800' 
-              : 'text-purple-700 bg-purple-50'
+              ? 'text-primary bg-surface' 
+              : 'text-primary bg-surface'
           }`}
         >
           <ChevronLeft className="w-3 h-3" />
         </button>
-        <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+        <span className={`text-sm ${isDarkMode ? 'text-foreground/80' : 'text-foreground/80'}`}>
           Page {currentPage} of {totalPages}
         </span>
         <button 
@@ -379,11 +388,11 @@ const CreatorDiscoverPage = () => {
           className={`p-2 rounded-md transition-all ${
             currentPage === totalPages 
               ? 'opacity-50 cursor-not-allowed' 
-              : 'hover:bg-purple-100 dark:hover:bg-purple-800'
+              : 'hover:bg-primary/10'
           } ${
             isDarkMode 
-              ? 'text-purple-300 bg-gray-800' 
-              : 'text-purple-700 bg-purple-50'
+              ? 'text-primary bg-surface' 
+              : 'text-primary bg-surface'
           }`}
         >
           <ChevronRight className="w-3 h-3" />
@@ -405,12 +414,16 @@ const CreatorDiscoverPage = () => {
   const paginatedCreators = getCurrentPageItems(filteredCreators);
 
   return (
-    <div className={`min-h-screen flex flex-col pl-20 pr-16 mx-auto min-w-[1240px] max-w-[1024] w-full ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'} cursor-none`}>
+    <div className={`min-h-screen flex flex-col pl-20 pr-16 mx-auto min-w-[1240px] max-w-[1024] w-full ${isDarkMode ? 'bg-background text-foreground' : 'bg-background text-foreground'} cursor-none`}>
       <BackgroundSVG />
       <CyberCursorEffect />
         <Toaster />
       <aside 
-        className={`hidden md:block fixed left-0 top-0 h-full border-r border-purple-100 dark:border-purple-900/50 shrink-0 bg-purple-50/80 dark:bg-purple-950/30 z-30 transition-all duration-600 ease-in-out`}
+        className={`hidden md:block fixed left-0 top-0 h-full border-r shrink-0 z-30 transition-all duration-600 ease-in-out ${
+          isDarkMode 
+            ? 'border-primary/30 bg-surface/80' 
+            : 'border-primary/20 bg-surface/80'
+        }`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -420,7 +433,7 @@ const CreatorDiscoverPage = () => {
         />
       </aside>
       {/* Fixed Header */}
-      <div className="sticky top-0 z-10 pt-4 bg-white dark:bg-gray-900">
+      <div className={`sticky top-0 z-10 pt-4 ${isDarkMode ? 'bg-background' : 'bg-background'}`}>
         <div className="container mx-auto px-4 max-w-screen-xl">
           <DiscoverHeader
             isDarkMode={isDarkMode}
@@ -440,14 +453,14 @@ const CreatorDiscoverPage = () => {
                 <SelectTrigger
                   className={`w-full ${
                     isDarkMode
-                      ? 'bg-gray-800 border-gray-700 text-white'
-                      : 'bg-white border-gray-300 text-black'
+                      ? 'bg-surface border-primary/30 text-foreground'
+                      : 'bg-white border-primary/30 text-foreground'
                   }`}
                 >
-                  <Filter className="mr-2 w-4 h-4 text-purple-500" />
+                  <Filter className="mr-2 w-4 h-4 text-secondary" />
                   <SelectValue placeholder="Filter by Department" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={isDarkMode ? 'bg-surface border-primary/30' : 'bg-white border-primary/30'}>
                   <SelectItem value="All Departments">All Departments</SelectItem>
                   {DEPARTMENTS.map((dept) => (
                     <SelectItem key={dept} value={dept}>
@@ -466,13 +479,13 @@ const CreatorDiscoverPage = () => {
                 onChange={handleSearchChange}
                 className={`w-full pl-10 ${
                   isDarkMode
-                    ? 'bg-gray-800 border-gray-700 text-white'
-                    : 'bg-white border-gray-300 text-black'
+                    ? 'bg-surface border-primary/30 text-foreground placeholder:text-foreground/50'
+                    : 'bg-white border-primary/30 text-foreground placeholder:text-foreground/50'
                 }`}
               />
               <Search
                 className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
-                  isDarkMode ? 'text-purple-300' : 'text-purple-500'
+                  isDarkMode ? 'text-secondary' : 'text-secondary'
                 }`}
               />
             </div>
@@ -493,8 +506,8 @@ const CreatorDiscoverPage = () => {
                     key={creator.id}
                     className={`cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl ${
                       isDarkMode 
-                        ? 'bg-gray-800 border-gray-700 hover:border-purple-600' 
-                        : 'bg-white border-purple-100 hover:border-purple-300'
+                        ? 'bg-surface border-primary/30 hover:border-primary' 
+                        : 'bg-white border-primary/20 hover:border-primary'
                     }`}
                     onClick={() => {
                       navigate('/portfolio', { 
@@ -514,21 +527,21 @@ const CreatorDiscoverPage = () => {
                           ? creator.avatar_url 
                           : `https://byoenyaekxtufmzsfqxq.supabase.co/storage/v1/object/public/user-avatars/avatars/${creator.avatar_url}`}`}
                         alt={creator.full_name}
-                        className="w-16 h-16 rounded-full object-cover border-2 border-purple-300"
+                        className="w-16 h-16 rounded-full object-cover border-2 border-secondary"
                       />
-                      <CardTitle className={isDarkMode ? 'text-purple-300' : 'text-purple-700'}>
+                      <CardTitle className={isDarkMode ? 'text-primary' : 'text-primary'}>
                         {creator.fullname}
                       </CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className={`text-sm mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-sm mb-2 ${isDarkMode ? 'text-foreground/70' : 'text-foreground/70'}`}>
                        {creator.department}
                     </p>
-                    <div className={`text-xs p-1 rounded ${
+                    <div className={`text-xs p-2 rounded ${
                       isDarkMode
-                        ? 'bg-purple-900/50 text-purple-300'
-                        : 'bg-purple-100 text-purple-700'
+                        ? 'bg-primary/20 text-primary'
+                        : 'bg-primary/10 text-primary'
                     }`}>
                       Skills: {creator.skills.length > 0
                         ? creator.skills.map((skill, index) => (
@@ -546,8 +559,8 @@ const CreatorDiscoverPage = () => {
           ) : (
             <div className={`text-center p-8 rounded-lg ${
               isDarkMode 
-                ? 'bg-gray-800 text-gray-400' 
-                : 'bg-purple-50 text-purple-700'
+                ? 'bg-surface text-foreground/80' 
+                : 'bg-surface text-foreground/80'
             }`}>
               <p className="text-xl mb-4">
                 {selectedDepartment !== 'All Departments' || searchQuery
@@ -558,8 +571,8 @@ const CreatorDiscoverPage = () => {
                 onClick={clearFilters} 
                 className={`px-4 py-2 rounded-md ${
                   isDarkMode 
-                    ? 'bg-purple-800 hover:bg-purple-700 text-purple-100' 
-                    : 'bg-purple-100 hover:bg-purple-200 text-purple-700'
+                    ? 'bg-primary/20 hover:bg-primary/30 text-primary' 
+                    : 'bg-primary/10 hover:bg-primary/20 text-primary'
                 }`}
               >
                 Reset Filters
@@ -570,10 +583,10 @@ const CreatorDiscoverPage = () => {
       </div>
 
       {/* Fixed Footer Pagination */}
-      <div className={`relative bottom-2 w-full z-50  ${
+      <div className={`relative bottom-2 w-full z-50 ${
         isDarkMode 
-          ? 'bg-black-600/75' 
-          : 'bg-cream/90'
+          ? 'bg-background/75' 
+          : 'bg-background/90'
       }`}>
         <div className="container mx-auto px-4 max-w-screen-xl">
           {filteredCreators.length > 0 && (

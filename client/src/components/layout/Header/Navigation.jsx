@@ -23,10 +23,10 @@ const Navigation = ({ userType }) => {
             <NavLink
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+                `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-500 hover:text-gray-900'
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`
               }
             >

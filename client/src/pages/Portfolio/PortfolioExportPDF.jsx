@@ -4,28 +4,31 @@ import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PropTypes from 'prop-types';
 import { supabase } from '@/utils/supabase';
+import { useTheme } from '@/contexts/ThemeContext';
+import LoadingScreen from '@/components/ui/loading';
 
 const PortfolioExportPDF = ({ 
   userid, 
   buttonVariant = "outline", 
   buttonSize = "default" 
 }) => {
+  const { isDarkMode } = useTheme();
   const [portfolioData, setPortfolioData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
 
-  // Enhanced PDF styles with improved typography and layout
+  // Enhanced PDF styles with improved typography and layout using theme colors
   const styles = useMemo(() => StyleSheet.create({
     page: {
       padding: 40,
       fontFamily: 'Helvetica',
       fontSize: 10,
       lineHeight: 1.6,
-      color: '#333333',
-      border: 2, // Add border width
-      borderColor: '#007bff', // Border color matching header
-      borderStyle: 'solid', // Solid border style
+      color: '#111827',
+      border: 2,
+      borderColor: '#6366F1', // Primary color
+      borderStyle: 'solid',
     },
     container: {
       display: 'flex',
@@ -38,12 +41,12 @@ const PortfolioExportPDF = ({
       marginBottom: 5,
       paddingBottom: 5,
       borderBottomWidth: 2,
-      borderBottomColor: '#007bff',
+      borderBottomColor: '#6366F1', // Primary color
     },
     headerTitle: {
       fontSize: 22,
       fontWeight: 'bold',
-      color: '#007bff',
+      color: '#6366F1', // Primary color
       marginBottom: 5,
     },
     headerContact: {
@@ -51,29 +54,29 @@ const PortfolioExportPDF = ({
       marginTop: 8,
       gap: 15,
       fontSize: 9,
-      color: '#666666',
+      color: '#6B7280', // Foreground variant
     },
     section: {
       marginBottom: 20,
       paddingBottom: 10,
       borderBottomWidth: 1,
-      borderBottomColor: '#E0E0E0',
+      borderBottomColor: '#E5E7EB',
     },
     sectionTitle: {
       fontSize: 16,
       fontWeight: 'bold',
-      color: '#007bff',
+      color: '#6366F1', // Primary color
       marginBottom: 10,
       paddingBottom: 5,
       borderBottomWidth: 1.5,
-      borderBottomColor: '#E0E0E0',
+      borderBottomColor: '#E5E7EB',
     },
     sectionContent: {
       paddingLeft: 10,
     },
     bioText: {
       fontSize: 10,
-      color: '#444444',
+      color: '#374151',
     },
     skillsContainer: {
       flexDirection: 'row',
@@ -81,8 +84,8 @@ const PortfolioExportPDF = ({
       gap: 5,
     },
     skillTag: {
-      backgroundColor: '#E6F2FF',
-      color: '#007bff',
+      backgroundColor: '#EEF2FF', // Primary background
+      color: '#6366F1', // Primary color
       padding: 3,
       borderRadius: 3,
       fontSize: 8,
@@ -92,7 +95,7 @@ const PortfolioExportPDF = ({
       marginBottom: 10,
       paddingBottom: 10,
       borderBottomWidth: 1,
-      borderBottomColor: '#F0F0F0',
+      borderBottomColor: '#F3F4F6',
     },
     experienceHeader: {
       flexDirection: 'row',
@@ -102,15 +105,15 @@ const PortfolioExportPDF = ({
     experienceRole: {
       fontSize: 12,
       fontWeight: 'bold',
-      color: '#333333',
+      color: '#111827',
     },
     experiencePeriod: {
       fontSize: 9,
-      color: '#666666',
+      color: '#6B7280',
     },
     experienceDescription: {
       fontSize: 9,
-      color: '#444444',
+      color: '#374151',
     },
     projectItem: {
       marginBottom: 10,
@@ -118,12 +121,12 @@ const PortfolioExportPDF = ({
     projectTitle: {
       fontSize: 12,
       fontWeight: 'bold',
-      color: '#333333',
+      color: '#111827',
       marginBottom: 5,
     },
     projectDescription: {
       fontSize: 9,
-      color: '#444444',
+      color: '#374151',
     },
   }), []);
 
@@ -211,7 +214,7 @@ const PortfolioExportPDF = ({
     );
   }, [portfolioData, styles]);
 
-  // Fetch portfolio data (same as before)
+  // Fetch portfolio data
   useEffect(() => {
     const fetchPortfolioData = async () => {
       try {
@@ -299,16 +302,16 @@ const PortfolioExportPDF = ({
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (error) {
     return (
-      <div className="text-red-500 p-4">
+      <div className={`p-4 rounded-lg ${
+        isDarkMode 
+          ? 'text-red-400 bg-surface border border-red-500/30' 
+          : 'text-red-600 bg-red-50 border border-red-200'
+      }`}>
         Error loading portfolio: {error}
       </div>
     );
@@ -320,7 +323,15 @@ const PortfolioExportPDF = ({
       variant={buttonVariant}
       size={buttonSize}
       disabled={loading || isExporting}
-      className="flex items-center gap-2"
+      className={`flex items-center gap-2 ${
+        buttonVariant === 'outline' 
+          ? (isDarkMode 
+              ? 'border-primary/50 text-primary hover:bg-primary/10 hover:text-primary-hover' 
+              : 'border-primary text-primary hover:bg-primary hover:text-white')
+          : (isDarkMode
+              ? 'bg-primary text-white hover:bg-primary-hover'
+              : 'bg-primary text-white hover:bg-primary-hover')
+      }`}
     >
       {isExporting ? 'Preparing PDF...' : (
         <>

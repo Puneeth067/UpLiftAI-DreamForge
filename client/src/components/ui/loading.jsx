@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 
 const LoadingScreen = () => {
   return (
-    <div className="flex items-center justify-center h-screen dark:bg-gray-900 bg-purple-50 p-4">
+    <div className="flex items-center justify-center h-screen bg-[#FAFAFF] dark:bg-[#0A0F1C] p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ 
@@ -23,8 +23,9 @@ const LoadingScreen = () => {
           }
         }}
       >
-        <Card className="w-full max-w-md shadow-2xl dark:shadow-purple-900/20">
+        <Card className="w-full max-w-md shadow-2xl bg-surface dark:bg-surface">
           <CardHeader className="text-center">
+            {/* Animated Loader */}
             <motion.div
               animate={{ 
                 rotate: 360,
@@ -37,20 +38,25 @@ const LoadingScreen = () => {
               className="mx-auto mb-4"
             >
               <Loader2 
-                className="w-16 h-16 text-purple-600 dark:text-purple-400 
-                animate-spin mx-auto"
+                className="w-16 h-16 text-indigo-600 dark:text-indigo-400 animate-spin mx-auto"
               />
             </motion.div>
-            <CardTitle className="text-2xl text-gray-900 dark:text-gray-100">
-              AI Support Hub
+
+            {/* Title */}
+            <CardTitle className="text-2xl text-foreground">
+              DreamForge
             </CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-400 mt-2">
-              Preparing your personalized experience...
+
+            {/* Subtitle */}
+            <CardDescription className="text-secondary mt-2 dark:text-secondary">
+              Crafting your personalized creative space...
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <div className="space-y-2">
-              <div className="h-2 bg-purple-100 dark:bg-purple-900 rounded-full">
+              {/* Progress Bar Track */}
+              <div className="h-2 bg-indigo-100 dark:bg-indigo-900 rounded-full overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ 
@@ -62,7 +68,7 @@ const LoadingScreen = () => {
                       repeatType: "loop"
                     }
                   }}
-                  className="h-2 bg-purple-600 dark:bg-purple-400 rounded-full"
+                  className="h-2 bg-indigo-600 dark:bg-indigo-400 rounded-full"
                 />
               </div>
             </div>

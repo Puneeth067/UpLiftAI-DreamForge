@@ -10,7 +10,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+    <footer className="bg-card dark:bg-card border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand and Tagline */}
@@ -19,14 +19,14 @@ const Footer = () => {
             <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   viewBox="0 0 100 100" 
-                  className="h-8 w-8 text-indigo-600 dark:text-indigo-400"
+                  className="h-8 w-8 text-primary"
                   aria-hidden="true"
                 >
                   <circle cx="50" cy="50" r="48" fill="url(#forgeGradient)"/>
                   <defs>
                     <linearGradient id="forgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#4A90E2" stopOpacity="1"/>
-                      <stop offset="100%" stopColor="#6D41A3" stopOpacity="1"/>
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="1"/>
+                      <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="1"/>
                     </linearGradient>
                   </defs>
                   <path d="M30 55 Q50 35, 70 55" fill="none" stroke="white" strokeWidth="4"/>
@@ -35,11 +35,11 @@ const Footer = () => {
                   <circle cx="50" cy="55" r="8" fill="white"/>
                   <path d="M40 70 Q50 80, 60 70" fill="none" stroke="white" strokeWidth="3"/>
                 </svg>
-              <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <span className="text-xl font-bold text-foreground">
                 DreamForge
               </span>
             </div>
-            <p className="text-gray-600 text-left dark:text-gray-400 mb-4">
+            <p className="text-muted-foreground text-left mb-4">
               Connecting creative talents with passionate patrons. Your dream project starts here.
             </p>
             <div className="flex space-x-4">
@@ -47,7 +47,7 @@ const Footer = () => {
                 href="https://twitter.com/puneethk67" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
+                className="text-muted-foreground hover:text-primary transition-colors"
               >
                 <Twitter className="w-6 h-6" />
               </a>
@@ -55,7 +55,7 @@ const Footer = () => {
                 href="https://instagram.com/puneeth._67" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
+                className="text-muted-foreground hover:text-primary transition-colors"
               >
                 <Instagram className="w-6 h-6" />
               </a>
@@ -63,7 +63,7 @@ const Footer = () => {
                 href="https://www.linkedin.com/in/puneeth-kumar-386a22224/" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
+                className="text-muted-foreground hover:text-primary transition-colors"
               >
                 <Linkedin className="w-6 h-6" />
               </a>         
@@ -72,12 +72,12 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Links</h4>
+            <h4 className="text-lg font-semibold text-foreground mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
                 <a 
                   href="/about" 
-                  className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
+                  className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   About Us
                 </a>
@@ -85,7 +85,7 @@ const Footer = () => {
               <li>
                 <a 
                   href="/faq" 
-                  className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
+                  className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   FAQ
                 </a>
@@ -93,7 +93,7 @@ const Footer = () => {
               <li>
                 <a 
                   href="/terms" 
-                  className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
+                  className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Terms of Service
                 </a>
@@ -101,7 +101,7 @@ const Footer = () => {
               <li>
                 <a 
                   href="/privacy" 
-                  className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
+                  className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Privacy Policy
                 </a>
@@ -111,13 +111,13 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Contact Us</h4>
+            <h4 className="text-lg font-semibold text-foreground mb-4">Contact Us</h4>
             <div className="space-y-4">
               <div className="flex justify-center items-center space-x-3">
-                <Mail className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <Mail className="w-5 h-5 text-muted-foreground" />
                 <a 
                   href="mailto:uplift.ai.tech@gmail.com" 
-                  className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
+                  className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   uplift.ai.tech@gmail.com
                 </a>
@@ -127,8 +127,8 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 text-center">
-          <p className="flex items-center justify-center text-gray-600 dark:text-gray-400">
+        <div className="mt-8 pt-8 border-t border-border text-center">
+          <p className="flex items-center justify-center text-muted-foreground">
             <Copyright className="w-4 h-4 mr-2" />
             {currentYear} DreamForge. All rights reserved.
           </p>

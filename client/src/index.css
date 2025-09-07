@@ -4,8 +4,9 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Updated colors to use our theme */
+  color: #111827; /* Light theme foreground */
+  background-color: #FAFAFF; /* Light theme background */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,11 +16,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #6366F1; /* Primary color */
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #4F46E5; /* Primary hover color */
 }
 
 body {
@@ -28,6 +29,14 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #FAFAFF; /* Light theme background */
+  color: #111827; /* Light theme foreground */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark {
+  background-color: #0A0F1C; /* Dark theme background */
+  color: #F9FAFB; /* Dark theme foreground */
 }
 
 h1 {
@@ -42,28 +51,42 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #6366F1; /* Primary color */
+  color: white;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.25s;
 }
+
 button:hover {
-  border-color: #646cff;
+  background-color: #4F46E5; /* Primary hover color */
+  border-color: #4F46E5;
 }
+
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid #6366F1; /* Primary color for focus */
+  outline-offset: 2px;
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: #F9FAFB; /* Dark theme foreground */
+    background-color: #0A0F1C; /* Dark theme background */
   }
+  
+  a {
+    color: #818CF8; /* Primary dark color */
+  }
+  
   a:hover {
-    color: #747bff;
+    color: #6366F1; /* Primary dark hover */
   }
+  
   button {
-    background-color: #f9f9f9;
+    background-color: #818CF8; /* Primary dark color */
+  }
+  
+  button:hover {
+    background-color: #6366F1; /* Primary dark hover */
   }
 }
-

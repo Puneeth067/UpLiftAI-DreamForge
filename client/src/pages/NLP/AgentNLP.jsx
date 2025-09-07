@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Send, Mic, MicOff, FileUp, X, Brain } from 'lucide-react';
 import { supabase } from '@/utils/supabase';
+import LoadingScreen from "@/components/ui/loading";
 
 // Enhanced NLP Features for the working bot
 class EnhancedPortfolioNLPBot {
@@ -89,34 +90,34 @@ class EnhancedPortfolioNLPBot {
   }
 
   extractBio(message) {
-  const words = message.split(' ').filter(word => word.length > 0);
-  if (words.length < 10) {
+    const words = message.split(' ').filter(word => word.length > 0);
+    if (words.length < 10) {
+      return {
+        valid: false,
+        feedback: `Your bio needs more detail (${words.length} words, minimum 10). Tell me about your background, skills, and interests.`,
+        suggestions: ['Add more details', 'Include your skills', 'Mention your goals']
+      };
+    }
+
+    // Check if user chose "Continue anyway"
+    const messageLower = message.toLowerCase();
+    if (messageLower.includes('continue anyway') || messageLower.includes('continue') || 
+        messageLower.includes('anyway') || messageLower.includes('skip')) {
+      return { valid: true, data: message.replace(/continue anyway|continue|anyway|skip/gi, '').trim() };
+    }
+
+    // Very basic check - if it's 15+ words, assume it's detailed enough
+    if (words.length >= 15) {
+      return { valid: true, data: message };
+    }
+
+    // Otherwise suggest improvement but allow bypass
     return {
       valid: false,
-      feedback: `Your bio needs more detail (${words.length} words, minimum 10). Tell me about your background, skills, and interests.`,
-      suggestions: ['Add more details', 'Include your skills', 'Mention your goals']
+      feedback: 'Consider adding more details about your background or interests to make your bio more engaging.',
+      suggestions: ['Add more details', 'Mention your field', 'Include interests', 'Continue anyway']
     };
   }
-
-  // Check if user chose "Continue anyway"
-  const messageLower = message.toLowerCase();
-  if (messageLower.includes('continue anyway') || messageLower.includes('continue') || 
-      messageLower.includes('anyway') || messageLower.includes('skip')) {
-    return { valid: true, data: message.replace(/continue anyway|continue|anyway|skip/gi, '').trim() };
-  }
-
-  // Very basic check - if it's 15+ words, assume it's detailed enough
-  if (words.length >= 15) {
-    return { valid: true, data: message };
-  }
-
-  // Otherwise suggest improvement but allow bypass
-  return {
-    valid: false,
-    feedback: 'Consider adding more details about your background or interests to make your bio more engaging.',
-    suggestions: ['Add more details', 'Mention your field', 'Include interests', 'Continue anyway']
-  };
-}
 
   extractSkills(message) {
     const skills = message.split(',').map(skill => skill.trim()).filter(skill => skill);
@@ -399,9 +400,9 @@ class EnhancedPortfolioNLPBot {
         return {
           response: `🎯 **Let's create your professional portfolio!** 
           
-  I'll guide you through each step with feedback and suggestions. Ready to showcase your skills and experience?
+I'll guide you through each step with feedback and suggestions. Ready to showcase your skills and experience?
           
-  *Follow the instructions carefully for the best results. You can always ask for examples or help!*`,
+*Follow the instructions carefully for the best results. You can always ask for examples or help!*`,
           prompt: this.getNextPrompt(),
           suggestions: ['Start Now', 'Get Help']
         };
@@ -466,7 +467,7 @@ class EnhancedPortfolioNLPBot {
     // Only check other intents if NOT in portfolio workflow
     if (intent === 'greet' && confidence > 0.5) {
       const greetings = [
-        `Hello ${this.userData?.fullname || 'there'}! 👋 I'm your Buddie Uplift. I can help you create a professional portfolio with guidance.`,
+        `Hello ${this.userData?.fullname || 'there'}! 👋 I'm your Assistant, DreamForge. I can help you create a professional portfolio with guidance.`,
         `Hi ${this.userData?.fullname || 'there'}! 🚀 Ready to build an impressive portfolio? I'll guide you through each step with smart suggestions.`,
         `Welcome ${this.userData?.fullname || 'back'}! ✨ I'm here to help you create a standout portfolio that showcases your unique skills.`
       ];
@@ -489,11 +490,11 @@ class EnhancedPortfolioNLPBot {
       return {
         response: `🤖 **I'm here to help!** Here's what I can do:
 
-  📝 **Portfolio Creation** - Step-by-step guidance through bio, skills, projects, and experience
-  💡 **Smart Suggestions** - I provide examples and tips for each section
-  🔍 **Intelligent Validation** - I check your input and give helpful feedback
+📝 **Portfolio Creation** - Step-by-step guidance through bio, skills, projects, and experience
+💡 **Smart Suggestions** - I provide examples and tips for each section
+🔍 **Intelligent Validation** - I check your input and give helpful feedback
 
-  Just say "create portfolio" to get started!`,
+Just say "create portfolio" to get started!`,
         suggestions: ['Create Portfolio', 'Ask Question']
       };
     }
@@ -520,7 +521,7 @@ const AgentNLP = ({ userData }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: `Hello ${userData?.fullname || 'there'}! 👋 I'm your buddie Uplift. I provide guidance for creating portfolios. How can I help you today?`,
+      text: `Hello ${userData?.fullname || 'there'}! 👋 I'm your Assistant, DreamForge. I provide guidance for creating portfolios. How can I help you today?`,
       sender: 'bot',
       timestamp: Date.now(),
       suggestions: ['Create Portfolio', 'Get Help', ]
@@ -534,7 +535,7 @@ const AgentNLP = ({ userData }) => {
   const lastMessageRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  // Voice Recognition Setup (same as before)
+  // Voice Recognition Setup
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
@@ -584,7 +585,7 @@ const AgentNLP = ({ userData }) => {
     }
   };
 
-  // File Upload Handling (same as before)
+  // File Upload Handling
   const handleFileUpload = async (event) => {
     const files = Array.from(event.target.files);
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -720,14 +721,14 @@ const AgentNLP = ({ userData }) => {
         <div className={`flex items-start max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
           <div className={`flex-shrink-0 ${isUser ? 'ml-3' : 'mr-3'}`}>
             {isUser ? (
-              <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-semibold">
                   {userData?.fullname?.charAt(0) || 'U'}
                 </span>
               </div>
             ) : (
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                isSystem ? 'bg-gray-500' : 'bg-blue-600'
+                isSystem ? 'bg-accent' : 'bg-secondary'
               }`}>
                 {isSystem ? '⚠️' : <Brain className="w-5 h-5 text-white" />}
               </div>
@@ -737,10 +738,10 @@ const AgentNLP = ({ userData }) => {
           <div className="flex flex-col text-left">
             <div className={`p-4 rounded-2xl ${
               isUser 
-                ? 'bg-purple-600 text-white rounded-br-md' 
+                ? 'bg-primary text-white rounded-br-md' 
                 : isSystem
-                ? 'bg-gray-100 text-gray-800 rounded-bl-md'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md'
+                ? 'bg-surface text-foreground rounded-bl-md border border-accent/20'
+                : 'bg-surface text-foreground rounded-bl-md border border-primary/20'
             }`}>
               <div className="whitespace-pre-wrap">
                 {msg.text.split('\n').map((line, index) => {
@@ -772,7 +773,7 @@ const AgentNLP = ({ userData }) => {
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="px-3 py-1 text-sm bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-full transition-colors"
+                    className="px-3 py-1 text-sm bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-full transition-colors"
                   >
                     {suggestion}
                   </button>
@@ -781,24 +782,24 @@ const AgentNLP = ({ userData }) => {
             )}
 
             {msg.progress && (
-              <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+              <div className="mt-3 p-3 bg-secondary/10 border border-secondary/20 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Portfolio Progress</span>
-                  <span className="text-sm text-gray-600">{msg.progress.percentage}%</span>
+                  <span className="text-sm font-medium text-foreground">Portfolio Progress</span>
+                  <span className="text-sm text-foreground/70">{msg.progress.percentage}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-surface rounded-full h-2 border border-primary/20">
                   <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-secondary h-2 rounded-full transition-all duration-300"
                     style={{ width: `${msg.progress.percentage}%` }}
                   ></div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-xs text-foreground/60 mt-1">
                   Step {msg.progress.current} of {msg.progress.total}
                 </div>
               </div>
             )}
 
-            <div className="text-xs text-gray-500 mt-1">
+            <div className="text-xs text-foreground/50 mt-1">
               {new Date(msg.timestamp).toLocaleTimeString()}
             </div>
           </div>
@@ -807,23 +808,27 @@ const AgentNLP = ({ userData }) => {
     );
   };
 
+  if (isTyping && !messages.some(m => m.sender === 'bot')) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden pt-16">
       <div className="flex-1 flex container min-w-3xl mx-auto px-4 py-4 max-w-4xl w-full">
-        <Card className="w-full flex flex-col shadow-lg rounded-xl overflow-hidden relative">
+        <Card className="w-full flex flex-col shadow-lg rounded-xl overflow-hidden relative bg-surface border-primary/20">
           {/* Enhanced Header */}
-          <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-b border-gray-100 dark:border-gray-700 py-4 px-6 sticky top-0 z-10">
+          <CardHeader className="bg-gradient-to-r from-primary to-secondary text-white border-b border-primary/20 py-4 px-6 sticky top-0 z-10">
             <div className="flex flex-col items-start text-left space-y-2">
               <div className="flex items-center gap-2">
                 <Brain className="w-6 h-6" />
                 <h1 className="text-2xl font-bold tracking-tight">
-                  Uplift Bot
+                  DreamForge Assistant
                 </h1>
                 <div className="px-2 py-1 bg-white/20 rounded-full text-xs">
                   NLP Powered
                 </div>
               </div>
-              <p className="text-purple-100 text-sm">
+              <p className="text-white/80 text-sm">
                 Welcome back {userData?.fullname}!
               </p>
               {progress && (
@@ -844,19 +849,19 @@ const AgentNLP = ({ userData }) => {
           </CardHeader>
 
           {/* Message Area */}
-          <CardContent className="flex-1 overflow-hidden p-0 bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 relative">
+          <CardContent className="flex-1 overflow-hidden p-0 bg-background relative">
             <div className="h-full overflow-y-auto px-6 py-4 space-y-4">
               {messages.map(renderMessage)}
               
               {isTyping && (
                 <div className="flex justify-start mb-4">
                   <div className="flex items-center">
-                    <Brain className="w-8 h-8 mr-3 text-blue-600" />
-                    <div className="p-3 bg-gray-200 dark:bg-gray-700 rounded-2xl rounded-bl-md">
+                    <Brain className="w-8 h-8 mr-3 text-secondary" />
+                    <div className="p-3 bg-surface border border-secondary/20 rounded-2xl rounded-bl-md">
                       <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-100"></div>
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-200"></div>
+                        <div className="w-2 h-2 bg-secondary rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-secondary rounded-full animate-bounce delay-100"></div>
+                        <div className="w-2 h-2 bg-secondary rounded-full animate-bounce delay-200"></div>
                       </div>
                     </div>
                   </div>
@@ -869,21 +874,21 @@ const AgentNLP = ({ userData }) => {
 
           {/* File Upload Preview */}
           {uploadedFiles.length > 0 && (
-            <div className="px-6 pb-4 bg-gray-50 dark:bg-gray-800 border-t">
+            <div className="px-6 pb-4 bg-surface border-t border-primary/20">
               <div className="flex flex-wrap gap-2">
                 {uploadedFiles.map((file, index) => (
                   <div 
                     key={index} 
-                    className="bg-white dark:bg-gray-700 p-3 rounded-lg flex items-center shadow-sm"
+                    className="bg-background p-3 rounded-lg flex items-center shadow-sm border border-accent/20"
                   >
-                    <FileUp className="w-4 h-4 mr-2 text-blue-500" />
+                    <FileUp className="w-4 h-4 mr-2 text-secondary" />
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium truncate max-w-[150px]">{file.name}</span>
-                      <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</span>
+                      <span className="text-sm font-medium truncate max-w-[150px] text-foreground">{file.name}</span>
+                      <span className="text-xs text-foreground/60">{(file.size / 1024).toFixed(1)} KB</span>
                     </div>
                     <button 
                       onClick={() => removeFile(file)}
-                      className="ml-2 text-red-500 hover:text-red-700 transition-colors"
+                      className="ml-2 text-accent hover:text-accent-hover transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -894,7 +899,7 @@ const AgentNLP = ({ userData }) => {
           )}
 
           {/* Footer */}
-          <CardFooter className="sticky bottom-0 z-10 p-6 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
+          <CardFooter className="sticky bottom-0 z-10 p-6 bg-surface border-t border-primary/20">
             <form onSubmit={handleSend} className="w-full">
               <div className="flex flex-col space-y-4">
                 <div className="relative">
@@ -915,12 +920,12 @@ const AgentNLP = ({ userData }) => {
                         : "Ask me anything about creating portfolios..."
                     }
                     rows="3"
-                    className="w-full p-4 pr-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl resize-none max-h-48 overflow-y-auto text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="w-full p-4 pr-12 bg-background border-2 border-primary/20 rounded-xl resize-none max-h-48 overflow-y-auto text-foreground placeholder-foreground/50 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                   />
                   {isListening && (
                     <div className="absolute top-2 right-2 flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                      <span className="text-xs text-red-500 font-medium">Listening...</span>
+                      <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                      <span className="text-xs text-accent font-medium">Listening...</span>
                     </div>
                   )}
                 </div>
@@ -928,7 +933,7 @@ const AgentNLP = ({ userData }) => {
                 <div className="flex justify-between items-center">
                   <div className="flex space-x-4">
                     <label htmlFor="file-upload" className="cursor-pointer group">
-                      <FileUp className="w-6 h-6 text-gray-600 dark:text-gray-300 group-hover:text-purple-600 transition-colors" />
+                      <FileUp className="w-6 h-6 text-foreground/60 group-hover:text-primary transition-colors" />
                       <input 
                         id="file-upload"
                         type="file" 
@@ -944,8 +949,8 @@ const AgentNLP = ({ userData }) => {
                       onClick={toggleVoiceTyping}
                       className={`group transition-colors ${
                         isListening 
-                          ? 'text-red-500 hover:text-red-700' 
-                          : 'text-gray-600 dark:text-gray-300 hover:text-purple-600'
+                          ? 'text-accent hover:text-accent-hover' 
+                          : 'text-foreground/60 hover:text-primary'
                       }`}
                     >
                       {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
@@ -957,8 +962,8 @@ const AgentNLP = ({ userData }) => {
                     disabled={!message.trim() && uploadedFiles.length === 0}
                     className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
                       message.trim() || uploadedFiles.length > 0
-                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-primary to-secondary hover:from-primary-hover hover:to-secondary-hover text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                        : 'bg-surface text-foreground/40 cursor-not-allowed border border-primary/20'
                     }`}
                   >
                     <Send className="w-5 h-5" />

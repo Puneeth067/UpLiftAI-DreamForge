@@ -1,14 +1,13 @@
+/** @type {import('tailwindcss').Config} */
 import tailwindcssAnimate from "tailwindcss-animate";
 
-/** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
   content: [
-    "./index.html",
-    "./pages/**/*.{js,jsx}",
-    "./components/**/*.{js,jsx}",
-    "./app/**/*.{js,jsx}",
-    "./src/**/*.{ts,tsx,js,jsx}",
+    './pages/**/*.{js,jsx}',
+    './components/**/*.{js,jsx}',
+    './app/**/*.{js,jsx}',
+    './src/**/*.{js,jsx}',
   ],
   prefix: "",
   theme: {
@@ -54,6 +53,31 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Custom theme colors
+        'theme': {
+          'light': {
+            'bg': '#FAFAFF',
+            'surface': '#F0F4FF',
+            'text': '#111827',
+            'primary': '#6366F1',
+            'primary-hover': '#4F46E5',
+            'secondary': '#06B6D4',
+            'secondary-hover': '#0891B2',
+            'accent': '#F59E0B',
+            'accent-hover': '#D97706',
+          },
+          'dark': {
+            'bg': '#0A0F1C',
+            'surface': '#111827',
+            'text': '#F9FAFB',
+            'primary': '#818CF8',
+            'primary-hover': '#6366F1',
+            'secondary': '#22D3EE',
+            'secondary-hover': '#06B6D4',
+            'accent': '#FBBF24',
+            'accent-hover': '#D97706',
+          }
+        }
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -69,17 +93,22 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        'bounce-soft': {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-10%)' }
-        }
+        fadeIn: {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        slideIn: {
+          from: { transform: "translateX(-100%)" },
+          to: { transform: "translateX(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        'bounce-soft': 'bounce-soft 1s ease-in-out infinite'
+        "fadeIn": "fadeIn 0.3s ease-in-out",
+        "slideIn": "slideIn 0.3s ease-in-out",
       },
     },
   },
   plugins: [tailwindcssAnimate],
-};
+}
