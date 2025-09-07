@@ -3,6 +3,7 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import PropTypes from "prop-types"
 
 const AlertDialog = AlertDialogPrimitive.Root
 
@@ -81,6 +82,56 @@ const AlertDialogCancel = React.forwardRef(({ className, ...props }, ref) => (
     {...props} />
 ))
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
+
+AlertDialog.propTypes = {
+  children: PropTypes.node,
+};
+AlertDialogTrigger.propTypes = {
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+AlertDialogPortal.propTypes = {
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+AlertDialogOverlay.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+AlertDialogContent.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+AlertDialogHeader.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+AlertDialogFooter.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+AlertDialogTitle.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+AlertDialogDescription.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+AlertDialogAction.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+AlertDialogCancel.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
 
 export {
   AlertDialog,

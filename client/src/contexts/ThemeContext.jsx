@@ -1,5 +1,6 @@
 // src/contexts/ThemeContext.jsx
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
+import PropTypes from 'prop-types';
 import { supabase } from '../utils/supabase';
 
 const ThemeContext = createContext();
@@ -83,4 +84,8 @@ export const ThemeProvider = ({ children }) => {
       {children}
     </ThemeContext.Provider>
   );
+};
+
+ThemeProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };

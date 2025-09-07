@@ -3,7 +3,7 @@ import * as React from "react";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import * as ToastPrimitives from "@radix-ui/react-toast";
 import { cva } from "class-variance-authority";
-
+import PropTypes from "prop-types"
 import { cn } from "@/lib/utils";
 
 const ToastProvider = ToastPrimitives.Provider;
@@ -89,6 +89,36 @@ const ToastDescription = React.forwardRef(({ className, ...props }, ref) => (
   />
 ));
 ToastDescription.displayName = ToastPrimitives.Description.displayName;
+
+ToastProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+  swipeDirection: PropTypes.oneOf(["up", "down", "left", "right"]),
+}
+
+ToastViewport.propTypes = {
+  className: PropTypes.string,
+}
+
+Toast.propTypes = {
+  className: PropTypes.string,
+  variant: PropTypes.oneOf(["default", "destructive"]),
+}
+
+ToastAction.propTypes = {
+  className: PropTypes.string,
+}
+
+ToastClose.propTypes = {
+  className: PropTypes.string,
+}
+
+ToastTitle.propTypes = {
+  className: PropTypes.string,
+}
+
+ToastDescription.propTypes = {
+  className: PropTypes.string,
+}
 
 export {
   ToastProvider,

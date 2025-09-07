@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose  } from '@/components/ui/dialog';
@@ -8,10 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Edit } from 'lucide-react';
 import { supabase } from '@/utils/supabase'; // Adjust the import path as needed
 import { v4 as uuidv4 } from 'uuid';
-import { useTheme } from '@/contexts/ThemeContext';
 
 const EditProjectDialog = ({ project, onEdit, userId }) => {
-  const { isDarkMode, loadUserTheme } = useTheme();
+  // Remove the unused isDarkMode variable
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState(project.image);
   const [title, setTitle] = useState(project.title);

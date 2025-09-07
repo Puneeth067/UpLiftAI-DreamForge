@@ -1,5 +1,5 @@
 import * as React from "react";
-
+import PropTypes from "prop-types"
 import { cn } from "@/lib/utils";
 
 const Table = React.forwardRef(({ className, ...props }, ref) => (
@@ -80,6 +80,46 @@ const TableCaption = React.forwardRef(({ className, ...props }, ref) => (
   />
 ));
 TableCaption.displayName = "TableCaption";
+
+Table.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+}
+
+TableHeader.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+}
+
+TableBody.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+}
+
+TableFooter.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+}
+
+TableRow.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+}
+
+TableHead.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+}
+
+TableCell.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+}
+
+TableCaption.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+}
 
 export {
   Table,

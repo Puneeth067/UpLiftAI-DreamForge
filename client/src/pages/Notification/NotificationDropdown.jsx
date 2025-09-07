@@ -188,6 +188,18 @@ const NotificationDropdown = ({ userId }) => {
       </DropdownMenu>
     );
   }
+  
+  if (error) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5 text-red-500" title={error} />
+          </Button>
+        </DropdownMenuTrigger>
+      </DropdownMenu>
+    );
+  }
 
   return (
     <>

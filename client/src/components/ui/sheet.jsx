@@ -3,6 +3,7 @@ import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils"
 import { Cross2Icon } from "@radix-ui/react-icons"
+import PropTypes from "prop-types"
 
 const Sheet = SheetPrimitive.Root
 
@@ -92,6 +93,48 @@ const SheetDescription = React.forwardRef(({ className, ...props }, ref) => (
     {...props} />
 ))
 SheetDescription.displayName = SheetPrimitive.Description.displayName
+
+SheetContent.propTypes = {
+  side: PropTypes.oneOf(["top", "bottom", "left", "right"]),
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+  props: PropTypes.object,
+}
+
+SheetContent.propTypes = {
+  side: PropTypes.oneOf(["top", "bottom", "left", "right"]),
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+  props: PropTypes.object,
+}
+SheetHeader.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+  props: PropTypes.object,
+}
+
+SheetFooter.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+  props: PropTypes.object,
+}
+
+SheetTitle.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+  props: PropTypes.object,
+}
+
+SheetDescription.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+  props: PropTypes.object,
+}
+
+SheetOverlay.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+}
 
 export {
   Sheet,

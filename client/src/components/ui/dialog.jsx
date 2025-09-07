@@ -2,6 +2,7 @@ import React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
+import PropTypes from "prop-types"
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
@@ -76,6 +77,57 @@ const DialogDescription = React.forwardRef(({ className, ...props }, ref) => (
   />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
+
+Dialog.propTypes = {
+  children: PropTypes.node,
+};
+
+DialogTrigger.propTypes = {
+  children: PropTypes.node,
+};
+
+DialogPortal.propTypes = {
+  children: PropTypes.node,
+};
+
+DialogOverlay.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+DialogClose.propTypes = {
+  children: PropTypes.node,
+};
+
+DialogContent.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+DialogHeader.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+DialogFooter.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+DialogTitle.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+DialogDescription.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
 
 export {
   Dialog,

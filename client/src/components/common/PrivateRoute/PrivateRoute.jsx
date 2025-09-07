@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import PropTypes from 'prop-types';
 
 const PrivateRoute = ({ children, userType: requiredUserType }) => {
   const { user, userType, loading, authError, isInitialized } = useAuth();
@@ -43,8 +44,12 @@ const PrivateRoute = ({ children, userType: requiredUserType }) => {
     const redirectPath = userType === 'agent' ? '/agentdashboard' : '/customerdashboard';
     return <Navigate to={redirectPath} replace />;
   }
-
   return children;
+};
+
+PrivateRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+  userType: PropTypes.string
 };
 
 export default PrivateRoute;

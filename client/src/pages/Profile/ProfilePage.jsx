@@ -199,13 +199,6 @@ const ProfilePage = () => {
   }, [hoverTimeout]);
 
 
-  useEffect(() => {
-    // Load user theme
-    loadUserTheme(userId);
-    fetchProfile();
-    fetchAvatars();
-  }, [userId, loadUserTheme]);
-
   const fetchAvatars = async () => {
     const avatarList = [
       'agent-boy.png', 'agent-girl.png', 'astronaut.png', 'bear.png',
@@ -219,40 +212,49 @@ const ProfilePage = () => {
     setAvatars(avatarList);
   };
 
-  const fetchProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+  useEffect(() => {
+    // Load user theme
+    loadUserTheme(userId);
+    
+    // Fetch profile data
+    const fetchProfile = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+  
+        if (error) throw error;
+  
+        setProfile(data);
+        setProfileData(data);
+        setFormData({
+          fullname: data.fullname || '',
+          email: data.email || '',
+          phonenumber: data.phonenumber || '',
+          department: data.department || '',
+          usertype: data.usertype || '',
+          avatar_url: data.avatar_url || 'user.png',
+          portfolio: data.portfolio || ''
+        });
+        setSelectedAvatar(data.avatar_url || 'user.png');
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
+          className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
+        });
+        setLoading(false);
+      }
+    };
 
-      if (error) throw error;
-
-      setProfile(data);
-      setProfileData(data);
-      setFormData({
-        fullname: data.fullname || '',
-        email: data.email || '',
-        phonenumber: data.phonenumber || '',
-        department: data.department || '',
-        usertype: data.usertype || '',
-        avatar_url: data.avatar_url || 'user.png',
-        portfolio: data.portfolio || ''
-      });
-      setSelectedAvatar(data.avatar_url || 'user.png');
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load profile data",
-        variant: "destructive",
-        className: isDarkMode ? "bg-gray-800 border-gray-700 text-gray-100" : ""
-      });
-      setLoading(false);
-    }
-  };
+    fetchProfile();
+    fetchAvatars();
+  }, [userId, loadUserTheme, isDarkMode]);
 
   const handleUpdate = async () => {
     try {

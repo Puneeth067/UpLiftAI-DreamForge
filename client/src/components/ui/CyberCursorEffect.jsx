@@ -17,22 +17,27 @@ const CyberCursorEffect = () => {
       cursorY.set(e.clientY);
     };
 
+    const cursor = cursorRef.current;
+    
+    const handleMouseEnter = () => cursor?.classList.add("hover");
+    const handleMouseLeave = () => cursor?.classList.remove("hover");
+
     const interactiveElements = document.querySelectorAll("button, a, input");
     interactiveElements.forEach((el) =>
-      el.addEventListener("mouseenter", () => cursorRef.current.classList.add("hover"))
+      el.addEventListener("mouseenter", handleMouseEnter)
     );
     interactiveElements.forEach((el) =>
-      el.addEventListener("mouseleave", () => cursorRef.current.classList.remove("hover"))
+      el.addEventListener("mouseleave", handleMouseLeave)
     );
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       interactiveElements.forEach((el) =>
-        el.removeEventListener("mouseenter", () => cursorRef.current.classList.add("hover"))
+        el.removeEventListener("mouseenter", handleMouseEnter)
       );
       interactiveElements.forEach((el) =>
-        el.removeEventListener("mouseleave", () => cursorRef.current.classList.remove("hover"))
+        el.removeEventListener("mouseleave", handleMouseLeave)
       );
     };
   }, [cursorX, cursorY]);

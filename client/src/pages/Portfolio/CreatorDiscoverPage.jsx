@@ -241,7 +241,7 @@ const CreatorDiscoverPage = () => {
     };
 
     fetchData();
-  }, [loadUserTheme]);
+  }, [loadUserTheme, userId, isDarkMode]);
 
   const handleDepartmentFilter = (dept) => {
     setSelectedDepartment(dept);

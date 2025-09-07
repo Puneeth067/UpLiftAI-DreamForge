@@ -1,6 +1,6 @@
-import React, { forwardRef } from "react";
+import { forwardRef } from "react";
 import { cva } from "class-variance-authority";
-
+import PropTypes from "prop-types"
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
@@ -55,5 +55,24 @@ const AlertDescription = forwardRef((props, ref) => {
   );
 });
 AlertDescription.displayName = "AlertDescription";
+
+Alert.propTypes = {
+  className: PropTypes.string,
+  variant: PropTypes.oneOf(["default", "destructive"]),
+  children: PropTypes.node,
+};
+
+AlertTitle.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};  
+
+AlertDescription.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
 
 export { Alert, AlertTitle, AlertDescription };

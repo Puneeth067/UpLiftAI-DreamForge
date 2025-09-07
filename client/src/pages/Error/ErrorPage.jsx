@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { XCircle, AlertCircle } from "lucide-react";
+import { XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
 export const ErrorPage = ({ error }) => {
   const navigate = useNavigate();
@@ -43,6 +44,12 @@ export const ErrorPage = ({ error }) => {
       </Card>
     </div>
   );
+};
+ErrorPage.propTypes = {
+  error: PropTypes.shape({
+    message: PropTypes.string,
+    stack: PropTypes.string
+  })
 };
 
 export default ErrorPage;

@@ -325,8 +325,10 @@ const AgentDashboard = () => {
 
             <div className="flex items-center space-x-2">
               <NotificationDropdown 
-              userId = {userData.id} 
-              />
+                      userId={userData.id}
+                      notifications={notifications}
+                      setNotifications={setNotifications}
+                      />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button className="p-2 hover:bg-violet-100 dark:hover:bg-violet-800/50 rounded-lg hidden sm:block transition-colors group">

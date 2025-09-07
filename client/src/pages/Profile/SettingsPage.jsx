@@ -181,7 +181,7 @@ const SettingsPage = () => {
     if (userData?.id) {
       loadSettings();
     }
-  }, [userData?.id]);
+  }, [userData?.id, settings, toast]);
 
   const updateSetting = async (key, value, subKey = null) => {
     try {

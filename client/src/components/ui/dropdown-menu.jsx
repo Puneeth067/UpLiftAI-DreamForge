@@ -2,6 +2,7 @@ import React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, ChevronRightIcon, DotFilledIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
+import PropTypes from "prop-types"
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
@@ -128,6 +129,70 @@ const DropdownMenuShortcut = ({ className, ...props }) => (
   <span className={cn("ml-auto text-xs tracking-widest opacity-60", className)} {...props} />
 );
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
+
+DropdownMenuShortcut.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+DropdownMenuItem.propTypes = {
+  className: PropTypes.string,
+  inset: PropTypes.bool,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+DropdownMenuCheckboxItem.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  checked: PropTypes.bool,
+  props: PropTypes.object,
+};
+
+DropdownMenuRadioItem.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+DropdownMenuLabel.propTypes = {
+  className: PropTypes.string,
+  inset: PropTypes.bool,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+DropdownMenuSeparator.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+DropdownMenuSubTrigger.propTypes = {
+  className: PropTypes.string,
+  inset: PropTypes.bool,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+DropdownMenuSubContent.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+DropdownMenuContent.propTypes = {
+  className: PropTypes.string,
+  sideOffset: PropTypes.number,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+DropdownMenuTrigger.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
 
 export {
   DropdownMenu,

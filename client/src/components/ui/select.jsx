@@ -2,6 +2,7 @@ import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { cn } from "@/lib/utils"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "@radix-ui/react-icons"
+import PropTypes from "prop-types"
 
 const Select = SelectPrimitive.Root
 
@@ -103,6 +104,55 @@ const SelectSeparator = React.forwardRef(({ className, ...props }, ref) => (
     {...props} />
 ))
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName
+
+SelectTrigger.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+Select.propTypes = {
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+SelectTrigger.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+SelectScrollUpButton.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+SelectScrollDownButton.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+SelectContent.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  position: PropTypes.oneOf(["popper", "static"]),
+  props: PropTypes.object,
+};
+
+SelectLabel.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+SelectItem.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+SelectSeparator.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
 
 export {
   Select,

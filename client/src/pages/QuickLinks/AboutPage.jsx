@@ -1,4 +1,3 @@
-import React from 'react';
 import { Award, Target, Globe } from 'lucide-react';
 
 const AboutPage = () => {
@@ -52,7 +51,7 @@ const AboutPage = () => {
             DreamForge leverages cutting-edge technology to create a seamless collaboration platform. Our NLP-powered interface and intelligent matching system ensure that creators find the right projects, and patrons discover the perfect talent.
           </p>
           <p>
-            We're not just a platform; we're a community committed to turning creative visions into tangible success stories.
+            We&apos;re not just a platform; we&apos;re a community committed to turning creative visions into tangible success stories.
           </p>
         </div>
       </section>

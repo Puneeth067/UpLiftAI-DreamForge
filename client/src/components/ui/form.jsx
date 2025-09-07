@@ -1,12 +1,10 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
-import { Controller, FormProvider, useFormContext } from "react-hook-form";
+import { Controller, FormProvider } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-
-// Create contexts
-const FormFieldContext = React.createContext({});
-const FormItemContext = React.createContext({});
+import PropTypes from "prop-types"
+import { FormFieldContext, FormItemContext, useFormField } from "./form-hooks";
 
 const Form = FormProvider;
 
@@ -24,26 +22,6 @@ const FormField = ({ ...props }) => {
   );
 };
 
-const useFormField = () => {
-  const fieldContext = React.useContext(FormFieldContext);
-  const itemContext = React.useContext(FormItemContext);
-  const { getFieldState, formState } = useFormContext();
-
-  if (!fieldContext) {
-    throw new Error("useFormField should be used within <FormField>");
-  }
-
-  const fieldState = getFieldState(fieldContext.name, formState);
-
-  return {
-    id: itemContext.id,
-    name: fieldContext.name,
-    formItemId: `${itemContext.id}-form-item`,
-    formDescriptionId: `${itemContext.id}-form-item-description`,
-    formMessageId: `${itemContext.id}-form-item-message`,
-    ...fieldState,
-  };
-};
 
 const FormItem = React.forwardRef(({ className, ...props }, ref) => {
   const id = React.useId();
@@ -124,8 +102,40 @@ const FormMessage = React.forwardRef(({ className, children, ...props }, ref) =>
 });
 FormMessage.displayName = "FormMessage";
 
+FormMessage.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+FormDescription.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+FormControl.propTypes = {
+  className: PropTypes.string,
+  props: PropTypes.object,
+};
+
+FormLabel.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+FormItem.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+  props: PropTypes.object,
+};
+
+FormField.propTypes = {
+  name: PropTypes.string.isRequired,
+};
+
 export {
-  useFormField,
   Form,
   FormItem,
   FormLabel,

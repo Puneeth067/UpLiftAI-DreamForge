@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -170,11 +170,7 @@ const AgentPortfolio = () => {
   }, [hoverTimeout]);
 
 
-  useEffect(() => {
-    fetchPortfolioData();
-  }, [userData.id]);
-
-  const fetchPortfolioData = async () => {
+  const fetchPortfolioData = useCallback(async () => {
     try {
       setLoading(true);
       console.log(userData.id);
@@ -246,7 +242,11 @@ const AgentPortfolio = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userData.id, patron, loadUserTheme]);
+
+  useEffect(() => {
+    fetchPortfolioData();
+  }, [fetchPortfolioData]);
 
   const handleSave = async () => {
     try {

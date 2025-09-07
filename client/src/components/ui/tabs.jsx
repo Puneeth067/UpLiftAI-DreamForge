@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-
+import PropTypes from "prop-types"
 import { cn } from "@/lib/utils";
 
 const Tabs = TabsPrimitive.Root;
@@ -40,5 +40,26 @@ const TabsContent = React.forwardRef(({ className, ...props }, ref) => (
   />
 ));
 TabsContent.displayName = TabsPrimitive.Content.displayName;
+
+Tabs.propTypes = {
+  children: PropTypes.node.isRequired,
+  defaultValue: PropTypes.string,
+  value: PropTypes.string,
+  onValueChange: PropTypes.func,
+  orientation: PropTypes.oneOf(["horizontal", "vertical"]),
+  activationMode: PropTypes.oneOf(["automatic", "manual"]),
+}
+
+TabsList.propTypes = {
+  className: PropTypes.string,
+}
+
+TabsTrigger.propTypes = {
+  className: PropTypes.string,
+}
+
+TabsContent.propTypes = {
+  className: PropTypes.string,
+}
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };

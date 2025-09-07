@@ -1,7 +1,7 @@
 // components/layout/Header/Navigation.jsx
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Ticket, BarChart2, User } from 'lucide-react';
+import PropTypes from 'prop-types';
 
 const Navigation = ({ userType }) => {
   const navItems = [
@@ -38,6 +38,10 @@ const Navigation = ({ userType }) => {
       </ul>
     </nav>
   );
+};
+
+Navigation.propTypes = {
+  userType: PropTypes.string
 };
 
 export default Navigation;

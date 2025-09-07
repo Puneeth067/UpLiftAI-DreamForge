@@ -1,5 +1,6 @@
 // components/ErrorBoundary.jsx
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from 'lucide-react';
@@ -16,7 +17,7 @@ class ErrorBoundary extends React.Component {
 
   static getDerivedStateFromError(error) {
     // Update state so the next render will show the fallback UI.
-    return { hasError: true };
+    return { hasError: true, error };
   }
 
   componentDidCatch(error, errorInfo) {
@@ -64,7 +65,7 @@ class ErrorBoundary extends React.Component {
               </Button>
             </div>
 
-            {process.env.NODE_ENV === 'development' && (
+            {import.meta.env.DEV && (
               <div className="mt-4 p-4 bg-gray-100 rounded-md">
                 <pre className="text-xs overflow-auto">
                   {this.state.error?.toString()}
@@ -82,5 +83,9 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export default ErrorBoundary;

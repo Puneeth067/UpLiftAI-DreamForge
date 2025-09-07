@@ -1,4 +1,3 @@
-import React from 'react';
 import { ShieldCheck, FileText, BookOpen } from 'lucide-react';
 
 const TermsOfServicePage = () => {

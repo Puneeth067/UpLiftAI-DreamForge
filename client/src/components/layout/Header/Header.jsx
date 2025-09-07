@@ -1,6 +1,6 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, LogOut } from 'lucide-react';
+import PropTypes from 'prop-types';
 import Navigation from './Navigation';
 import NotificationDropdown from '../../../pages/Notification/NotificationDropdown';
 
@@ -72,6 +72,10 @@ const Header = ({ title }) => {
       </div>
     </header>
   );
+};
+
+Header.propTypes = {
+  title: PropTypes.string.isRequired
 };
 
 export default Header;

@@ -191,7 +191,7 @@ const AuthPages = () => {
         duration: 5000 // optional: how long the toast stays visible
       })
     }
-  }, [apiError, toast])
+  }, [apiError])
 
   // Replace the existing email check with this version
   const checkEmailExists = async (email) => {
